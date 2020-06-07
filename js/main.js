@@ -70,6 +70,8 @@ let basic_a_uv = null
 let basic_u_model_view_matrix = null
 let basic_u_projection_matrix = null
 let basic_u_sampler = null
+let model_view_matrix = new Float32Array(16)
+let inverse_model_view_matrix = new Float32Array(16)
 
 
 /*
@@ -77,30 +79,90 @@ let basic_u_sampler = null
  * Application variables
  *
  */
-let camera_rotation_y = 0
-const camera_translation = [
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, -4, 1,
-]
-const camera_rotation = [
+let frame = 0
+const camera_translation = new Float32Array([
   1, 0, 0, 0,
   0, 1, 0, 0,
   0, 0, 1, 0,
   0, 0, 0, 1,
-]
+])
+const camera_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const inverse_camera_translation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const inverse_camera_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+let inverse_projection_matrix = null
+let pick_ray = new Float32Array(4)
+let mouse_x = 0
+const PICK_DEPTH = 10
+const PICK_STEP = 0.1
+let mouse_y = 0
+let has_clicked = false
+let screen_canvas = null
+let screen_ctx = null
 
 
 function update () {
   /*
    * Update stuff at 60fps
    */
-  camera_rotation_y = camera_rotation_y + 0.01
-  camera_rotation[0] = Math.cos(camera_rotation_y)
-  camera_rotation[2] = Math.sin(camera_rotation_y)
-  camera_rotation[8] = -Math.sin(camera_rotation_y)
-  camera_rotation[10] = Math.cos(camera_rotation_y)
+  if (has_clicked) {
+    pick_ray[0] = 2 * mouse_x / canvas.width - 1
+    pick_ray[1] = -2 * mouse_y / canvas.height + 1
+    pick_ray[2] = -1
+    pick_ray[3] = 1
+
+    matrix_mult_4(inverse_model_view_matrix, inverse_camera_translation, inverse_camera_rotation)
+    matrix_operate_4(inverse_projection_matrix, pick_ray)
+    pick_ray[3] = 0
+    matrix_operate_4(inverse_model_view_matrix, pick_ray)
+
+      /*
+    screen_0 = [0.060993, -1.000000, 1.948891]
+    screen_h = 2
+    screen_w = 2*1.948891
+    */
+
+    console.log(pick_ray)
+  }
+
+  const ry = 0.7*Math.sin(frame*0.01)+1.5
+  const tx = -5*Math.sin(ry)
+  const ty = 0
+  const tz = -5*Math.cos(ry)
+
+  camera_translation[12] = tx
+  camera_translation[13] = ty
+  camera_translation[14] = tz
+
+  camera_rotation[0] = Math.cos(ry)
+  camera_rotation[2] = Math.sin(ry)
+  camera_rotation[8] = -Math.sin(ry)
+  camera_rotation[10] = Math.cos(ry)
+
+  matrix_mult_4(model_view_matrix, camera_rotation, camera_translation)
+
+  matrix_transpose_4(inverse_camera_rotation, camera_rotation)
+
+  inverse_camera_translation[12] = -tx
+  inverse_camera_translation[13] = -ty
+  inverse_camera_translation[14] = -tz
+
+
+  frame = frame + 1
 }
 
 
@@ -111,9 +173,23 @@ function update () {
  * 3. Send the shader the vertex indices, and draw
  */
 function render_screen () {
+  screen_ctx.clearRect(0, 0, screen_canvas.width, screen_canvas.height)
+  screen_ctx.fillStyle = "#fff"
+  screen_ctx.fillRect(0, 0, screen_canvas.width, screen_canvas.height)
+  screen_ctx.fillStyle = '#000'
+  screen_ctx.fillRect(100,100,500,100)
+  screen_ctx.fillStyle = '#f00'
+  screen_ctx.font = "80px Arial"
+  screen_ctx.fillText("Click here!!!?", 120, 180)
+  screen_ctx.drawImage(images.screen_png, 500, 400, 960, 540)
+
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.screen.texture_id)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
+
+
   gl.useProgram(basic_shader_program)
 
-  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, matrix_mult_4(camera_translation, camera_rotation))
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, model_view_matrix)
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
@@ -151,6 +227,9 @@ function main_loop (timestamp) {
   const frame_time = timestamp - prev_timestamp
   prev_timestamp = timestamp
   total_time += frame_time
+  if (total_time > TARGET_FRAME_TIME*2) {
+    total_time = TARGET_FRAME_TIME
+  }
   while (total_time >= TARGET_FRAME_TIME) {
     update()
     render()
@@ -164,6 +243,20 @@ function main () {
   init_gl(canvas, gl)
 
 
+  screen_canvas = document.createElement('canvas')
+  screen_canvas.width = 1920
+  screen_canvas.height = 1080
+  screen_ctx = screen_canvas.getContext('2d')
+
+  canvas.addEventListener('mousemove', function (e) {
+    mouse_x = e.clientX
+    mouse_y = e.clientY
+  })
+
+  canvas.addEventListener('click', function (e) {
+    has_clicked = true
+  })
+
   /*
    *
    * Load OBJ and textures onto the GPU
@@ -171,7 +264,9 @@ function main () {
    */
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)
-  model_buffers.screen.texture_id = load_texture(gl, images.screen_png)
+  //model_buffers.screen.texture_id = load_texture(gl, images.screen_png)
+  model_buffers.screen.texture_id = 0
+  model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
 
 
   /*
@@ -206,12 +301,24 @@ function main () {
   const fov = Math.PI/4
   const near = 1
   const far = 50
+  const pa = 1/Math.tan(fov/2)/aspect
+  const pb = 1/Math.tan(fov/2)
+  const pc = (near + far)/(near - far)
+  const pd = -1
+  const pe = 2*near*far/(near - far)
   gl.uniformMatrix4fv(basic_u_projection_matrix, false, new Float32Array([
-    1/Math.tan(fov/2)/aspect, 0, 0, 0,
-    0, 1/Math.tan(fov/2), 0, 0,
-    0, 0, (near + far)/(near - far), -1,
-    0, 0, 2*near*far/(near - far), 0,
+    pa, 0, 0, 0,
+    0, pb, 0, 0,
+    0, 0, pc, pd,
+    0, 0, pe, 0,
   ]))
+  inverse_projection_matrix = new Float32Array([
+    1/pa, 0, 0, 0,
+    0, 1/pb, 0, 0,
+    0, 0, 0, 1/pe,
+    0, 0, 1/pd, -pc/(pd*pe),
+  ])
+
 
 
   window.requestAnimationFrame(main_loop)
