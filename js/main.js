@@ -114,6 +114,16 @@ let has_clicked = false
 let screen_canvas = null
 let screen_ctx = null
 
+const screen_0 = new Float32Array([0.060993, -1.000000, 1.948891])
+const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
+const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
+function cross3 (a,b) { return new Float32Array([(a[1]*b[2])-(a[2]*b[1]), -((a[0]*b[2])-(a[2]*b[0])), (a[0]*b[1])-(a[1]*b[0])]) }
+function sub3 (a,b) { return new Float32Array([a[0]-b[0], a[1]-b[1], a[2]-b[2]]) }
+function sum3 (a,b) { return new Float32Array([a[0]+b[0], a[1]+b[1], a[2]+b[2]]) }
+function dot3 (a,b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] }
+function scale3 (c,v) { return new Float32Array([c*v[0], c*v[1], c*v[2]]) }
+const screen_n = cross3(sub3(screen_v, screen_0), sub3(screen_h, screen_0))
+
 
 function update () {
   /*
@@ -130,13 +140,12 @@ function update () {
     pick_ray[3] = 0
     matrix_operate_4(inverse_model_view_matrix, pick_ray)
 
-      /*
-    screen_0 = [0.060993, -1.000000, 1.948891]
-    screen_h = 2
-    screen_w = 2*1.948891
-    */
-
-    console.log(pick_ray)
+    const denom = dot3(pick_ray, screen_n)
+    if (denom != 0) {
+      const camera_0 = new Float32Array([-camera_translation[12], -camera_translation[13], -camera_translation[14]])
+      const t = dot3(screen_n, sub3(screen_0, camera_0)) / denom
+      const p = sum3(camera_0, scale3(t, pick_ray))
+    }
   }
 
   const ry = 0.7*Math.sin(frame*0.01)+1.5
