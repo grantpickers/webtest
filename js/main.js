@@ -114,15 +114,56 @@ let has_clicked = false
 let screen_canvas = null
 let screen_ctx = null
 
-const screen_0 = new Float32Array([0.060993, -1.000000, 1.948891])
-const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
-const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
 function cross3 (a,b) { return new Float32Array([(a[1]*b[2])-(a[2]*b[1]), -((a[0]*b[2])-(a[2]*b[0])), (a[0]*b[1])-(a[1]*b[0])]) }
 function sub3 (a,b) { return new Float32Array([a[0]-b[0], a[1]-b[1], a[2]-b[2]]) }
 function sum3 (a,b) { return new Float32Array([a[0]+b[0], a[1]+b[1], a[2]+b[2]]) }
 function dot3 (a,b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] }
 function scale3 (c,v) { return new Float32Array([c*v[0], c*v[1], c*v[2]]) }
+
+function create_rotation_y_half_pi () {
+  // TODO: lol just calculate this
+  const ry = Math.PI/2
+
+  const m = new Float32Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+  ])
+
+  m[0] = Math.cos(ry)
+  m[2] = Math.sin(ry)
+  m[8] = -Math.sin(ry)
+  m[10] = Math.cos(ry)
+
+  return m
+}
+
+function create_inverse_translation_matrix (t) {
+  return new Float32Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    -t[0], -t[1], -t[2], 1
+  ])
+}
+
+const screen_0 = new Float32Array([0.060993, -1.000000, 1.948891])
+const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
+const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
 const screen_n = cross3(sub3(screen_v, screen_0), sub3(screen_h, screen_0))
+const inverse_screen_translation = create_inverse_translation_matrix(screen_0)
+const inverse_screen_rotation = create_rotation_y_half_pi()
+const inverse_screen_scale = [
+  1920/(2*1.948891), 0, 0, 0,
+  0, 1080/2, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+]
+//const inverse_screen_model_to_world = new Float32Array(16)
+const camera_0 = new Float32Array(3)
+
+const p_ = new Float32Array([0, 0, 0, 1])
 
 
 function update () {
@@ -135,16 +176,37 @@ function update () {
     pick_ray[2] = -1
     pick_ray[3] = 1
 
-    matrix_mult_4(inverse_model_view_matrix, inverse_camera_translation, inverse_camera_rotation)
+    matrix_mult_4(inverse_model_view_matrix, inverse_camera_rotation, inverse_camera_translation)
     matrix_operate_4(inverse_perspective_matrix, pick_ray)
     pick_ray[3] = 0
     matrix_operate_4(inverse_model_view_matrix, pick_ray)
 
     const denom = dot3(pick_ray, screen_n)
     if (denom != 0) {
-      const camera_0 = new Float32Array([-camera_translation[12], -camera_translation[13], -camera_translation[14]])
+      camera_0[0] = -camera_translation[12]
+      camera_0[1] = -camera_translation[13]
+      camera_0[2] = -camera_translation[14]
       const t = dot3(screen_n, sub3(screen_0, camera_0)) / denom
       const p = sum3(camera_0, scale3(t, pick_ray))
+      //console.log(p)
+
+      //console.log('inverse_screen_model_to_world', inverse_screen_model_to_world)
+      //console.log('inverse_screen_translation', inverse_screen_translation)
+      //console.log('inverse_screen_rotation', inverse_screen_rotation)
+      //matrix_mult_4(inverse_screen_model_to_world, inverse_screen_translation, inverse_screen_rotation)
+      //console.log('inverse_screen_model_to_world', inverse_screen_model_to_world)
+      // TODO: make vector operations not create data, so that we can operate on a 4-dim p. (instead of butchering it here:)
+      // Or, maybe just make a constant global p_ but named well.
+      p_[0] = p[0]
+      p_[1] = p[1]
+      p_[2] = p[2]
+      //matrix_operate_4(inverse_screen_model_to_world, p_)
+      matrix_operate_4(inverse_screen_translation, p_)
+      matrix_operate_4(inverse_screen_rotation, p_)
+      matrix_operate_4(inverse_screen_scale, p_)
+
+      console.log('x: '+ p_[0]+', y: ' +p[1]+' :)')
+      //has_clicked = false
     }
   }
 
