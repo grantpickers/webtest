@@ -68,7 +68,7 @@ let basic_a_pos = null
 let basic_a_normal = null
 let basic_a_uv = null
 let basic_u_model_view_matrix = null
-let basic_u_projection_matrix = null
+let basic_u_perspective_matrix = null
 let basic_u_sampler = null
 let model_view_matrix = new Float32Array(16)
 let inverse_model_view_matrix = new Float32Array(16)
@@ -104,7 +104,7 @@ const inverse_camera_rotation = new Float32Array([
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-let inverse_projection_matrix = null
+let inverse_perspective_matrix = null
 let pick_ray = new Float32Array(4)
 let mouse_x = 0
 const PICK_DEPTH = 10
@@ -126,7 +126,7 @@ function update () {
     pick_ray[3] = 1
 
     matrix_mult_4(inverse_model_view_matrix, inverse_camera_translation, inverse_camera_rotation)
-    matrix_operate_4(inverse_projection_matrix, pick_ray)
+    matrix_operate_4(inverse_perspective_matrix, pick_ray)
     pick_ray[3] = 0
     matrix_operate_4(inverse_model_view_matrix, pick_ray)
 
@@ -207,6 +207,31 @@ function render () {
   // render_lady()
 }
 
+function reset_perspective_matrices () {
+  const aspect = window.innerWidth / window.innerHeight
+  const fov = Math.PI/4
+  const near = 1
+  const far = 50
+  const pa = 1/Math.tan(fov/2)/aspect
+  const pb = 1/Math.tan(fov/2)
+  const pc = (near + far)/(near - far)
+  const pd = -1
+  const pe = 2*near*far/(near - far)
+  perspective_matrix = new Float32Array([
+    pa, 0, 0, 0,
+    0, pb, 0, 0,
+    0, 0, pc, pd,
+    0, 0, pe, 0,
+  ])
+  gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
+  inverse_perspective_matrix = new Float32Array([
+    1/pa, 0, 0, 0,
+    0, 1/pb, 0, 0,
+    0, 0, 0, 1/pe,
+    0, 0, 1/pd, -pc/(pd*pe),
+  ])
+}
+
 
 function init_gl () {
   canvas = document.createElement('canvas')
@@ -214,6 +239,7 @@ function init_gl () {
   canvas.width = window.devicePixelRatio * window.innerWidth
   canvas.height = window.devicePixelRatio * window.innerHeight
   gl = canvas.getContext('webgl')
+  gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0,0,0,1)
   gl.enable(gl.DEPTH_TEST)
   gl.enable(gl.CULL_FACE)
@@ -227,7 +253,7 @@ function main_loop (timestamp) {
   const frame_time = timestamp - prev_timestamp
   prev_timestamp = timestamp
   total_time += frame_time
-  if (total_time > TARGET_FRAME_TIME*2) {
+  if (total_time > TARGET_FRAME_TIME*3) {
     total_time = TARGET_FRAME_TIME
   }
   while (total_time >= TARGET_FRAME_TIME) {
@@ -248,6 +274,13 @@ function main () {
   screen_canvas.height = 1080
   screen_ctx = screen_canvas.getContext('2d')
 
+  window.addEventListener('resize', function (e) {
+    canvas.width = window.devicePixelRatio * window.innerWidth
+    canvas.height = window.devicePixelRatio * window.innerHeight
+    gl.viewport(0, 0, canvas.width, canvas.height)
+    reset_perspective_matrices()
+  })
+ 
   canvas.addEventListener('mousemove', function (e) {
     mouse_x = e.clientX
     mouse_y = e.clientY
@@ -296,28 +329,9 @@ function main () {
   basic_u_model_view_matrix = gl.getUniformLocation(basic_shader_program, 'u_model_view_matrix')
   basic_u_sampler = gl.getUniformLocation(basic_shader_program, 'u_sampler')
 
-  basic_u_projection_matrix = gl.getUniformLocation(basic_shader_program, 'u_projection_matrix')
-  const aspect = window.innerWidth / window.innerHeight
-  const fov = Math.PI/4
-  const near = 1
-  const far = 50
-  const pa = 1/Math.tan(fov/2)/aspect
-  const pb = 1/Math.tan(fov/2)
-  const pc = (near + far)/(near - far)
-  const pd = -1
-  const pe = 2*near*far/(near - far)
-  gl.uniformMatrix4fv(basic_u_projection_matrix, false, new Float32Array([
-    pa, 0, 0, 0,
-    0, pb, 0, 0,
-    0, 0, pc, pd,
-    0, 0, pe, 0,
-  ]))
-  inverse_projection_matrix = new Float32Array([
-    1/pa, 0, 0, 0,
-    0, 1/pb, 0, 0,
-    0, 0, 0, 1/pe,
-    0, 0, 1/pd, -pc/(pd*pe),
-  ])
+  basic_u_perspective_matrix = gl.getUniformLocation(basic_shader_program, 'u_perspective_matrix')
+
+  reset_perspective_matrices()
 
 
 
