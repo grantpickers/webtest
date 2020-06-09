@@ -104,21 +104,19 @@ const inverse_camera_rotation = new Float32Array([
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-let inverse_perspective_matrix = null
+let perspective_matrix = new Float32Array(16)
+let inverse_perspective_matrix = new Float32Array(16)
+
 let pick_ray = new Float32Array(4)
 const PICK_DEPTH = 10
 const PICK_STEP = 0.1
+const pick_p = new Float32Array([0, 0, 0, 1])
+
 let mouse_x = 0
 let mouse_y = 0
 let has_clicked = false
 let screen_canvas = null
 let screen_ctx = null
-
-function cross3 (a,b) { return new Float32Array([(a[1]*b[2])-(a[2]*b[1]), -((a[0]*b[2])-(a[2]*b[0])), (a[0]*b[1])-(a[1]*b[0])]) }
-function sub3 (a,b) { return new Float32Array([a[0]-b[0], a[1]-b[1], a[2]-b[2]]) }
-function sum3 (a,b) { return new Float32Array([a[0]+b[0], a[1]+b[1], a[2]+b[2]]) }
-function dot3 (a,b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] }
-function scale3 (c,v) { return new Float32Array([c*v[0], c*v[1], c*v[2]]) }
 
 const ROTATION_Y_HALF_PI = new Float32Array([
   0, 0, 1, 0,
@@ -134,28 +132,6 @@ const ROTATION_X_PI = new Float32Array([
   0, 0, 0, 1
 ])
 
-
-  // TODO: oh shit our RY matrices haven't been column/row major
-  /*
-function create_rotation_y_half_pi () {
-  const ry = Math.PI/2
-
-  const m = new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-  ])
-
-  m[0] = Math.cos(ry)
-  m[2] = Math.sin(ry)
-  m[8] = -Math.sin(ry)
-  m[10] = Math.cos(ry)
-
-  return m
-}
-*/
-
 function create_inverse_translation_matrix (t) {
   return new Float32Array([
     1, 0, 0, 0,
@@ -168,7 +144,13 @@ function create_inverse_translation_matrix (t) {
 const screen_0 = new Float32Array([0.060993, -1.000000, 1.948891])
 const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
 const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
-const screen_n = cross3(sub3(screen_v, screen_0), sub3(screen_h, screen_0))
+let screen_n = new Float32Array(16)
+function init_screen_normal() {
+  const t0 = new Float32Array(3)
+  const t1 = new Float32Array(3)
+  cross3(screen_n, sub3(t0, screen_v, screen_0), sub3(t1, screen_h, screen_0))
+}
+init_screen_normal()
 const inverse_screen_translation = create_inverse_translation_matrix(screen_h)
 const inverse_screen_rotation = new Float32Array(16)
 matrix_mult_4(inverse_screen_rotation, ROTATION_X_PI, ROTATION_Y_HALF_PI)
@@ -179,7 +161,7 @@ const inverse_screen_scale = new Float32Array([
   0, 0, 0, 1,
 ])
 const camera_0 = new Float32Array(3)
-const p_ = new Float32Array([0, 0, 0, 1])
+const temp0 = new Float32Array(3)
 
 
 function update () {
@@ -202,22 +184,13 @@ function update () {
       camera_0[0] = -camera_translation[12]
       camera_0[1] = -camera_translation[13]
       camera_0[2] = -camera_translation[14]
-      const t = dot3(screen_n, sub3(screen_0, camera_0)) / denom
-      const p = sum3(camera_0, scale3(t, pick_ray))
-      //console.log(p)
+      const t = dot3(screen_n, sub3(temp0, screen_0, camera_0)) / denom
+      sum3(pick_p, camera_0, scl3(temp0, t, pick_ray))
+      matrix_operate_4(inverse_screen_translation, pick_p)
+      matrix_operate_4(inverse_screen_rotation, pick_p)
+      matrix_operate_4(inverse_screen_scale, pick_p)
 
-      // TODO: make vector operations not create data, so that we can operate on a 4-dim p. (instead of butchering it here:)
-      // Or, maybe just make a constant global p_ but named well.
-      p_[0] = p[0]
-      p_[1] = p[1]
-      p_[2] = p[2]
-      //matrix_operate_4(inverse_screen_model_to_world, p_)
-      matrix_operate_4(inverse_screen_translation, p_)
-      matrix_operate_4(inverse_screen_rotation, p_)
-      matrix_operate_4(inverse_screen_scale, p_)
-
-      console.log('x: '+ p_[0]+', y: ' +p_[1]+' :)')
-      //has_clicked = false
+      console.log(pick_p)
     }
   }
 
@@ -244,6 +217,7 @@ function update () {
   inverse_camera_translation[14] = -tz
 
 
+  has_clicked = false
   frame = frame + 1
 }
 
@@ -299,19 +273,20 @@ function reset_perspective_matrices () {
   const pc = (near + far)/(near - far)
   const pd = -1
   const pe = 2*near*far/(near - far)
-  perspective_matrix = new Float32Array([
-    pa, 0, 0, 0,
-    0, pb, 0, 0,
-    0, 0, pc, pd,
-    0, 0, pe, 0,
-  ])
+
+  perspective_matrix[0] = pa
+  perspective_matrix[5] = pb
+  perspective_matrix[10] = pc
+  perspective_matrix[11] = pd
+  perspective_matrix[14] = pe
+
   gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
-  inverse_perspective_matrix = new Float32Array([
-    1/pa, 0, 0, 0,
-    0, 1/pb, 0, 0,
-    0, 0, 0, 1/pe,
-    0, 0, 1/pd, -pc/(pd*pe),
-  ])
+
+  inverse_perspective_matrix[0] = 1/pa
+  inverse_perspective_matrix[5] = 1/pb
+  inverse_perspective_matrix[11] = 1/pe
+  inverse_perspective_matrix[14] = 1/pd
+  inverse_perspective_matrix[15] = -pc/(pd*pe)
 }
 
 
