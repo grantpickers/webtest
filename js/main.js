@@ -106,9 +106,9 @@ const inverse_camera_rotation = new Float32Array([
 ])
 let inverse_perspective_matrix = null
 let pick_ray = new Float32Array(4)
-let mouse_x = 0
 const PICK_DEPTH = 10
 const PICK_STEP = 0.1
+let mouse_x = 0
 let mouse_y = 0
 let has_clicked = false
 let screen_canvas = null
@@ -120,28 +120,24 @@ function sum3 (a,b) { return new Float32Array([a[0]+b[0], a[1]+b[1], a[2]+b[2]])
 function dot3 (a,b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] }
 function scale3 (c,v) { return new Float32Array([c*v[0], c*v[1], c*v[2]]) }
 
-function create_rotation_x_pi () {
-  // TODO: lol just calculate this
-  const rx = Math.PI
+const ROTATION_Y_HALF_PI = new Float32Array([
+  0, 0, 1, 0,
+  0, 1, 0, 0,
+  -1, 0, 0, 0,
+  0, 0, 0, 1
+])
 
-  const m = new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-  ])
+const ROTATION_X_PI = new Float32Array([
+  1, 0, 0, 0,
+  0, -1, 0, 0,
+  0, 0, -1, 0,
+  0, 0, 0, 1
+])
 
-  m[5] = Math.cos(rx)
-  m[6] = -Math.sin(rx)
-  m[9] = Math.sin(rx)
-  m[10] = Math.cos(rx)
 
-  return m
-}
-
-function create_rotation_y_half_pi () {
-  // TODO: lol just calculate this
   // TODO: oh shit our RY matrices haven't been column/row major
+  /*
+function create_rotation_y_half_pi () {
   const ry = Math.PI/2
 
   const m = new Float32Array([
@@ -158,6 +154,7 @@ function create_rotation_y_half_pi () {
 
   return m
 }
+*/
 
 function create_inverse_translation_matrix (t) {
   return new Float32Array([
@@ -173,18 +170,15 @@ const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
 const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
 const screen_n = cross3(sub3(screen_v, screen_0), sub3(screen_h, screen_0))
 const inverse_screen_translation = create_inverse_translation_matrix(screen_h)
-//const inverse_screen_rotation = create_rotation_y_half_pi()
 const inverse_screen_rotation = new Float32Array(16)
-matrix_mult_4(inverse_screen_rotation, create_rotation_x_pi(), create_rotation_y_half_pi())
+matrix_mult_4(inverse_screen_rotation, ROTATION_X_PI, ROTATION_Y_HALF_PI)
 const inverse_screen_scale = new Float32Array([
   1920/(2*1.948891), 0, 0, 0,
   0, 1080/2, 0, 0,
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-//const inverse_screen_model_to_world = new Float32Array(16)
 const camera_0 = new Float32Array(3)
-
 const p_ = new Float32Array([0, 0, 0, 1])
 
 
