@@ -383,12 +383,25 @@ function render_screen () {
   }
 
   //screen_ctx.drawImage(images.screen_png, 500, 400, 960, 540)
+  gl.useProgram(basic_shader_program)
+
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.vertices)
+  gl.enableVertexAttribArray(basic_a_pos)
+  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.normals)
+  gl.enableVertexAttribArray(basic_a_normal)
+  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.uvs)
+  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(basic_a_uv)
+
 
   gl.activeTexture(gl.TEXTURE0 + model_buffers.screen.texture_id)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
 
-
-  gl.useProgram(basic_shader_program)
 
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
@@ -399,7 +412,21 @@ function render_screen () {
 function render_cube () {
   gl.useProgram(basic_shader_program)
 
-  gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.vertices)
+  gl.enableVertexAttribArray(basic_a_pos)
+  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.normals)
+  gl.enableVertexAttribArray(basic_a_normal)
+  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.uvs)
+  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(basic_a_uv)
+
+
+  //gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
