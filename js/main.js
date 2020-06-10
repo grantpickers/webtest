@@ -62,8 +62,8 @@ const assets = {}
 const images = {}
 const models = {}
 const model_buffers = {}
-let canvas = null
-let gl = null
+let canvas = document.createElement('canvas')
+let gl = canvas.getContext('webgl')
 let prev_timestamp = null
 let total_time = 0
 const TARGET_FRAME_TIME = 1000/60
@@ -132,8 +132,9 @@ const pick_p = new Float32Array([0, 0, 0, 1])
 let mouse_x = 0
 let mouse_y = 0
 let has_clicked = false
-let screen_canvas = null
-let screen_ctx = null
+let has_resized = true
+const screen_canvas = document.createElement('canvas')
+let screen_ctx = screen_canvas.getContext('2d')
 
 const ROTATION_Y_HALF_PI = new Float32Array([
   0, 0, 1, 0,
@@ -185,7 +186,7 @@ const temp0 = new Float32Array(3)
 // Screen UI
 const buttons = [
   {
-    x: 100,
+    x: 150,
     y: 100,
     w: 500,
     h: 100,
@@ -193,7 +194,7 @@ const buttons = [
     page: 'works',
   },
   {
-    x: 100,
+    x: 150,
     y: 240,
     w: 500,
     h: 100,
@@ -201,7 +202,7 @@ const buttons = [
     page: 'about',
   },
   {
-    x: 100,
+    x: 150,
     y: 380,
     w: 500,
     h: 100,
@@ -289,6 +290,18 @@ function update () {
   /*
    * Update stuff at 60fps
    */
+  if (has_resized) {
+    canvas.width = window.devicePixelRatio * canvas.offsetWidth
+    canvas.height = 9/16*canvas.width
+    gl.viewport(0, 0, canvas.width, canvas.height)
+    reset_perspective_matrices()
+    gl.useProgram(basic_shader_program)
+    gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
+    gl.useProgram(plain_shader_program)
+    gl.uniformMatrix4fv(plain_u_perspective_matrix, false, perspective_matrix)
+  }
+
+
   update_pick()
 
 
@@ -347,6 +360,7 @@ function update () {
 
 
   has_clicked = false
+  has_resized = false
   frame = frame + 1
 }
 
@@ -389,7 +403,7 @@ function render_screen () {
 
   screen_ctx.fillStyle = '#222'
   screen_ctx.font = "bold 600px Arial"
-  screen_ctx.fillText('G', 1500, 580)
+  screen_ctx.fillText('G', 1400, 580)
 
   screen_ctx.font = "100 20px Arial"
   for (let i=0; i<current_page.length; i++) {
@@ -468,7 +482,7 @@ function render () {
 }
 
 function reset_perspective_matrices () {
-  const aspect = window.innerWidth / window.innerHeight
+  const aspect = canvas.width / canvas.height
   const fov = Math.PI/4
   const near = 1
   const far = 50
@@ -493,11 +507,9 @@ function reset_perspective_matrices () {
 
 
 function init_gl () {
-  canvas = document.createElement('canvas')
   document.body.appendChild(canvas)
-  canvas.width = window.devicePixelRatio * window.innerWidth
-  canvas.height = window.devicePixelRatio * window.innerHeight
-  gl = canvas.getContext('webgl')
+  canvas.width = window.devicePixelRatio * canvas.offsetWidth
+  canvas.height = 9/16*canvas.width
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0,0,0,1)
   gl.enable(gl.DEPTH_TEST)
@@ -527,29 +539,9 @@ function main_loop (timestamp) {
 function main () {
   init_gl(canvas, gl)
 
-  reset_perspective_matrices()
-
-
-  screen_canvas = document.createElement('canvas')
   screen_canvas.width = 1920
   screen_canvas.height = 1080
-  screen_ctx = screen_canvas.getContext('2d')
-
-  window.addEventListener('resize', function (e) {
-    canvas.width = window.devicePixelRatio * window.innerWidth
-    canvas.height = window.devicePixelRatio * window.innerHeight
-    gl.viewport(0, 0, canvas.width, canvas.height)
-    reset_perspective_matrices()
-  })
- 
-  canvas.addEventListener('mousemove', function (e) {
-    mouse_x = e.clientX
-    mouse_y = e.clientY
-  })
-
-  canvas.addEventListener('click', function (e) {
-    has_clicked = true
-  })
+  reset_perspective_matrices()
 
   /*
    *
@@ -566,7 +558,6 @@ function main () {
   model_buffers.monkey = load_obj(gl, assets.monkey_obj)
 
 
-
   /*
    *
    * Compile shaders and get control of shader variables
@@ -575,51 +566,30 @@ function main () {
 
   basic_shader_program = create_shader_program(gl, assets.basic_vertex, assets.basic_fragment)
   gl.useProgram(basic_shader_program)
-
-  basic_a_pos = gl.getAttribLocation(basic_shader_program, 'a_pos')
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.vertices)
-  gl.enableVertexAttribArray(basic_a_pos)
-  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
-
+  basic_a_pos    = gl.getAttribLocation(basic_shader_program, 'a_pos')
   basic_a_normal = gl.getAttribLocation(basic_shader_program, 'a_normal')
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.normals)
-  gl.enableVertexAttribArray(basic_a_normal)
-  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
-
-  basic_a_uv = gl.getAttribLocation(basic_shader_program, 'a_uv')
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.uvs)
-  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
-  gl.enableVertexAttribArray(basic_a_uv)
-
-  basic_u_model_view_matrix = gl.getUniformLocation(basic_shader_program, 'u_model_view_matrix')
-  basic_u_sampler = gl.getUniformLocation(basic_shader_program, 'u_sampler')
-
+  basic_a_uv     = gl.getAttribLocation(basic_shader_program, 'a_uv')
+  basic_u_model_view_matrix  = gl.getUniformLocation(basic_shader_program, 'u_model_view_matrix')
+  basic_u_sampler            = gl.getUniformLocation(basic_shader_program, 'u_sampler')
   basic_u_perspective_matrix = gl.getUniformLocation(basic_shader_program, 'u_perspective_matrix')
   gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
 
 
-
-
-
-
-
-
-
   plain_shader_program = create_shader_program(gl, assets.plain_vertex, assets.plain_fragment)
   gl.useProgram(plain_shader_program)
-
   plain_a_pos = gl.getAttribLocation(plain_shader_program, 'a_pos')
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.vertices)
-  gl.enableVertexAttribArray(plain_a_pos)
-  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
   plain_a_normal = gl.getAttribLocation(plain_shader_program, 'a_normal')
-  plain_a_uv = gl.getAttribLocation(plain_shader_program, 'a_uv')
-  plain_u_model_view_matrix = gl.getUniformLocation(plain_shader_program, 'u_model_view_matrix')
+  plain_a_uv     = gl.getAttribLocation(plain_shader_program, 'a_uv')
+  plain_u_model_view_matrix  = gl.getUniformLocation(plain_shader_program, 'u_model_view_matrix')
   plain_u_perspective_matrix = gl.getUniformLocation(plain_shader_program, 'u_perspective_matrix')
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, perspective_matrix)
 
 
 
+
+  window.addEventListener('resize', function (e) { has_resized = true })
+  canvas.addEventListener('mousemove', function (e) { mouse_x = e.offsetX; mouse_y = e.offsetY })
+  canvas.addEventListener('click', function (e) { has_clicked = true })
 
   window.requestAnimationFrame(main_loop)
 }
