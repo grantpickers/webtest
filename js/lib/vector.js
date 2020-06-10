@@ -1,3 +1,6 @@
+// temp0 is useful for not creating temp memory for use with vector.js. Maybe make temp0-16?
+const temp0 = new Float32Array(3)
+
 function cross3 (v,a,b) { 
   const ax = a[0]
   const ay = a[1]

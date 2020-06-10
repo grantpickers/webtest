@@ -1,3 +1,17 @@
+const ROTATION_Y_HALF_PI = new Float32Array([
+  0, 0, 1, 0,
+  0, 1, 0, 0,
+  -1, 0, 0, 0,
+  0, 0, 0, 1
+])
+
+const ROTATION_X_PI = new Float32Array([
+  1, 0, 0, 0,
+  0, -1, 0, 0,
+  0, 0, -1, 0,
+  0, 0, 0, 1
+])
+
 function matrix_transpose_4 (m, a) {
   for (let i=0; i<4; i++) {
     for (let j=0; j<4; j++) {
@@ -5,6 +19,7 @@ function matrix_transpose_4 (m, a) {
       m[j*4 + i] = a[i*4 + j]
     }
   }
+  return m
 }
 
 function matrix_mult_4 (m, a, b) {
@@ -16,6 +31,7 @@ function matrix_mult_4 (m, a, b) {
       }
     }
   }
+  return m
 }
 
 function matrix_operate_4 (m, v) {
@@ -30,4 +46,5 @@ function matrix_operate_4 (m, v) {
       v[j] += m[j + k*4] * t[k]
     }
   }
+  return v
 }
