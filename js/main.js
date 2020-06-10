@@ -286,19 +286,23 @@ function update_pick () {
   }
 }
 
+function handle_resize () {
+  canvas.width = window.devicePixelRatio * canvas.offsetWidth
+  canvas.height = 9/16*canvas.width
+  gl.viewport(0, 0, canvas.width, canvas.height)
+  reset_perspective_matrices()
+  gl.useProgram(basic_shader_program)
+  gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
+  gl.useProgram(plain_shader_program)
+  gl.uniformMatrix4fv(plain_u_perspective_matrix, false, perspective_matrix)
+}
+
 function update () {
   /*
    * Update stuff at 60fps
    */
   if (has_resized) {
-    canvas.width = window.devicePixelRatio * canvas.offsetWidth
-    canvas.height = 9/16*canvas.width
-    gl.viewport(0, 0, canvas.width, canvas.height)
-    reset_perspective_matrices()
-    gl.useProgram(basic_shader_program)
-    gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
-    gl.useProgram(plain_shader_program)
-    gl.uniformMatrix4fv(plain_u_perspective_matrix, false, perspective_matrix)
+    handle_resize()
   }
 
 
@@ -541,6 +545,7 @@ function main () {
 
   screen_canvas.width = 1920
   screen_canvas.height = 1080
+
   reset_perspective_matrices()
 
   /*
