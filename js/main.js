@@ -44,6 +44,7 @@ Harry
 const asset_urls = {
   screen_obj: '/obj/screen.obj',
   cube_obj: '/obj/cube.obj',
+  monkey_obj: '/obj/monkey.obj',
   basic_vertex: '/shaders/basic.vert',
   basic_fragment: '/shaders/basic.frag',
   plain_vertex: '/shaders/plain.vert',
@@ -310,7 +311,7 @@ function update () {
     if (is_hovered && has_clicked) {
       current_page = b.page
       if ((current_page !== previous_page) && current_page == pages.works) {
-        ry_target = Math.PI/2 - 2*Math.PI/6
+        ry_target = Math.PI/2 - 1*Math.PI/7
         tx_target = -6.4*Math.sin(ry_target)
         ty_target = 0
         tz_target = -6.4*Math.cos(ry_target)
@@ -440,12 +441,30 @@ function render_cube () {
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
+function render_monkey () {
+  gl.useProgram(plain_shader_program)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.monkey.vertices)
+  gl.enableVertexAttribArray(plain_a_pos)
+  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.monkey.normals)
+  gl.enableVertexAttribArray(plain_a_normal)
+  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, model_view_matrix)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.monkey.num_indices, gl.UNSIGNED_SHORT, 0)
+}
+
 function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 
   render_screen()
   render_cube()
+  render_monkey()
 }
 
 function reset_perspective_matrices () {
@@ -539,11 +558,12 @@ function main () {
    */
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)
-  //model_buffers.screen.texture_id = load_texture(gl, images.screen_png)
   model_buffers.screen.texture_id = 0
   model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
 
   model_buffers.cube = load_obj(gl, assets.cube_obj)
+
+  model_buffers.monkey = load_obj(gl, assets.monkey_obj)
 
 
 
