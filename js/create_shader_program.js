@@ -5,10 +5,16 @@ function create_shader_program (gl, vert_source, frag_source) {
   gl.shaderSource(frag_shader, frag_source)
   gl.compileShader(vert_shader)
   const info_log_vert = gl.getShaderInfoLog(vert_shader)
-  if (info_log_vert) { console.log(info_log_vert) }
+  if (info_log_vert) {
+    console.log(vert_source)
+    console.log(info_log_vert)
+  }
   gl.compileShader(frag_shader)
   const info_log_frag = gl.getShaderInfoLog(frag_shader)
-  if (info_log_frag) { console.log(info_log_frag) }
+  if (info_log_frag) {
+    console.log(frag_source)
+    console.log(info_log_frag)
+  }
   const program = gl.createProgram()
   gl.attachShader(program, vert_shader)
   gl.attachShader(program, frag_shader)

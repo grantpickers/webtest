@@ -43,6 +43,7 @@ Harry
 
 const asset_urls = {
   screen_obj: '/obj/screen.obj',
+  cube_obj: '/obj/cube.obj',
   basic_vertex: '/shaders/basic.vert',
   basic_fragment: '/shaders/basic.frag',
 }
@@ -80,6 +81,7 @@ let inverse_model_view_matrix = new Float32Array(16)
  *
  */
 let frame = 0
+
 const camera_translation = new Float32Array([
   1, 0, 0, 0,
   0, 1, 0, 0,
@@ -106,6 +108,7 @@ const inverse_camera_rotation = new Float32Array([
 ])
 let perspective_matrix = new Float32Array(16)
 let inverse_perspective_matrix = new Float32Array(16)
+
 
 let pick_ray = new Float32Array(4)
 const PICK_DEPTH = 10
@@ -141,6 +144,7 @@ function create_inverse_translation_matrix (t) {
   ])
 }
 
+const camera_0 = new Float32Array(3)
 const screen_0 = new Float32Array([0.060993, -1.000000, 1.948891])
 const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
 const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
@@ -160,8 +164,11 @@ const inverse_screen_scale = new Float32Array([
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-const camera_0 = new Float32Array(3)
+
+// temp0 is useful for not creating temp memory for use with vector.js. Maybe make temp0-16?
 const temp0 = new Float32Array(3)
+
+// Screen UI
 const buttons = [
   {
     x: 100,
@@ -214,6 +221,19 @@ const pages = {
 }
 let current_page = pages.about
 
+// Camera
+
+let ry_target = Math.PI/2
+let tx_target = -2.4
+let ty_target = 0
+let tz_target = 0
+let ry = ry_target
+let tx = tx_target
+let ty = ty_target
+let tz = tz_target
+let animation_tween = 1
+
+
 for (let i=0; i<buttons.length; i++) {
   const b = buttons[i]
   const keys = Object.keys(pages)
@@ -250,24 +270,6 @@ function update_pick () {
     matrix_operate_4(inverse_screen_scale, pick_p)
   }
 }
-
-let ry_target = Math.PI/2
-let tx_target = -2.4
-let ty_target = 0
-let tz_target = 0
-let animation_tween = 1
-
-let ry = Math.PI/2 - Math.PI/4
-let tx = -4.4
-let ty = 0
-let tz = 0
-
-  /*
-let ry = Math.PI/2
-let tx = -2.4
-let ty = 0
-let tz = 0
-*/
 
 function update () {
   /*
@@ -388,22 +390,28 @@ function render_screen () {
 
   gl.useProgram(basic_shader_program)
 
-  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, model_view_matrix)
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
+function render_cube () {
+  gl.useProgram(basic_shader_program)
+
+  gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
+}
 
 function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, model_view_matrix)
+
   render_screen()
-  // render_chair()
-  // render_window()
-  // render_spider()
-  // render_lady()
+  render_cube()
 }
 
 function reset_perspective_matrices () {
@@ -501,6 +509,7 @@ function main () {
   model_buffers.screen.texture_id = 0
   model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
 
+  model_buffers.cube = load_obj(gl, assets.cube_obj)
 
   /*
    *
