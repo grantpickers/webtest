@@ -162,42 +162,154 @@ const inverse_screen_scale = new Float32Array([
 ])
 const camera_0 = new Float32Array(3)
 const temp0 = new Float32Array(3)
+const buttons = [
+  {
+    x: 100,
+    y: 100,
+    w: 500,
+    h: 100,
+    txt: "3D WORKS",
+    page: 'works',
+  },
+  {
+    x: 100,
+    y: 240,
+    w: 500,
+    h: 100,
+    txt: "ABOUT",
+    page: 'about',
+  },
+  {
+    x: 100,
+    y: 380,
+    w: 500,
+    h: 100,
+    txt: "CONTACT",
+    page: 'contact',
+  },
+]
+const button_bg = '#eee'
+const button_fg = '#00f'
+const button_hover_bg = '#aaa'
+const button_hover_fg = '#00f'
+const button_active_bg = '#000'
+const button_active_fg = '#fff'
+const pages = {
+  'works': [
+    "Aenean commodo ligula eget dolor.",
+    "Cum sociis natoque penatibus et magnis dis.",
+  ],
+  about: [
+    'grant.gl',
+    '',
+    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.",
+    "Aenean commodo ligula eget dolor.",
+    "Aenean massa.",
+    "Cum sociis natoque penatibus et magnis dis.",
+  ],
+  contact: [
+    "Aenean commodo ligula eget dolor.",
+    "Aenean massa.",
+  ],
+}
+let current_page = pages.about
 
+for (let i=0; i<buttons.length; i++) {
+  const b = buttons[i]
+  const keys = Object.keys(pages)
+  for (let j=0; j<keys.length; j++) {
+    const k = keys[j]
+    if (b.page == k) {
+      b.page = pages[k]
+    }
+  }
+}
+
+
+
+function update_pick () {
+  pick_ray[0] = 2 * mouse_x / canvas.width - 1
+  pick_ray[1] = -2 * mouse_y / canvas.height + 1
+  pick_ray[2] = -1
+  pick_ray[3] = 1
+
+  matrix_mult_4(inverse_model_view_matrix, inverse_camera_rotation, inverse_camera_translation)
+  matrix_operate_4(inverse_perspective_matrix, pick_ray)
+  pick_ray[3] = 0
+  matrix_operate_4(inverse_model_view_matrix, pick_ray)
+
+  const denom = dot3(pick_ray, screen_n)
+  if (denom != 0) {
+    camera_0[0] = -camera_translation[12]
+    camera_0[1] = -camera_translation[13]
+    camera_0[2] = -camera_translation[14]
+    const t = dot3(screen_n, sub3(temp0, screen_0, camera_0)) / denom
+    sum3(pick_p, camera_0, scl3(temp0, t, pick_ray))
+    matrix_operate_4(inverse_screen_translation, pick_p)
+    matrix_operate_4(inverse_screen_rotation, pick_p)
+    matrix_operate_4(inverse_screen_scale, pick_p)
+  }
+}
+
+let ry_target = Math.PI/2
+let tx_target = -2.4
+let ty_target = 0
+let tz_target = 0
+let animation_tween = 1
+
+let ry = Math.PI/2 - Math.PI/4
+let tx = -4.4
+let ty = 0
+let tz = 0
+
+  /*
+let ry = Math.PI/2
+let tx = -2.4
+let ty = 0
+let tz = 0
+*/
 
 function update () {
   /*
    * Update stuff at 60fps
    */
-  if (has_clicked) {
-    pick_ray[0] = 2 * mouse_x / canvas.width - 1
-    pick_ray[1] = -2 * mouse_y / canvas.height + 1
-    pick_ray[2] = -1
-    pick_ray[3] = 1
+  update_pick()
 
-    matrix_mult_4(inverse_model_view_matrix, inverse_camera_rotation, inverse_camera_translation)
-    matrix_operate_4(inverse_perspective_matrix, pick_ray)
-    pick_ray[3] = 0
-    matrix_operate_4(inverse_model_view_matrix, pick_ray)
 
-    const denom = dot3(pick_ray, screen_n)
-    if (denom != 0) {
-      camera_0[0] = -camera_translation[12]
-      camera_0[1] = -camera_translation[13]
-      camera_0[2] = -camera_translation[14]
-      const t = dot3(screen_n, sub3(temp0, screen_0, camera_0)) / denom
-      sum3(pick_p, camera_0, scl3(temp0, t, pick_ray))
-      matrix_operate_4(inverse_screen_translation, pick_p)
-      matrix_operate_4(inverse_screen_rotation, pick_p)
-      matrix_operate_4(inverse_screen_scale, pick_p)
 
-      console.log(pick_p)
+  if (animation_tween < 1) {
+    animation_tween += 0.005
+  }
+
+  //const ry = 0.7*Math.sin(frame*0.01)+1.5
+
+
+  const previous_page = current_page
+
+  const screen_mouse_x = pick_p[0]
+  const screen_mouse_y = pick_p[1]
+  for (let i=0; i<buttons.length; i++) {
+    const b = buttons[i]
+    const is_hovered = screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h
+    b.is_hovered = is_hovered
+    if (is_hovered && has_clicked) {
+      current_page = b.page
+      if ((current_page !== previous_page) && current_page == pages.works) {
+        ry_target = Math.PI/2 - Math.PI/4
+        tx_target = -4.4*Math.sin(ry_target)
+        ty_target = 0
+        tz_target = -4.4*Math.cos(ry_target)
+        animation_tween = 0
+      }
     }
   }
 
-  const ry = 0.7*Math.sin(frame*0.01)+1.5
-  const tx = -5*Math.sin(ry)
-  const ty = 0
-  const tz = -5*Math.cos(ry)
+  ry = animation_tween * (ry_target) + (1-animation_tween) * ry
+  tx = animation_tween * (tx_target) + (1-animation_tween) * tx
+  ty = animation_tween * (ty_target) + (1-animation_tween) * ty
+  tz = animation_tween * (tz_target) + (1-animation_tween) * tz
+
+
 
   camera_translation[12] = tx
   camera_translation[13] = ty
@@ -217,6 +329,7 @@ function update () {
   inverse_camera_translation[14] = -tz
 
 
+
   has_clicked = false
   frame = frame + 1
 }
@@ -232,12 +345,42 @@ function render_screen () {
   screen_ctx.clearRect(0, 0, screen_canvas.width, screen_canvas.height)
   screen_ctx.fillStyle = "#fff"
   screen_ctx.fillRect(0, 0, screen_canvas.width, screen_canvas.height)
-  screen_ctx.fillStyle = '#000'
-  screen_ctx.fillRect(100,100,500,100)
-  screen_ctx.fillStyle = '#f00'
-  screen_ctx.font = "80px Arial"
-  screen_ctx.fillText("Click here!!!?", 120, 180)
-  screen_ctx.drawImage(images.screen_png, 500, 400, 960, 540)
+
+  screen_ctx.font = "bold 20px Arial"
+  for (let i=0; i<buttons.length; i++) {
+    const b = buttons[i]
+    //let is_hover = (screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h)
+    let bg, fg
+    if (b.page == current_page) {
+      bg = button_active_bg
+      fg = button_active_fg
+    }
+    else if (b.is_hovered) {
+      bg = button_hover_bg
+      fg = button_hover_fg
+    }
+    else {
+      bg = button_bg
+      fg = button_fg
+    }
+
+    screen_ctx.fillStyle = bg
+    screen_ctx.fillRect(b.x,b.y,b.w,b.h)
+
+    screen_ctx.fillStyle = fg
+    screen_ctx.fillText(b.txt, b.x+20, b.y+80)
+  }
+
+  screen_ctx.fillStyle = '#222'
+  screen_ctx.font = "bold 600px Arial"
+  screen_ctx.fillText('G', 1500, 580)
+
+  screen_ctx.font = "100 20px Arial"
+  for (let i=0; i<current_page.length; i++) {
+    screen_ctx.fillText(current_page[i], 700, 280+30*i)
+  }
+
+  //screen_ctx.drawImage(images.screen_png, 500, 400, 960, 540)
 
   gl.activeTexture(gl.TEXTURE0 + model_buffers.screen.texture_id)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
