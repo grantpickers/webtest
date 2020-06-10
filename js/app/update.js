@@ -12,7 +12,7 @@ function handle_resize () {
   canvas.width = window.devicePixelRatio * canvas.offsetWidth
   canvas.height = 9/16*canvas.width
   gl.viewport(0, 0, canvas.width, canvas.height)
-  update_perspective(camera_perspective_matrix, camera_inverse_perspective_matrix)
+  camera_update_perspective()
   gl.useProgram(basic_shader_program)
   gl.uniformMatrix4fv(basic_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(plain_shader_program)

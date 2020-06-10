@@ -1,3 +1,8 @@
+function compile_shaders () {
+  compile_basic_shader()
+  compile_plain_shader()
+}
+
 // Basic Shader
 
 let basic_shader_program = null
@@ -37,5 +42,4 @@ function compile_plain_shader () {
   plain_u_perspective_matrix = gl.getUniformLocation(plain_shader_program, 'u_perspective_matrix')
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
 }
-
 

@@ -19,18 +19,24 @@ const model_buffers = {}
 
 function main () {
   init()
-  update_perspective(camera_perspective_matrix, camera_inverse_perspective_matrix)
+  camera_update_perspective()
+
 
   // Load OBJ and textures
+
   model_buffers.cube = load_obj(gl, assets.cube_obj)
+
   model_buffers.monkey = load_obj(gl, assets.monkey_obj)
+
   model_buffers.screen = load_obj(gl, assets.screen_obj)
   model_buffers.screen.texture_id = 0
   model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
 
+
   // Shaders
-  compile_basic_shader()
-  compile_plain_shader()
+
+  compile_shaders()
+
 
   window.requestAnimationFrame(main_loop)
 }

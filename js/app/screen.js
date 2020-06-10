@@ -31,7 +31,7 @@ const buttons = [
   { x: 150, y: 380, w: 500, h: 100, txt: "CONTACT",  page: 'contact', },
 ]
 const pages = {
-  'works': [
+  works: [
     "Aenean commodo ligula eget dolor.",
     "Cum sociis natoque penatibus et magnis dis.",
   ],
