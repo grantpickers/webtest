@@ -46,6 +46,8 @@ const asset_urls = {
   cube_obj: '/obj/cube.obj',
   basic_vertex: '/shaders/basic.vert',
   basic_fragment: '/shaders/basic.frag',
+  plain_vertex: '/shaders/plain.vert',
+  plain_fragment: '/shaders/plain.frag',
 }
 
 const image_urls = {
@@ -64,6 +66,8 @@ let gl = null
 let prev_timestamp = null
 let total_time = 0
 const TARGET_FRAME_TIME = 1000/60
+
+// basic shader
 let basic_shader_program = null
 let basic_a_pos = null
 let basic_a_normal = null
@@ -71,6 +75,15 @@ let basic_a_uv = null
 let basic_u_model_view_matrix = null
 let basic_u_perspective_matrix = null
 let basic_u_sampler = null
+
+// plain shader
+let plain_shader_program = null
+let plain_a_pos = null
+let plain_a_normal = null
+let plain_u_model_view_matrix = null
+let plain_u_perspective_matrix = null
+
+
 let model_view_matrix = new Float32Array(16)
 let inverse_model_view_matrix = new Float32Array(16)
 
@@ -297,10 +310,10 @@ function update () {
     if (is_hovered && has_clicked) {
       current_page = b.page
       if ((current_page !== previous_page) && current_page == pages.works) {
-        ry_target = Math.PI/2 - Math.PI/4
-        tx_target = -4.4*Math.sin(ry_target)
+        ry_target = Math.PI/2 - 2*Math.PI/6
+        tx_target = -6.4*Math.sin(ry_target)
         ty_target = 0
-        tz_target = -4.4*Math.cos(ry_target)
+        tz_target = -6.4*Math.cos(ry_target)
         animation_tween = 0
       }
     }
@@ -401,32 +414,27 @@ function render_screen () {
 
   gl.activeTexture(gl.TEXTURE0 + model_buffers.screen.texture_id)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
-
-
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
+
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, model_view_matrix)
+
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
 function render_cube () {
-  gl.useProgram(basic_shader_program)
-
+  gl.useProgram(plain_shader_program)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.vertices)
-  gl.enableVertexAttribArray(basic_a_pos)
-  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(plain_a_pos)
+  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.normals)
-  gl.enableVertexAttribArray(basic_a_normal)
-  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(plain_a_normal)
+  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.uvs)
-  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
-  gl.enableVertexAttribArray(basic_a_uv)
-
-
-  //gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, model_view_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -435,7 +443,6 @@ function render_cube () {
 function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, model_view_matrix)
 
   render_screen()
   render_cube()
@@ -457,8 +464,6 @@ function reset_perspective_matrices () {
   perspective_matrix[10] = pc
   perspective_matrix[11] = pd
   perspective_matrix[14] = pe
-
-  gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
 
   inverse_perspective_matrix[0] = 1/pa
   inverse_perspective_matrix[5] = 1/pb
@@ -503,6 +508,8 @@ function main_loop (timestamp) {
 function main () {
   init_gl(canvas, gl)
 
+  reset_perspective_matrices()
+
 
   screen_canvas = document.createElement('canvas')
   screen_canvas.width = 1920
@@ -538,6 +545,8 @@ function main () {
 
   model_buffers.cube = load_obj(gl, assets.cube_obj)
 
+
+
   /*
    *
    * Compile shaders and get control of shader variables
@@ -566,8 +575,29 @@ function main () {
   basic_u_sampler = gl.getUniformLocation(basic_shader_program, 'u_sampler')
 
   basic_u_perspective_matrix = gl.getUniformLocation(basic_shader_program, 'u_perspective_matrix')
+  gl.uniformMatrix4fv(basic_u_perspective_matrix, false, perspective_matrix)
 
-  reset_perspective_matrices()
+
+
+
+
+
+
+
+
+  plain_shader_program = create_shader_program(gl, assets.plain_vertex, assets.plain_fragment)
+  gl.useProgram(plain_shader_program)
+
+  plain_a_pos = gl.getAttribLocation(plain_shader_program, 'a_pos')
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.vertices)
+  gl.enableVertexAttribArray(plain_a_pos)
+  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
+  plain_a_normal = gl.getAttribLocation(plain_shader_program, 'a_normal')
+  plain_a_uv = gl.getAttribLocation(plain_shader_program, 'a_uv')
+  plain_u_model_view_matrix = gl.getUniformLocation(plain_shader_program, 'u_model_view_matrix')
+  plain_u_perspective_matrix = gl.getUniformLocation(plain_shader_program, 'u_perspective_matrix')
+  gl.uniformMatrix4fv(plain_u_perspective_matrix, false, perspective_matrix)
+
 
 
 
