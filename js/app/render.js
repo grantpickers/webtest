@@ -64,7 +64,7 @@ function render_screen () {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
-  gl.uniformMatrix4fv(basic_u_world_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, camera_world_view_matrix)
 
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
@@ -82,7 +82,7 @@ function render_cube () {
   gl.enableVertexAttribArray(plain_a_normal)
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.uniformMatrix4fv(plain_u_world_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, cube_model_view_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -99,7 +99,7 @@ function render_monkey () {
   gl.enableVertexAttribArray(plain_a_normal)
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.uniformMatrix4fv(plain_u_world_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, camera_world_view_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.monkey.num_indices, gl.UNSIGNED_SHORT, 0)

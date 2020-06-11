@@ -3,6 +3,7 @@ function update () {
   update_pick()
   update_screen()
   update_camera()
+  update_cube()
 
   has_clicked = false
   has_resized = false
@@ -25,7 +26,6 @@ function update_pick () {
   pick_ray[2] = -1
   pick_ray[3] = 1
 
-  matrix_mult_4(camera_view_world_matrix, camera_inverse_rotation, camera_inverse_translation)
   matrix_operate_4(camera_inverse_perspective_matrix, pick_ray)
   pick_ray[3] = 0
   matrix_operate_4(camera_view_world_matrix, pick_ray)
@@ -74,6 +74,11 @@ function update_screen () {
   }
 }
 
+function update_cube () {
+  matrix_mult_4(cube_model_world_matrix, cube_translation, cube_rotation)
+  matrix_mult_4(cube_model_view_matrix, camera_world_view_matrix, cube_model_world_matrix)
+}
+
 function update_camera () {
   if (camera_animation_tween < 1) {
     camera_animation_tween += 0.005
@@ -100,4 +105,7 @@ function update_camera () {
   camera_inverse_translation[12] = -camera_tx
   camera_inverse_translation[13] = -camera_ty
   camera_inverse_translation[14] = -camera_tz
+
+  matrix_mult_4(camera_view_world_matrix, camera_inverse_rotation, camera_inverse_translation)
+  matrix_transpose_4(camera_view_world_transpose_matrix, camera_view_world_matrix)
 }
