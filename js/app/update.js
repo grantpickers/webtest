@@ -57,14 +57,14 @@ function update_screen () {
       if (current_page !== previous_page) {
         if (current_page == pages.works) {
           camera_ry_target = Math.PI/2 - 1*Math.PI/7
-          camera_tx_target = -6.4*Math.sin(camera_ry_target)
+          camera_tx_target = -4.4*Math.sin(camera_ry_target)
           camera_ty_target = 0
-          camera_tz_target = -6.4*Math.cos(camera_ry_target)
+          camera_tz_target = 1-4.4*Math.cos(camera_ry_target)
           camera_animation_tween = 0
         }
         if (current_page == pages.about || current_page == pages.contact) {
           camera_ry_target = Math.PI/2
-          camera_tx_target = -2.4
+          camera_tx_target = -0.92
           camera_ty_target = 0
           camera_tz_target = 0
           camera_animation_tween = 0
