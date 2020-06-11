@@ -41,8 +41,8 @@ let camera_animation_tween = 1
 
 function camera_update_perspective () {
   const aspect = canvas.width / canvas.height
-  const fov = Math.PI/4
-  const near = 1
+  const fov = Math.PI/3
+  const near = 0.5
   const far = 50
   const pa = 1/Math.tan(fov/2)/aspect
   const pb = 1/Math.tan(fov/2)
