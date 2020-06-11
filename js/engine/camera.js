@@ -1,7 +1,7 @@
 // Camera
 
-const camera_model_view_matrix = new Float32Array(16)
-const camera_view_model_matrix = new Float32Array(16)
+const camera_world_view_matrix = new Float32Array(16)
+const camera_view_world_matrix = new Float32Array(16)
 const camera_translation = new Float32Array([
   1, 0, 0, 0,
   0, 1, 0, 0,

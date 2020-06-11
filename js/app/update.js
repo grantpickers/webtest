@@ -25,10 +25,10 @@ function update_pick () {
   pick_ray[2] = -1
   pick_ray[3] = 1
 
-  matrix_mult_4(camera_view_model_matrix, camera_inverse_rotation, camera_inverse_translation)
+  matrix_mult_4(camera_view_world_matrix, camera_inverse_rotation, camera_inverse_translation)
   matrix_operate_4(camera_inverse_perspective_matrix, pick_ray)
   pick_ray[3] = 0
-  matrix_operate_4(camera_view_model_matrix, pick_ray)
+  matrix_operate_4(camera_view_world_matrix, pick_ray)
 
   const denom = dot3(pick_ray, screen_n)
   if (denom != 0) {
@@ -93,7 +93,7 @@ function update_camera () {
   camera_rotation[8] = -Math.sin(camera_ry)
   camera_rotation[10] = Math.cos(camera_ry)
 
-  matrix_mult_4(camera_model_view_matrix, camera_rotation, camera_translation)
+  matrix_mult_4(camera_world_view_matrix, camera_rotation, camera_translation)
 
   matrix_transpose_4(camera_inverse_rotation, camera_rotation)
 
