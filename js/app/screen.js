@@ -4,9 +4,9 @@ const screen_canvas = document.createElement('canvas')
 screen_canvas.width = 1920
 screen_canvas.height = 1080
 const screen_ctx = screen_canvas.getContext('2d')
-const screen_0 = new Float32Array([0.060993, -1.000000, 1.948891])
-const screen_h = new Float32Array([0.060993, 1.000000, 1.948891])
-const screen_v = new Float32Array([0.060993, -1.000000, -1.948891])
+const screen_0 = new Float32Array([0.060993, -0.500000, 0.8888888])
+const screen_h = new Float32Array([0.060993, 0.500000, 0.8888888])
+const screen_v = new Float32Array([0.060993, -0.500000, -0.8888888])
 const screen_n = cross3(new Float32Array(3), sub3([], screen_v, screen_0), sub3([], screen_h, screen_0))
 const screen_inverse_rotation = matrix_mult_4(new Float32Array(16), ROTATION_X_PI, ROTATION_Y_HALF_PI)
 const screen_inverse_translation = new Float32Array([
@@ -15,12 +15,29 @@ const screen_inverse_translation = new Float32Array([
   0, 0, 1, 0,
   -screen_h[0], -screen_h[1], -screen_h[2], 1
 ])
+const screen_pixel_width = 1920
+const screen_pixel_height = 1080
+const screen_model_width = 1.7777777
+const screen_model_height = 1
 const screen_inverse_scale = new Float32Array([
-  1920/(2*1.948891), 0, 0, 0,
-  0, 1080/2, 0, 0,
+  screen_pixel_width/screen_model_width, 0, 0, 0,
+  0, screen_pixel_height/screen_model_height, 0, 0,
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
+
+
+  /*
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+
+  screen_canvas.width/((screen_h[1] - screen_0[1])*(screen_0[2] - screen_v[2])), 0, 0, 0,
+  0, screen_canvas.height/(screen_0[2] - screen_v[2]), 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+  */
 
 
 // Screen UI

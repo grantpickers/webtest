@@ -28,10 +28,11 @@ const camera_inverse_rotation = new Float32Array([
 ])
 const camera_perspective_matrix = new Float32Array(16)
 const camera_inverse_perspective_matrix = new Float32Array(16)
-let camera_ry_target = Math.PI/2
-let camera_tx_target = -2.4
+// TODO: make camera_lookat(x,y,z)
+let camera_ry_target = 0
+let camera_tx_target = 0
 let camera_ty_target = 0
-let camera_tz_target = 0
+let camera_tz_target = -3
 let camera_ry = camera_ry_target
 let camera_tx = camera_tx_target
 let camera_ty = camera_ty_target

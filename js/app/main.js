@@ -19,7 +19,15 @@ const model_buffers = {}
 
 function main () {
   init()
+
   camera_update_perspective()
+
+  camera_ry_target = Math.PI/2
+  camera_tx_target = -1.245
+  camera_ty_target = 0
+  camera_tz_target = 0
+
+
 
 
   // Load OBJ and textures
