@@ -32,6 +32,7 @@ let plain_a_pos = null
 let plain_a_normal = null
 let plain_u_model_view_matrix = null
 let plain_u_perspective_matrix = null
+let plain_u_view_model_transpose_matrix = null
 function compile_plain_shader () {
   plain_shader_program = create_shader_program(gl, assets.plain_vertex, assets.plain_fragment)
   gl.useProgram(plain_shader_program)
@@ -40,6 +41,7 @@ function compile_plain_shader () {
   plain_a_uv     = gl.getAttribLocation(plain_shader_program, 'a_uv')
   plain_u_model_view_matrix  = gl.getUniformLocation(plain_shader_program, 'u_model_view_matrix')
   plain_u_perspective_matrix = gl.getUniformLocation(plain_shader_program, 'u_perspective_matrix')
+  plain_u_view_model_transpose_matrix  = gl.getUniformLocation(plain_shader_program, 'u_view_model_transpose_matrix')
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
 }
 

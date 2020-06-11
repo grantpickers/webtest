@@ -66,7 +66,6 @@ function render_screen () {
 
   gl.uniformMatrix4fv(basic_u_model_view_matrix, false, camera_world_view_matrix)
 
-
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
 }
@@ -83,6 +82,7 @@ function render_cube () {
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
   gl.uniformMatrix4fv(plain_u_model_view_matrix, false, cube_model_view_matrix)
+  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, cube_view_model_transpose_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -100,6 +100,7 @@ function render_monkey () {
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
   gl.uniformMatrix4fv(plain_u_model_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, camera_view_world_transpose_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.monkey.num_indices, gl.UNSIGNED_SHORT, 0)

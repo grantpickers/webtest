@@ -42,21 +42,22 @@ function matrix_mult_4 (m, a, b) {
   return m
 }
 
-function matrix_operate_4 (m, v) {
+function matrix_operate_4 (w, m, v) {
   let t = new Float32Array(4)
   t[0] = v[0]
   t[1] = v[1]
   t[2] = v[2]
   t[3] = v[3]
   for (let j=0; j<4; j++) {
-    v[j] = 0
+    w[j] = 0
     for (let k=0; k<4; k++) {
-      v[j] += m[j + k*4] * t[k]
+      w[j] += m[j + k*4] * t[k]
     }
   }
-  return v
+  return w
 }
 
+// TODO: create_[xyz]_rotation_matrix (m, t) to not alloc memory
 function create_x_rotation_matrix (t) {
   const c = Math.cos(t)
   const s = Math.sin(t)
@@ -85,5 +86,13 @@ function create_z_rotation_matrix (t) {
    -s, c, 0, 0,
     0, 0, 1, 0,
     0, 0, 0, 1,
+  ])
+}
+function create_translation_matrix (x,y,z) {
+  return new Float32Array([
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    x, y, z, 1,
   ])
 }
