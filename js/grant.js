@@ -4,7 +4,6 @@
  * It demonstrates how to set up data for a 3d object that can move, rotate, and be clicked
  ***************************/
 
-const cube_width = 0.25
 const cube_translation = create_translation_matrix(2,0,-1)
 const cube_inverse_translation = create_translation_matrix(-2,0,1)
 
@@ -19,6 +18,10 @@ const cube_model_view_matrix = new Float32Array(16)
 const cube_view_model_matrix = new Float32Array(16)
 const cube_view_model_transpose_matrix = new Float32Array(16)
 
+const cube_half_width = 0.25
+const cube_inv_ray = new Float32Array(3)
+let cube_light = 0.0
+let cube_light_target = cube_light
 
 /****************************
  * Screen
@@ -120,6 +123,7 @@ let plain_a_normal = null
 let plain_u_model_view_matrix = null
 let plain_u_perspective_matrix = null
 let plain_u_view_model_transpose_matrix = null
+let plain_u_light = null
 function compile_plain_shader () {
   plain_shader_program = create_shader_program(gl, assets.plain_vertex, assets.plain_fragment)
   gl.useProgram(plain_shader_program)
@@ -128,7 +132,8 @@ function compile_plain_shader () {
   plain_a_uv     = gl.getAttribLocation(plain_shader_program, 'a_uv')
   plain_u_model_view_matrix  = gl.getUniformLocation(plain_shader_program, 'u_model_view_matrix')
   plain_u_perspective_matrix = gl.getUniformLocation(plain_shader_program, 'u_perspective_matrix')
-  plain_u_view_model_transpose_matrix  = gl.getUniformLocation(plain_shader_program, 'u_view_model_transpose_matrix')
+  plain_u_view_model_transpose_matrix = gl.getUniformLocation(plain_shader_program, 'u_view_model_transpose_matrix')
+  plain_u_light = gl.getUniformLocation(plain_shader_program, 'u_light')
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -161,7 +166,34 @@ function handle_resize () {
 }
 
 
-const cube_pick = new Float32Array(3)
+
+
+const cube_pick_ray = new Float32Array(3)
+const cube_camera_0 = new Float32Array(4)
+
+function ray_cube_collide (width, ray_0, inv_ray) {
+  const pa = -width
+  const pb = width
+
+  t_i  = (pb - ray_0[0]) * inv_ray[0]
+  t_mi = (pa - ray_0[0]) * inv_ray[0]
+  t_j  = (pb - ray_0[1]) * inv_ray[1]
+  t_mj = (pa - ray_0[1]) * inv_ray[1]
+  t_k  = (pb - ray_0[2]) * inv_ray[2]
+  t_mk = (pa - ray_0[2]) * inv_ray[2]
+
+  let t_min = Math.min(t_i, t_mi)
+  let t_max = Math.max(t_i, t_mi)
+
+  t_min = Math.max(t_min, Math.min(t_j, t_mj))
+  t_max = Math.min(t_max, Math.max(t_j, t_mj))
+
+  t_min = Math.max(t_min, Math.min(t_k, t_mk))
+  t_max = Math.min(t_max, Math.max(t_k, t_mk))
+
+  return t_max >= t_min
+}
+
 function update_pick () {
   pick_ray[0] = 2 * mouse_x / canvas.width - 1
   pick_ray[1] = -2 * mouse_y / canvas.height + 1
@@ -172,17 +204,25 @@ function update_pick () {
   pick_ray[3] = 0
   matrix_operate_4(pick_ray, camera_view_world_matrix, pick_ray)
 
-  matrix_operate_4(cube_pick, cube_world_model_matrix, pick_ray)
-  if (
-    cube_pick[0] > -cube_width*0.5 &&
-    cube_pick[0] <  cube_width*0.5 &&
-    cube_pick[1] > -cube_width*0.5 &&
-    cube_pick[1] <  cube_width*0.5 &&
-    cube_pick[2] > -cube_width*0.5 &&
-    cube_pick[2] <  cube_width*0.5
-  ) {
-    console.log('yea')
+
+  // Cube pick
+
+  matrix_operate_4(cube_pick_ray, cube_world_model_matrix, pick_ray)
+  matrix_operate_4(cube_camera_0, cube_world_model_matrix, camera_0)
+
+  cube_inv_ray[0] = 1/cube_pick_ray[0]
+  cube_inv_ray[1] = 1/cube_pick_ray[1]
+  cube_inv_ray[2] = 1/cube_pick_ray[2]
+  if (ray_cube_collide(cube_half_width, cube_camera_0, cube_inv_ray)) {
+    cube_light_target = 1.0
   }
+  else {
+    cube_light_target = 0.0
+  }
+
+
+
+  // Screen pick
 
   const denom = dot3(pick_ray, screen_n)
   if (denom != 0) {
@@ -198,6 +238,8 @@ function update_pick () {
 }
 
 function update_cube () {
+  cube_light += (cube_light_target - cube_light)*0.1
+
   matrix_mult_4(cube_rotation, cube_rotation_rate, cube_rotation)
 
   matrix_mult_4(cube_model_world_matrix, cube_translation, cube_rotation)
@@ -224,7 +266,7 @@ function update_screen () {
           camera_ry_target = Math.PI/2 - 1*Math.PI/7
           camera_tx_target = -4.4*Math.sin(camera_ry_target)
           camera_ty_target = 0
-          camera_tz_target = 1-4.4*Math.cos(camera_ry_target)
+          camera_tz_target = 0.5-4.4*Math.cos(camera_ry_target)
           camera_animation_tween = 0
         }
         if (current_page == pages.about || current_page == pages.contact) {
@@ -259,6 +301,7 @@ function update_camera () {
   camera_rotation[10] = Math.cos(camera_ry)
 
   matrix_mult_4(camera_world_view_matrix, camera_rotation, camera_translation)
+
 
   matrix_transpose_4(camera_inverse_rotation, camera_rotation)
 
@@ -297,10 +340,16 @@ function main () {
   camera_update_perspective()
 
 
+  /*
   camera_ry_target = Math.PI/2
   camera_tx_target = -0.92
   camera_ty_target = 0
   camera_tz_target = 0
+  */
+  camera_ry_target = Math.PI/2 - 1*Math.PI/7
+  camera_tx_target = -4.4*Math.sin(camera_ry_target)
+  camera_ty_target = 0
+  camera_tz_target = 0.5-4.4*Math.cos(camera_ry_target)
 
 
   model_buffers.cube = load_obj(gl, assets.cube_obj)

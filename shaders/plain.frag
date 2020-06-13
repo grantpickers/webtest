@@ -1,8 +1,9 @@
 precision mediump float;
 
-varying lowp vec3 normal;
+varying vec3 normal;
+varying float light;
 
 void main () {
-  float light = 0.0+0.9*(-normal.x + normal.y*0.0 + normal.z*0.0);
-  gl_FragColor = vec4(light, light, light, 1.0);
+  float c = light+0.7*(-normal.x + normal.y*0.0 + normal.z*0.0);
+  gl_FragColor = vec4(c, c, c, 1.0);
 }
