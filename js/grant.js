@@ -285,7 +285,7 @@ const asset_urls = {
   plain_fragment: '/shaders/plain.frag',
 }
 const image_urls = {
-  screen_png: '/img/screen.png',
+  theloop_png: '/img/theloop.png',
 }
 
 const model_buffers = {}

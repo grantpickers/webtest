@@ -11,6 +11,8 @@ function render_screen () {
   screen_ctx.fillStyle = "#fff"
   screen_ctx.fillRect(0, 0, screen_canvas.width, screen_canvas.height)
 
+  screen_ctx.drawImage(images.theloop_png, 500, 700, 1198*0.5, 741*0.5)
+
   screen_ctx.font = "bold 20px Arial"
   for (let i=0; i<buttons.length; i++) {
     const b = buttons[i]
@@ -44,8 +46,10 @@ function render_screen () {
     screen_ctx.fillText(current_page[i], 700, 280+30*i)
   }
 
-  gl.useProgram(basic_shader_program)
 
+  // GL
+
+  gl.useProgram(basic_shader_program)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.vertices)
   gl.enableVertexAttribArray(basic_a_pos)
@@ -58,7 +62,6 @@ function render_screen () {
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.uvs)
   gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(basic_a_uv)
-
 
   gl.activeTexture(gl.TEXTURE0 + model_buffers.screen.texture_id)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
