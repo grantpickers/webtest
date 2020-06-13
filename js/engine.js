@@ -1,4 +1,17 @@
-// Camera
+/****************************
+ * Pick
+ ***************************/
+
+const camera_0 = new Float32Array(3)
+const PICK_DEPTH = 10
+const PICK_STEP = 0.1
+const pick_ray = new Float32Array(4)
+const pick_p = new Float32Array([0, 0, 0, 1])
+
+
+/****************************
+ * Camera
+ ***************************/
 
 const camera_world_view_matrix = new Float32Array(16)
 const camera_view_world_matrix = new Float32Array(16)
@@ -63,3 +76,58 @@ function camera_update_perspective () {
   camera_inverse_perspective_matrix[14] = 1/pd
   camera_inverse_perspective_matrix[15] = -pc/(pd*pe)
 }
+
+
+/****************************
+ * Canvas
+ ***************************/
+
+let canvas = document.createElement('canvas')
+let gl = canvas.getContext('webgl')
+let mouse_x = 0
+let mouse_y = 0
+let has_clicked = false
+let has_resized = true
+
+function init_canvas () {
+  document.body.appendChild(canvas)
+  canvas.width = window.devicePixelRatio * canvas.offsetWidth
+  canvas.height = 9/16*canvas.width
+  gl.viewport(0, 0, canvas.width, canvas.height)
+  gl.clearColor(0,0,0,1)
+  gl.enable(gl.DEPTH_TEST)
+  gl.enable(gl.CULL_FACE)
+  gl.cullFace(gl.BACK)
+
+  window.addEventListener('resize', function (e) { has_resized = true })
+  canvas.addEventListener('mousemove', function (e) { mouse_x = e.offsetX; mouse_y = e.offsetY })
+  canvas.addEventListener('click', function (e) { has_clicked = true })
+}
+
+
+/****************************
+ * Main Loop
+ ***************************/
+
+let prev_timestamp = null
+let total_time = 0
+const TARGET_FRAME_TIME = 1000/60
+
+function main_loop (timestamp) {
+  if (prev_timestamp == null) {
+    prev_timestamp = timestamp
+  }
+  const frame_time = timestamp - prev_timestamp
+  prev_timestamp = timestamp
+  total_time += frame_time
+  if (total_time > TARGET_FRAME_TIME*3) {
+    total_time = TARGET_FRAME_TIME
+  }
+  while (total_time >= TARGET_FRAME_TIME) {
+    update()
+    render()
+    total_time -= TARGET_FRAME_TIME
+  }
+  window.requestAnimationFrame(main_loop)
+}
+
