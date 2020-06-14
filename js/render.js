@@ -103,9 +103,9 @@ function render_monkey () {
   gl.enableVertexAttribArray(plain_a_normal)
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, camera_world_view_matrix)
-  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, camera_view_world_transpose_matrix)
-  gl.uniform1f(plain_u_light, 0.5)
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, monkey_model_view_matrix)
+  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, monkey_view_model_transpose_matrix)
+  gl.uniform1f(plain_u_light, monkey_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.monkey.num_indices, gl.UNSIGNED_SHORT, 0)

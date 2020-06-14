@@ -1,4 +1,33 @@
 /****************************
+ * Monkey
+ ***************************/
+
+const monkey_translation = create_translation_matrix(-2,0,2)
+const monkey_inverse_translation = create_translation_matrix(2,0,-2)
+
+const monkey_rotation = create_x_rotation_matrix(0)
+const monkey_rotation_rate = create_y_rotation_matrix(0.01)
+const monkey_inverse_rotation = new Float32Array(16)
+
+const monkey_model_world_matrix = new Float32Array(16)
+const monkey_world_model_matrix = new Float32Array(16)
+
+const monkey_model_view_matrix = new Float32Array(16)
+const monkey_view_model_matrix = new Float32Array(16)
+const monkey_view_model_transpose_matrix = new Float32Array(16)
+
+
+const monkey_pick_ray = new Float32Array(3)
+const monkey_camera_0 = new Float32Array(4)
+const monkey_half_width = 0.684
+const monkey_half_height = 0.426
+const monkey_half_depth = 0.492
+const monkey_inv_ray = new Float32Array(3)
+let monkey_light = 0.0
+let monkey_light_target = monkey_light
+
+
+/****************************
  * Cube
  * This is an example object that should be replaced.
  * It demonstrates how to set up data for a 3d object that can move, rotate, and be clicked
@@ -18,10 +47,13 @@ const cube_model_view_matrix = new Float32Array(16)
 const cube_view_model_matrix = new Float32Array(16)
 const cube_view_model_transpose_matrix = new Float32Array(16)
 
+const cube_pick_ray = new Float32Array(3)
+const cube_camera_0 = new Float32Array(4)
 const cube_half_width = 0.25
 const cube_inv_ray = new Float32Array(3)
 let cube_light = 0.0
 let cube_light_target = cube_light
+
 
 /****************************
  * Screen
@@ -146,6 +178,7 @@ function compile_plain_shader () {
 function update () {
   if (has_resized) { handle_resize() }
   update_pick()
+  update_monkey()
   update_cube()
   update_screen()
   update_camera()
@@ -167,20 +200,20 @@ function handle_resize () {
 
 
 
+function ray_box_collide (half_width, half_height, half_depth, ray_0, inv_ray) {
+  const pa_0 = -half_width
+  const pa_1 = -half_height
+  const pa_2 = -half_depth
+  const pb_0 = half_width
+  const pb_1 = half_height
+  const pb_2 = half_depth
 
-const cube_pick_ray = new Float32Array(3)
-const cube_camera_0 = new Float32Array(4)
-
-function ray_cube_collide (width, ray_0, inv_ray) {
-  const pa = -width
-  const pb = width
-
-  t_i  = (pb - ray_0[0]) * inv_ray[0]
-  t_mi = (pa - ray_0[0]) * inv_ray[0]
-  t_j  = (pb - ray_0[1]) * inv_ray[1]
-  t_mj = (pa - ray_0[1]) * inv_ray[1]
-  t_k  = (pb - ray_0[2]) * inv_ray[2]
-  t_mk = (pa - ray_0[2]) * inv_ray[2]
+  const t_i  = (pb_0 - ray_0[0]) * inv_ray[0]
+  const t_mi = (pa_0 - ray_0[0]) * inv_ray[0]
+  const t_j  = (pb_1 - ray_0[1]) * inv_ray[1]
+  const t_mj = (pa_1 - ray_0[1]) * inv_ray[1]
+  const t_k  = (pb_2 - ray_0[2]) * inv_ray[2]
+  const t_mk = (pa_2 - ray_0[2]) * inv_ray[2]
 
   let t_min = Math.min(t_i, t_mi)
   let t_max = Math.max(t_i, t_mi)
@@ -205,6 +238,21 @@ function update_pick () {
   matrix_operate_4(pick_ray, camera_view_world_matrix, pick_ray)
 
 
+  // Monkey pick
+
+  matrix_operate_4(monkey_pick_ray, monkey_world_model_matrix, pick_ray)
+  matrix_operate_4(monkey_camera_0, monkey_world_model_matrix, camera_0)
+
+  monkey_inv_ray[0] = 1/monkey_pick_ray[0]
+  monkey_inv_ray[1] = 1/monkey_pick_ray[1]
+  monkey_inv_ray[2] = 1/monkey_pick_ray[2]
+  if (ray_box_collide(monkey_half_width, monkey_half_height, monkey_half_depth, monkey_camera_0, monkey_inv_ray)) {
+    monkey_light_target = 1.0
+  }
+  else {
+    monkey_light_target = 0.0
+  }
+
   // Cube pick
 
   matrix_operate_4(cube_pick_ray, cube_world_model_matrix, pick_ray)
@@ -213,7 +261,7 @@ function update_pick () {
   cube_inv_ray[0] = 1/cube_pick_ray[0]
   cube_inv_ray[1] = 1/cube_pick_ray[1]
   cube_inv_ray[2] = 1/cube_pick_ray[2]
-  if (ray_cube_collide(cube_half_width, cube_camera_0, cube_inv_ray)) {
+  if (ray_box_collide(cube_half_width, cube_half_width, cube_half_width, cube_camera_0, cube_inv_ray)) {
     cube_light_target = 1.0
   }
   else {
@@ -235,6 +283,19 @@ function update_pick () {
     matrix_operate_4(pick_p, screen_inverse_rotation, pick_p)
     matrix_operate_4(pick_p, screen_inverse_scale, pick_p)
   }
+}
+
+function update_monkey () {
+  monkey_light += (monkey_light_target - monkey_light)*0.1
+
+  matrix_mult_4(monkey_rotation, monkey_rotation_rate, monkey_rotation)
+
+  matrix_mult_4(monkey_model_world_matrix, monkey_translation, monkey_rotation)
+  matrix_mult_4(monkey_model_view_matrix, camera_world_view_matrix, monkey_model_world_matrix)
+  matrix_transpose_4(monkey_inverse_rotation, monkey_rotation)
+  matrix_mult_4(monkey_world_model_matrix, monkey_inverse_rotation, monkey_inverse_translation)
+  matrix_mult_4(monkey_view_model_matrix, monkey_world_model_matrix, camera_view_world_matrix)
+  matrix_transpose_4(monkey_view_model_transpose_matrix, monkey_view_model_matrix)
 }
 
 function update_cube () {
