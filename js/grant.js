@@ -74,20 +74,39 @@ const screen_bot_right = new Float32Array([0.060993, -0.500000, -0.8888888])
 const screen_model_width = 1.7777777
 const screen_model_height = 1
 const screen_pick_p = new Float32Array([0, 0, 0, 1])
+const screen_light = 1.7
+const screen_translation = create_translation_matrix(0,0,0)
+const screen_inverse_translation = create_translation_matrix(0,0,0)
+
+const screen_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const screen_inverse_rotation = new Float32Array(16)
+
+const screen_model_world_matrix = new Float32Array(16)
+const screen_world_model_matrix = new Float32Array(16)
+
+const screen_model_view_matrix = new Float32Array(16)
+const screen_view_model_matrix = new Float32Array(16)
+const screen_view_model_transpose_matrix = new Float32Array(16)
+
 
 const screen_canvas = document.createElement('canvas')
 screen_canvas.width = screen_pixel_width
 screen_canvas.height = screen_pixel_height
 const screen_ctx = screen_canvas.getContext('2d')
 const screen_n = cross3(new Float32Array(3), sub3([], screen_bot_right, screen_bot_left), sub3([], screen_top_left, screen_bot_left))
-const screen_inverse_rotation = matrix_mult_4(new Float32Array(16), ROTATION_X_PI, ROTATION_Y_HALF_PI)
-const screen_inverse_translation = new Float32Array([
+const screen_display_inverse_rotation = matrix_mult_4(new Float32Array(16), ROTATION_X_PI, ROTATION_Y_HALF_PI)
+const screen_display_inverse_translation = new Float32Array([
   1, 0, 0, 0,
   0, 1, 0, 0,
   0, 0, 1, 0,
   -screen_top_left[0], -screen_top_left[1], -screen_top_left[2], 1
 ])
-const screen_inverse_scale = new Float32Array([
+const screen_display_inverse_scale = new Float32Array([
   screen_pixel_width/screen_model_width, 0, 0, 0,
   0, screen_pixel_height/screen_model_height, 0, 0,
   0, 0, 1, 0,
@@ -139,6 +158,8 @@ let basic_a_uv = null
 let basic_u_model_view_matrix = null
 let basic_u_perspective_matrix = null
 let basic_u_sampler = null
+let basic_u_view_model_transpose_matrix = null
+let basic_u_light = null
 function compile_basic_shader () {
   basic_shader_program = create_shader_program(gl, assets.basic_vertex, assets.basic_fragment)
   gl.useProgram(basic_shader_program)
@@ -148,6 +169,8 @@ function compile_basic_shader () {
   basic_u_model_view_matrix  = gl.getUniformLocation(basic_shader_program, 'u_model_view_matrix')
   basic_u_sampler            = gl.getUniformLocation(basic_shader_program, 'u_sampler')
   basic_u_perspective_matrix = gl.getUniformLocation(basic_shader_program, 'u_perspective_matrix')
+  basic_u_view_model_transpose_matrix = gl.getUniformLocation(basic_shader_program, 'u_view_model_transpose_matrix')
+  basic_u_light = gl.getUniformLocation(basic_shader_program, 'u_light')
   gl.uniformMatrix4fv(basic_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -293,9 +316,9 @@ function update_pick () {
     camera_0[2] = -camera_translation[14]
     const t = dot3(screen_n, sub3(temp0, screen_bot_left, camera_0)) / denom
     sum3(screen_pick_p, camera_0, scl3(temp0, t, pick_ray))
-    matrix_operate_4(screen_pick_p, screen_inverse_translation, screen_pick_p)
-    matrix_operate_4(screen_pick_p, screen_inverse_rotation, screen_pick_p)
-    matrix_operate_4(screen_pick_p, screen_inverse_scale, screen_pick_p)
+    matrix_operate_4(screen_pick_p, screen_display_inverse_translation, screen_pick_p)
+    matrix_operate_4(screen_pick_p, screen_display_inverse_rotation, screen_pick_p)
+    matrix_operate_4(screen_pick_p, screen_display_inverse_scale, screen_pick_p)
   }
 }
 
@@ -372,6 +395,13 @@ function update_screen () {
       }
     }
   }
+
+  matrix_mult_4(screen_model_world_matrix, screen_translation, screen_rotation)
+  matrix_mult_4(screen_model_view_matrix, camera_world_view_matrix, screen_model_world_matrix)
+  matrix_transpose_4(screen_inverse_rotation, screen_rotation)
+  matrix_mult_4(screen_world_model_matrix, screen_inverse_rotation, screen_inverse_translation)
+  matrix_mult_4(screen_view_model_matrix, screen_world_model_matrix, camera_view_world_matrix)
+  matrix_transpose_4(screen_view_model_transpose_matrix, screen_world_model_matrix)
 }
 
 function update_camera () {
@@ -422,6 +452,7 @@ const asset_urls = {
 }
 const image_urls = {
   theloop_png: '/img/theloop.png',
+  cube_tex_png: '/img/cube_tex.png',
 }
 
 const model_buffers = {}
@@ -445,13 +476,22 @@ function main () {
   camera_tz_target = 0.5-4.4*Math.cos(camera_ry_target)
 
 
-  model_buffers.cube = load_obj(gl, assets.cube_obj)
-
-  model_buffers.monkey = load_obj(gl, assets.monkey_obj)
-
   model_buffers.screen = load_obj(gl, assets.screen_obj)
   model_buffers.screen.texture_id = 0
   model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
+
+
+  model_buffers.cube = load_obj(gl, assets.cube_obj)
+  model_buffers.cube.texture_id = 1
+  model_buffers.cube.texture = load_texture(gl, images.cube_tex_png, model_buffers.cube.texture_id)
+
+  gl.useProgram(basic_shader_program)
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.cube.texture_id)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.cube_tex_png)
+
+
+  model_buffers.monkey = load_obj(gl, assets.monkey_obj)
+
 
 
   compile_basic_shader()

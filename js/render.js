@@ -67,26 +67,35 @@ function render_screen () {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
-  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, screen_model_view_matrix)
+  gl.uniformMatrix4fv(basic_u_view_model_transpose_matrix, false, screen_view_model_transpose_matrix)
+  gl.uniform1f(basic_u_light, screen_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
 function render_cube () {
-  gl.useProgram(plain_shader_program)
+  gl.useProgram(basic_shader_program)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.vertices)
-  gl.enableVertexAttribArray(plain_a_pos)
-  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(basic_a_pos)
+  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.normals)
-  gl.enableVertexAttribArray(plain_a_normal)
-  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(basic_a_normal)
+  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, cube_model_view_matrix)
-  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, cube_view_model_transpose_matrix)
-  gl.uniform1f(plain_u_light, cube_light)
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.uvs)
+  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(basic_a_uv)
+
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.cube.texture_id)
+  gl.uniform1i(basic_u_sampler, model_buffers.cube.texture_id)
+
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, cube_model_view_matrix)
+  gl.uniformMatrix4fv(basic_u_view_model_transpose_matrix, false, cube_view_model_transpose_matrix)
+  gl.uniform1f(basic_u_light, cube_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
