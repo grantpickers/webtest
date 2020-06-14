@@ -13,7 +13,7 @@ function render_screen () {
 
   screen_ctx.drawImage(images.theloop_png, 500, 700, 1198*0.5, 741*0.5)
 
-  screen_ctx.font = "bold 20px Arial"
+  screen_ctx.font = "bold 20px 'Helvetica Neue'"
   for (let i=0; i<buttons.length; i++) {
     const b = buttons[i]
     let bg, fg
@@ -38,10 +38,10 @@ function render_screen () {
   }
 
   screen_ctx.fillStyle = '#222'
-  screen_ctx.font = "bold 600px Arial"
+  screen_ctx.font = "bold 600px Helvetica Neue"
   screen_ctx.fillText('G', 1400, 580)
 
-  screen_ctx.font = "100 20px Arial"
+  screen_ctx.font = "100 20px Helvetica Neue"
   for (let i=0; i<current_page.length; i++) {
     screen_ctx.fillText(current_page[i], 700, 280+30*i)
   }

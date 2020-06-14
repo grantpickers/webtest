@@ -1,6 +1,33 @@
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/fonts/HelveticaNeueLTStd-Lt.woff') format('woff');
+}
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/HelveticaNeueLTStd-Roman.woff') format('woff');
+}
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/fonts/HelveticaNeueLTStd-Md.woff') format('woff');
+
+}
+@font-face {
+  font-family: 'Helvetica Neue';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/HelveticaNeueLTStd-Bd.woff') format('woff');
+}
+
 body {
   margin: 0;
   background: #000;
+  font-family: Helvetica Neue;
 }
 canvas {
   display: block;
