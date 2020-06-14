@@ -73,6 +73,7 @@ const screen_top_left = new Float32Array([0.060993, 0.500000, 0.8888888])
 const screen_bot_right = new Float32Array([0.060993, -0.500000, -0.8888888])
 const screen_model_width = 1.7777777
 const screen_model_height = 1
+const screen_pick_p = new Float32Array([0, 0, 0, 1])
 
 const screen_canvas = document.createElement('canvas')
 screen_canvas.width = screen_pixel_width
@@ -92,7 +93,7 @@ const screen_inverse_scale = new Float32Array([
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-const pages = {
+const screen_pages = {
   works: [
     "Aenean commodo ligula eget dolor.",
     "Cum sociis natoque penatibus et magnis dis.",
@@ -111,9 +112,9 @@ const pages = {
   ],
 }
 const buttons = [
-  { x: 150, y: 100, w: 500, h: 100, txt: "3D WORKS", page: pages.works, },
-  { x: 150, y: 240, w: 500, h: 100, txt: "ABOUT",    page: pages.about, },
-  { x: 150, y: 380, w: 500, h: 100, txt: "CONTACT",  page: pages.contact, },
+  { x: 150, y: 100, w: 500, h: 100, txt: "3D WORKS", page: screen_pages.works, },
+  { x: 150, y: 240, w: 500, h: 100, txt: "ABOUT",    page: screen_pages.about, },
+  { x: 150, y: 380, w: 500, h: 100, txt: "CONTACT",  page: screen_pages.contact, },
 ]
 const button_bg = '#eee'
 const button_fg = '#00f'
@@ -121,7 +122,7 @@ const button_hover_bg = '#aaa'
 const button_hover_fg = '#00f'
 const button_active_bg = '#000'
 const button_active_fg = '#fff'
-let current_page = pages.about
+let current_page = screen_pages.about
 
 
 
@@ -262,6 +263,7 @@ function update_pick () {
     monkey_is_hovered = false
   }
 
+
   // Cube pick
 
   matrix_operate_4(cube_pick_ray, cube_world_model_matrix, pick_ray)
@@ -282,7 +284,6 @@ function update_pick () {
   }
 
 
-
   // Screen pick
 
   const denom = dot3(pick_ray, screen_n)
@@ -291,10 +292,10 @@ function update_pick () {
     camera_0[1] = -camera_translation[13]
     camera_0[2] = -camera_translation[14]
     const t = dot3(screen_n, sub3(temp0, screen_bot_left, camera_0)) / denom
-    sum3(pick_p, camera_0, scl3(temp0, t, pick_ray))
-    matrix_operate_4(pick_p, screen_inverse_translation, pick_p)
-    matrix_operate_4(pick_p, screen_inverse_rotation, pick_p)
-    matrix_operate_4(pick_p, screen_inverse_scale, pick_p)
+    sum3(screen_pick_p, camera_0, scl3(temp0, t, pick_ray))
+    matrix_operate_4(screen_pick_p, screen_inverse_translation, screen_pick_p)
+    matrix_operate_4(screen_pick_p, screen_inverse_rotation, screen_pick_p)
+    matrix_operate_4(screen_pick_p, screen_inverse_scale, screen_pick_p)
   }
 }
 
@@ -345,8 +346,8 @@ function update_cube () {
 function update_screen () {
   const previous_page = current_page
 
-  const screen_mouse_x = pick_p[0]
-  const screen_mouse_y = pick_p[1]
+  const screen_mouse_x = screen_pick_p[0]
+  const screen_mouse_y = screen_pick_p[1]
   for (let i=0; i<buttons.length; i++) {
     const b = buttons[i]
     const is_hovered = screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h
@@ -354,14 +355,14 @@ function update_screen () {
     if (is_hovered && has_clicked) {
       current_page = b.page
       if (current_page !== previous_page) {
-        if (current_page == pages.works) {
+        if (current_page == screen_pages.works) {
           camera_ry_target = Math.PI/2 - 1*Math.PI/7
           camera_tx_target = -4.4*Math.sin(camera_ry_target)
           camera_ty_target = 0
           camera_tz_target = 0.5-4.4*Math.cos(camera_ry_target)
           camera_animation_tween = 0
         }
-        if (current_page == pages.about || current_page == pages.contact) {
+        if (current_page == screen_pages.about || current_page == screen_pages.contact) {
           camera_ry_target = Math.PI/2
           camera_tx_target = -0.92
           camera_ty_target = 0
