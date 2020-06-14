@@ -4,6 +4,7 @@ function render () {
   render_screen()
   render_cube()
   render_monkey()
+  render_tower()
 }
 
 function render_screen () {
@@ -118,4 +119,23 @@ function render_monkey () {
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.monkey.num_indices, gl.UNSIGNED_SHORT, 0)
+}
+
+function render_tower () {
+  gl.useProgram(plain_shader_program)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.tower.vertices)
+  gl.enableVertexAttribArray(plain_a_pos)
+  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.tower.normals)
+  gl.enableVertexAttribArray(plain_a_normal)
+  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, tower_model_view_matrix)
+  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, tower_view_model_transpose_matrix)
+  gl.uniform1f(plain_u_light, tower_light)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.tower.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.tower.num_indices, gl.UNSIGNED_SHORT, 0)
 }
