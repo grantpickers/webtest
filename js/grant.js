@@ -25,6 +25,8 @@ const monkey_half_depth = 0.492
 const monkey_inv_ray = new Float32Array(3)
 let monkey_light = 0.0
 let monkey_light_target = monkey_light
+let monkey_is_hovered = false
+let monkey_is_selected = false
 
 
 /****************************
@@ -53,6 +55,8 @@ const cube_half_width = 0.25
 const cube_inv_ray = new Float32Array(3)
 let cube_light = 0.0
 let cube_light_target = cube_light
+let cube_is_hovered = false
+let cube_is_selected = false
 
 
 /****************************
@@ -247,10 +251,15 @@ function update_pick () {
   monkey_inv_ray[1] = 1/monkey_pick_ray[1]
   monkey_inv_ray[2] = 1/monkey_pick_ray[2]
   if (ray_box_collide(monkey_half_width, monkey_half_height, monkey_half_depth, monkey_camera_0, monkey_inv_ray)) {
-    monkey_light_target = 1.0
+    monkey_is_hovered = true
+    if (has_clicked) {
+      monkey_is_selected = true
+      cube_is_selected = false
+    }
   }
   else {
     monkey_light_target = 0.0
+    monkey_is_hovered = false
   }
 
   // Cube pick
@@ -262,10 +271,14 @@ function update_pick () {
   cube_inv_ray[1] = 1/cube_pick_ray[1]
   cube_inv_ray[2] = 1/cube_pick_ray[2]
   if (ray_box_collide(cube_half_width, cube_half_width, cube_half_width, cube_camera_0, cube_inv_ray)) {
-    cube_light_target = 1.0
+    cube_is_hovered = true
+    if (has_clicked) {
+      cube_is_selected = true
+      monkey_is_selected = false
+    }
   }
   else {
-    cube_light_target = 0.0
+    cube_is_hovered = false
   }
 
 
@@ -286,6 +299,15 @@ function update_pick () {
 }
 
 function update_monkey () {
+  if (monkey_is_selected) {
+    monkey_light_target = 1.0
+  }
+  else if (monkey_is_hovered) {
+    monkey_light_target = 0.5
+  }
+  else {
+    monkey_light_target = 0.0
+  }
   monkey_light += (monkey_light_target - monkey_light)*0.1
 
   matrix_mult_4(monkey_rotation, monkey_rotation_rate, monkey_rotation)
@@ -299,6 +321,15 @@ function update_monkey () {
 }
 
 function update_cube () {
+  if (cube_is_selected) {
+    cube_light_target = 1.0
+  }
+  else if (cube_is_hovered) {
+    cube_light_target = 0.5
+  }
+  else {
+    cube_light_target = 0.0
+  }
   cube_light += (cube_light_target - cube_light)*0.1
 
   matrix_mult_4(cube_rotation, cube_rotation_rate, cube_rotation)
