@@ -68,8 +68,6 @@ const sky_rotation_rate = create_y_rotation_matrix(0.001)
 const sky_inverse_rotation = new Float32Array(16)
 
 const sky_model_world_matrix = new Float32Array(16)
-const sky_world_model_matrix = new Float32Array(16)
-const sky_world_model_transpose_matrix = new Float32Array(16)
 
 const sky_model_view_matrix = new Float32Array(16)
 
@@ -80,10 +78,6 @@ const sky_half_width = 0.56
 const sky_half_height = 0.908
 const sky_half_depth = 0.56
 const sky_inv_ray = new Float32Array(3)
-let sky_light = 0.0
-let sky_light_target = sky_light
-let sky_is_hovered = false
-let sky_is_selected = false
 
 /****************************
  * Cube
@@ -202,6 +196,56 @@ let current_page = screen_pages.about
 /****************************
  * Shaders
  ***************************/
+
+// Skybox Shader
+
+let skybox_shader_program = null
+let skybox_a_pos = null
+let skybox_a_normal = null
+let skybox_a_uv = null
+let skybox_u_model_view_matrix = null
+let skybox_u_perspective_matrix = null
+let skybox_u_sampler = null
+let skybox_u_world_model_transpose_matrix = null
+let skybox_u_light = null
+function compile_skybox_shader () {
+  skybox_shader_program = create_shader_program(gl, assets.skybox_vertex, assets.skybox_fragment)
+  gl.useProgram(skybox_shader_program)
+  skybox_a_pos    = gl.getAttribLocation(skybox_shader_program, 'a_pos')
+  skybox_a_normal = gl.getAttribLocation(skybox_shader_program, 'a_normal')
+  skybox_a_uv     = gl.getAttribLocation(skybox_shader_program, 'a_uv')
+  skybox_u_model_view_matrix  = gl.getUniformLocation(skybox_shader_program, 'u_model_view_matrix')
+  skybox_u_sampler            = gl.getUniformLocation(skybox_shader_program, 'u_sampler')
+  skybox_u_perspective_matrix = gl.getUniformLocation(skybox_shader_program, 'u_perspective_matrix')
+  skybox_u_world_model_transpose_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_model_transpose_matrix')
+  skybox_u_light = gl.getUniformLocation(skybox_shader_program, 'u_light')
+  gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
+}
+
+// Screen Shader
+
+let screen_shader_program = null
+let screen_a_pos = null
+let screen_a_normal = null
+let screen_a_uv = null
+let screen_u_model_view_matrix = null
+let screen_u_perspective_matrix = null
+let screen_u_sampler = null
+let screen_u_world_model_transpose_matrix = null
+let screen_u_light = null
+function compile_screen_shader () {
+  screen_shader_program = create_shader_program(gl, assets.screen_vertex, assets.screen_fragment)
+  gl.useProgram(screen_shader_program)
+  screen_a_pos    = gl.getAttribLocation(screen_shader_program, 'a_pos')
+  screen_a_normal = gl.getAttribLocation(screen_shader_program, 'a_normal')
+  screen_a_uv     = gl.getAttribLocation(screen_shader_program, 'a_uv')
+  screen_u_model_view_matrix  = gl.getUniformLocation(screen_shader_program, 'u_model_view_matrix')
+  screen_u_sampler            = gl.getUniformLocation(screen_shader_program, 'u_sampler')
+  screen_u_perspective_matrix = gl.getUniformLocation(screen_shader_program, 'u_perspective_matrix')
+  screen_u_world_model_transpose_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_model_transpose_matrix')
+  screen_u_light = gl.getUniformLocation(screen_shader_program, 'u_light')
+  gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
+}
 
 // Basic Shader
 
@@ -443,24 +487,11 @@ function update_tower () {
 
 
 function update_sky () {
-  if (sky_is_selected) {
-    sky_light_target = 1.0
-  }
-  else if (sky_is_hovered) {
-    sky_light_target = 0.5
-  }
-  else {
-    sky_light_target = 0.0
-  }
-  sky_light += (sky_light_target - sky_light)*0.1
-
   matrix_mult_4(sky_rotation, sky_rotation_rate, sky_rotation)
 
   matrix_mult_4(sky_model_world_matrix, sky_translation, sky_rotation)
   matrix_mult_4(sky_model_view_matrix, camera_world_view_matrix, sky_model_world_matrix)
   matrix_transpose_4(sky_inverse_rotation, sky_rotation)
-  matrix_mult_4(sky_world_model_matrix, sky_inverse_rotation, sky_inverse_translation)
-  matrix_transpose_4(sky_world_model_transpose_matrix, sky_world_model_matrix)
 }
 
 function update_cube () {
@@ -564,6 +595,10 @@ const asset_urls = {
   monkey_obj: '/obj/monkey.obj',
   tower_obj: '/obj/tower.obj',
   sky_obj: '/obj/sky.obj',
+  skybox_vertex: '/shaders/skybox.vert',
+  skybox_fragment: '/shaders/skybox.frag',
+  screen_vertex: '/shaders/screen.vert',
+  screen_fragment: '/shaders/screen.frag',
   basic_vertex: '/shaders/basic.vert',
   basic_fragment: '/shaders/basic.frag',
   plain_vertex: '/shaders/plain.vert',
@@ -615,7 +650,7 @@ function main () {
   model_buffers.tower = load_obj(gl, assets.tower_obj)
 
   model_buffers.sky = load_obj(gl, assets.sky_obj)
-  model_buffers.sky.texture_id = 1
+  model_buffers.sky.texture_id = 2
   model_buffers.sky.texture = load_texture(gl, images.sky_png, model_buffers.sky.texture_id)
 
   gl.useProgram(basic_shader_program)
@@ -623,6 +658,8 @@ function main () {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.sky_png)
 
 
+  compile_skybox_shader()
+  compile_screen_shader()
   compile_basic_shader()
   compile_plain_shader()
 
