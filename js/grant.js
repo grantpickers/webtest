@@ -318,7 +318,7 @@ function update () {
 
 function handle_resize () {
   canvas.width = window.devicePixelRatio * canvas.offsetWidth
-  canvas.height = 9/16*canvas.width
+  canvas.height = 1115/1920*canvas.width
   gl.viewport(0, 0, canvas.width, canvas.height)
   camera_update_perspective()
   gl.useProgram(basic_shader_program)
@@ -536,9 +536,9 @@ function update_screen () {
         }
         if (current_page == screen_pages.about || current_page == screen_pages.contact) {
           camera_ry_target = Math.PI/2
-          camera_tx_target = -0.92
-          camera_ty_target = 0
-          camera_tz_target = 0
+          camera_tx_target = -0.78
+          camera_ty_target = -0.020
+          camera_tz_target = 0.004
           camera_animation_tween = 0
         }
       }
@@ -615,20 +615,13 @@ const assets = {}
 const images = {}
 
 function main () {
-  init_canvas()
+  init_canvas(screen_pixel_width, screen_pixel_height)
   camera_update_perspective()
 
-
-  /*
   camera_ry_target = Math.PI/2
-  camera_tx_target = -0.92
-  camera_ty_target = 0
-  camera_tz_target = 0
-  */
-  camera_ry_target = Math.PI/2 - 1*Math.PI/7
-  camera_tx_target = -4.4*Math.sin(camera_ry_target)
-  camera_ty_target = 0
-  camera_tz_target = 0.5-4.4*Math.cos(camera_ry_target)
+  camera_tx_target = -0.78
+  camera_ty_target = -0.020
+  camera_tz_target = 0.004
 
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)

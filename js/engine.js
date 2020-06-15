@@ -86,10 +86,10 @@ let mouse_y = 0
 let has_clicked = false
 let has_resized = true
 
-function init_canvas () {
+function init_canvas (width, height) {
   document.body.appendChild(canvas)
   canvas.width = window.devicePixelRatio * canvas.offsetWidth
-  canvas.height = 9/16*canvas.width
+  canvas.height = height/width*canvas.width
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0,0,0,1)
   gl.enable(gl.DEPTH_TEST)
