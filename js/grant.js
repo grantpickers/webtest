@@ -11,10 +11,9 @@ const monkey_inverse_rotation = new Float32Array(16)
 
 const monkey_model_world_matrix = new Float32Array(16)
 const monkey_world_model_matrix = new Float32Array(16)
+const monkey_world_model_transpose_matrix = new Float32Array(16)
 
 const monkey_model_view_matrix = new Float32Array(16)
-const monkey_view_model_matrix = new Float32Array(16)
-const monkey_view_model_transpose_matrix = new Float32Array(16)
 
 
 const monkey_pick_ray = new Float32Array(3)
@@ -44,10 +43,9 @@ const cube_inverse_rotation = new Float32Array(16)
 
 const cube_model_world_matrix = new Float32Array(16)
 const cube_world_model_matrix = new Float32Array(16)
+const cube_world_model_transpose_matrix = new Float32Array(16)
 
 const cube_model_view_matrix = new Float32Array(16)
-const cube_view_model_matrix = new Float32Array(16)
-const cube_view_model_transpose_matrix = new Float32Array(16)
 
 const cube_pick_ray = new Float32Array(3)
 const cube_camera_0 = new Float32Array(4)
@@ -88,10 +86,9 @@ const screen_inverse_rotation = new Float32Array(16)
 
 const screen_model_world_matrix = new Float32Array(16)
 const screen_world_model_matrix = new Float32Array(16)
+const screen_world_model_transpose_matrix = new Float32Array(16)
 
 const screen_model_view_matrix = new Float32Array(16)
-const screen_view_model_matrix = new Float32Array(16)
-const screen_view_model_transpose_matrix = new Float32Array(16)
 
 
 const screen_canvas = document.createElement('canvas')
@@ -158,7 +155,7 @@ let basic_a_uv = null
 let basic_u_model_view_matrix = null
 let basic_u_perspective_matrix = null
 let basic_u_sampler = null
-let basic_u_view_model_transpose_matrix = null
+let basic_u_world_model_transpose_matrix = null
 let basic_u_light = null
 function compile_basic_shader () {
   basic_shader_program = create_shader_program(gl, assets.basic_vertex, assets.basic_fragment)
@@ -169,7 +166,7 @@ function compile_basic_shader () {
   basic_u_model_view_matrix  = gl.getUniformLocation(basic_shader_program, 'u_model_view_matrix')
   basic_u_sampler            = gl.getUniformLocation(basic_shader_program, 'u_sampler')
   basic_u_perspective_matrix = gl.getUniformLocation(basic_shader_program, 'u_perspective_matrix')
-  basic_u_view_model_transpose_matrix = gl.getUniformLocation(basic_shader_program, 'u_view_model_transpose_matrix')
+  basic_u_world_model_transpose_matrix = gl.getUniformLocation(basic_shader_program, 'u_world_model_transpose_matrix')
   basic_u_light = gl.getUniformLocation(basic_shader_program, 'u_light')
   gl.uniformMatrix4fv(basic_u_perspective_matrix, false, camera_perspective_matrix)
 }
@@ -182,7 +179,7 @@ let plain_a_pos = null
 let plain_a_normal = null
 let plain_u_model_view_matrix = null
 let plain_u_perspective_matrix = null
-let plain_u_view_model_transpose_matrix = null
+let plain_u_world_model_transpose_matrix = null
 let plain_u_light = null
 function compile_plain_shader () {
   plain_shader_program = create_shader_program(gl, assets.plain_vertex, assets.plain_fragment)
@@ -192,7 +189,7 @@ function compile_plain_shader () {
   plain_a_uv     = gl.getAttribLocation(plain_shader_program, 'a_uv')
   plain_u_model_view_matrix  = gl.getUniformLocation(plain_shader_program, 'u_model_view_matrix')
   plain_u_perspective_matrix = gl.getUniformLocation(plain_shader_program, 'u_perspective_matrix')
-  plain_u_view_model_transpose_matrix = gl.getUniformLocation(plain_shader_program, 'u_view_model_transpose_matrix')
+  plain_u_world_model_transpose_matrix = gl.getUniformLocation(plain_shader_program, 'u_world_model_transpose_matrix')
   plain_u_light = gl.getUniformLocation(plain_shader_program, 'u_light')
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
 }
@@ -340,8 +337,7 @@ function update_monkey () {
   matrix_mult_4(monkey_model_view_matrix, camera_world_view_matrix, monkey_model_world_matrix)
   matrix_transpose_4(monkey_inverse_rotation, monkey_rotation)
   matrix_mult_4(monkey_world_model_matrix, monkey_inverse_rotation, monkey_inverse_translation)
-  matrix_mult_4(monkey_view_model_matrix, monkey_world_model_matrix, camera_view_world_matrix)
-  matrix_transpose_4(monkey_view_model_transpose_matrix, monkey_view_model_matrix)
+  matrix_transpose_4(monkey_world_model_transpose_matrix, monkey_world_model_matrix)
 }
 
 function update_cube () {
@@ -362,8 +358,7 @@ function update_cube () {
   matrix_mult_4(cube_model_view_matrix, camera_world_view_matrix, cube_model_world_matrix)
   matrix_transpose_4(cube_inverse_rotation, cube_rotation)
   matrix_mult_4(cube_world_model_matrix, cube_inverse_rotation, cube_inverse_translation)
-  matrix_mult_4(cube_view_model_matrix, cube_world_model_matrix, camera_view_world_matrix)
-  matrix_transpose_4(cube_view_model_transpose_matrix, cube_view_model_matrix)
+  matrix_transpose_4(cube_world_model_transpose_matrix, cube_world_model_matrix)
 }
 
 function update_screen () {
@@ -400,8 +395,7 @@ function update_screen () {
   matrix_mult_4(screen_model_view_matrix, camera_world_view_matrix, screen_model_world_matrix)
   matrix_transpose_4(screen_inverse_rotation, screen_rotation)
   matrix_mult_4(screen_world_model_matrix, screen_inverse_rotation, screen_inverse_translation)
-  matrix_mult_4(screen_view_model_matrix, screen_world_model_matrix, camera_view_world_matrix)
-  matrix_transpose_4(screen_view_model_transpose_matrix, screen_world_model_matrix)
+  matrix_transpose_4(screen_world_model_transpose_matrix, screen_world_model_matrix)
 }
 
 function update_camera () {

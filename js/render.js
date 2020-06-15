@@ -68,7 +68,7 @@ function render_screen () {
   gl.uniform1i(basic_u_sampler, model_buffers.screen.texture_id)
 
   gl.uniformMatrix4fv(basic_u_model_view_matrix, false, screen_model_view_matrix)
-  gl.uniformMatrix4fv(basic_u_view_model_transpose_matrix, false, screen_view_model_transpose_matrix)
+  gl.uniformMatrix4fv(basic_u_world_model_transpose_matrix, false, screen_world_model_transpose_matrix)
   gl.uniform1f(basic_u_light, screen_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
@@ -94,7 +94,7 @@ function render_cube () {
   gl.uniform1i(basic_u_sampler, model_buffers.cube.texture_id)
 
   gl.uniformMatrix4fv(basic_u_model_view_matrix, false, cube_model_view_matrix)
-  gl.uniformMatrix4fv(basic_u_view_model_transpose_matrix, false, cube_view_model_transpose_matrix)
+  gl.uniformMatrix4fv(basic_u_world_model_transpose_matrix, false, cube_world_model_transpose_matrix)
   gl.uniform1f(basic_u_light, cube_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
@@ -113,7 +113,7 @@ function render_monkey () {
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
   gl.uniformMatrix4fv(plain_u_model_view_matrix, false, monkey_model_view_matrix)
-  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, monkey_view_model_transpose_matrix)
+  gl.uniformMatrix4fv(plain_u_world_model_transpose_matrix, false, monkey_world_model_transpose_matrix)
   gl.uniform1f(plain_u_light, monkey_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
