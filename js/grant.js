@@ -59,6 +59,36 @@ let tower_is_hovered = false
 let tower_is_selected = false
 
 /****************************
+ * sky
+ ***************************/
+
+const sky_translation = create_translation_matrix(-1,0,1)
+const sky_inverse_translation = create_translation_matrix(1,0,-1)
+
+const sky_rotation = create_x_rotation_matrix(0)
+const sky_rotation_rate = create_y_rotation_matrix(0.001)
+const sky_inverse_rotation = new Float32Array(16)
+
+const sky_model_world_matrix = new Float32Array(16)
+const sky_world_model_matrix = new Float32Array(16)
+
+const sky_model_view_matrix = new Float32Array(16)
+const sky_view_model_matrix = new Float32Array(16)
+const sky_view_model_transpose_matrix = new Float32Array(16)
+
+
+const sky_pick_ray = new Float32Array(3)
+const sky_camera_0 = new Float32Array(4)
+const sky_half_width = 0.56
+const sky_half_height = 0.908
+const sky_half_depth = 0.56
+const sky_inv_ray = new Float32Array(3)
+let sky_light = 0.0
+let sky_light_target = sky_light
+let sky_is_hovered = false
+let sky_is_selected = false
+
+/****************************
  * Cube
  * This is an example object that should be replaced.
  * It demonstrates how to set up data for a 3d object that can move, rotate, and be clicked
@@ -238,6 +268,7 @@ function update () {
   update_monkey()
   update_tower()
   update_cube()
+  update_sky()
   update_screen()
   update_camera()
   
@@ -418,6 +449,28 @@ function update_tower () {
 }
 
 
+function update_sky () {
+  if (sky_is_selected) {
+    sky_light_target = 1.0
+  }
+  else if (sky_is_hovered) {
+    sky_light_target = 0.5
+  }
+  else {
+    sky_light_target = 0.0
+  }
+  sky_light += (sky_light_target - sky_light)*0.1
+
+  matrix_mult_4(sky_rotation, sky_rotation_rate, sky_rotation)
+
+  matrix_mult_4(sky_model_world_matrix, sky_translation, sky_rotation)
+  matrix_mult_4(sky_model_view_matrix, camera_world_view_matrix, sky_model_world_matrix)
+  matrix_transpose_4(sky_inverse_rotation, sky_rotation)
+  matrix_mult_4(sky_world_model_matrix, sky_inverse_rotation, sky_inverse_translation)
+  matrix_mult_4(sky_view_model_matrix, sky_world_model_matrix, camera_view_world_matrix)
+  matrix_transpose_4(sky_view_model_transpose_matrix, sky_view_model_matrix)
+}
+
 function update_cube () {
   if (cube_is_selected) {
     cube_light_target = 1.0
@@ -520,6 +573,7 @@ const asset_urls = {
   cube_obj: '/obj/cube.obj',
   monkey_obj: '/obj/monkey.obj',
   tower_obj: '/obj/tower.obj',
+  sky_obj: '/obj/sky.obj',
   basic_vertex: '/shaders/basic.vert',
   basic_fragment: '/shaders/basic.frag',
   plain_vertex: '/shaders/plain.vert',
@@ -528,6 +582,7 @@ const asset_urls = {
 const image_urls = {
   theloop_png: '/img/theloop.png',
   cube_tex_png: '/img/cube_tex.png',
+  sky_png: '/img/sky.png',
 }
 
 const model_buffers = {}
@@ -568,6 +623,14 @@ function main () {
   model_buffers.monkey = load_obj(gl, assets.monkey_obj)
 
   model_buffers.tower = load_obj(gl, assets.tower_obj)
+
+  model_buffers.sky = load_obj(gl, assets.sky_obj)
+  model_buffers.sky.texture_id = 1
+  model_buffers.sky.texture = load_texture(gl, images.sky_png, model_buffers.sky.texture_id)
+
+  gl.useProgram(basic_shader_program)
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.sky.texture_id)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.sky_png)
 
 
   compile_basic_shader()

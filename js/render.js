@@ -5,6 +5,7 @@ function render () {
   render_cube()
   render_monkey()
   render_tower()
+  render_sky()
 }
 
 function render_screen () {
@@ -138,4 +139,30 @@ function render_tower () {
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.tower.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.tower.num_indices, gl.UNSIGNED_SHORT, 0)
+}
+
+function render_sky () {
+  gl.useProgram(basic_shader_program)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sky.vertices)
+  gl.enableVertexAttribArray(basic_a_pos)
+  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sky.normals)
+  gl.enableVertexAttribArray(basic_a_normal)
+  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sky.uvs)
+  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(basic_a_uv)
+
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.sky.texture_id)
+  gl.uniform1i(basic_u_sampler, model_buffers.sky.texture_id)
+
+  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, sky_model_view_matrix)
+  gl.uniformMatrix4fv(basic_u_view_model_transpose_matrix, false, sky_view_model_transpose_matrix)
+  gl.uniform1f(basic_u_light, sky_light)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sky.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.sky.num_indices, gl.UNSIGNED_SHORT, 0)
 }
