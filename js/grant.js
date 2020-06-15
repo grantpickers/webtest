@@ -47,9 +47,9 @@ const tower_model_view_matrix = new Float32Array(16)
 
 const tower_pick_ray = new Float32Array(3)
 const tower_camera_0 = new Float32Array(4)
-const tower_half_width = 0.56
-const tower_half_height = 0.908
-const tower_half_depth = 0.56
+const tower_half_width = 1.12
+const tower_half_height = 1.804
+const tower_half_depth = 1.12
 const tower_inv_ray = new Float32Array(3)
 let tower_light = 0.0
 let tower_light_target = tower_light
