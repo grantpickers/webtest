@@ -40,10 +40,9 @@ const tower_inverse_rotation = new Float32Array(16)
 
 const tower_model_world_matrix = new Float32Array(16)
 const tower_world_model_matrix = new Float32Array(16)
+const tower_world_model_transpose_matrix = new Float32Array(16)
 
 const tower_model_view_matrix = new Float32Array(16)
-const tower_view_model_matrix = new Float32Array(16)
-const tower_view_model_transpose_matrix = new Float32Array(16)
 
 
 const tower_pick_ray = new Float32Array(3)
@@ -70,10 +69,9 @@ const sky_inverse_rotation = new Float32Array(16)
 
 const sky_model_world_matrix = new Float32Array(16)
 const sky_world_model_matrix = new Float32Array(16)
+const sky_world_model_transpose_matrix = new Float32Array(16)
 
 const sky_model_view_matrix = new Float32Array(16)
-const sky_view_model_matrix = new Float32Array(16)
-const sky_view_model_transpose_matrix = new Float32Array(16)
 
 
 const sky_pick_ray = new Float32Array(3)
@@ -440,8 +438,7 @@ function update_tower () {
   matrix_mult_4(tower_model_view_matrix, camera_world_view_matrix, tower_model_world_matrix)
   matrix_transpose_4(tower_inverse_rotation, tower_rotation)
   matrix_mult_4(tower_world_model_matrix, tower_inverse_rotation, tower_inverse_translation)
-  matrix_mult_4(tower_view_model_matrix, tower_world_model_matrix, camera_view_world_matrix)
-  matrix_transpose_4(tower_view_model_transpose_matrix, tower_view_model_matrix)
+  matrix_transpose_4(tower_world_model_transpose_matrix, tower_world_model_matrix)
 }
 
 
@@ -463,8 +460,7 @@ function update_sky () {
   matrix_mult_4(sky_model_view_matrix, camera_world_view_matrix, sky_model_world_matrix)
   matrix_transpose_4(sky_inverse_rotation, sky_rotation)
   matrix_mult_4(sky_world_model_matrix, sky_inverse_rotation, sky_inverse_translation)
-  matrix_mult_4(sky_view_model_matrix, sky_world_model_matrix, camera_view_world_matrix)
-  matrix_transpose_4(sky_view_model_transpose_matrix, sky_view_model_matrix)
+  matrix_transpose_4(sky_world_model_transpose_matrix, sky_world_model_matrix)
 }
 
 function update_cube () {

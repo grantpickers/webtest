@@ -134,7 +134,7 @@ function render_tower () {
   gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
 
   gl.uniformMatrix4fv(plain_u_model_view_matrix, false, tower_model_view_matrix)
-  gl.uniformMatrix4fv(plain_u_view_model_transpose_matrix, false, tower_view_model_transpose_matrix)
+  gl.uniformMatrix4fv(plain_u_world_model_transpose_matrix, false, tower_world_model_transpose_matrix)
   gl.uniform1f(plain_u_light, tower_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.tower.indices)
@@ -160,7 +160,7 @@ function render_sky () {
   gl.uniform1i(basic_u_sampler, model_buffers.sky.texture_id)
 
   gl.uniformMatrix4fv(basic_u_model_view_matrix, false, sky_model_view_matrix)
-  gl.uniformMatrix4fv(basic_u_view_model_transpose_matrix, false, sky_view_model_transpose_matrix)
+  gl.uniformMatrix4fv(basic_u_world_model_transpose_matrix, false, sky_world_model_transpose_matrix)
   gl.uniform1f(basic_u_light, sky_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sky.indices)
