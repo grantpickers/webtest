@@ -1,4 +1,23 @@
 /****************************
+ * Sphere
+ ***************************/
+
+const sphere_translation = create_translation_matrix(2,0,2)
+const sphere_inverse_translation = create_translation_matrix(-2,0,-2)
+
+const sphere_rotation = create_x_rotation_matrix(0)
+const sphere_rotation_rate = create_y_rotation_matrix(0.02)
+const sphere_translation_rate = create_translation_matrix(-0.001,0,-0.001)
+const sphere_inverse_rotation = new Float32Array(16)
+
+const sphere_model_world_matrix = new Float32Array(16)
+const sphere_world_model_matrix = new Float32Array(16)
+const sphere_world_model_transpose_matrix = new Float32Array(16)
+
+const sphere_model_view_matrix = new Float32Array(16)
+
+
+/****************************
  * Monkey
  ***************************/
 
@@ -207,7 +226,6 @@ let skybox_u_model_view_matrix = null
 let skybox_u_perspective_matrix = null
 let skybox_u_sampler = null
 let skybox_u_world_model_transpose_matrix = null
-let skybox_u_light = null
 function compile_skybox_shader () {
   skybox_shader_program = create_shader_program(gl, assets.skybox_vertex, assets.skybox_fragment)
   gl.useProgram(skybox_shader_program)
@@ -218,8 +236,32 @@ function compile_skybox_shader () {
   skybox_u_sampler            = gl.getUniformLocation(skybox_shader_program, 'u_sampler')
   skybox_u_perspective_matrix = gl.getUniformLocation(skybox_shader_program, 'u_perspective_matrix')
   skybox_u_world_model_transpose_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_model_transpose_matrix')
-  skybox_u_light = gl.getUniformLocation(skybox_shader_program, 'u_light')
   gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
+}
+
+// Envmap Shader
+
+let envmap_shader_program = null
+let envmap_a_pos = null
+let envmap_a_normal = null
+let envmap_a_uv = null
+let envmap_u_model_view_matrix = null
+let envmap_u_perspective_matrix = null
+let envmap_u_sampler = null
+let envmap_u_camera_position = null
+let envmap_u_model_world_matrix = null
+function compile_envmap_shader () {
+  envmap_shader_program = create_shader_program(gl, assets.envmap_vertex, assets.envmap_fragment)
+  gl.useProgram(envmap_shader_program)
+  envmap_a_pos    = gl.getAttribLocation(envmap_shader_program, 'a_pos')
+  envmap_a_normal = gl.getAttribLocation(envmap_shader_program, 'a_normal')
+  envmap_a_uv     = gl.getAttribLocation(envmap_shader_program, 'a_uv')
+  envmap_u_model_view_matrix  = gl.getUniformLocation(envmap_shader_program, 'u_model_view_matrix')
+  envmap_u_sampler            = gl.getUniformLocation(envmap_shader_program, 'u_sampler')
+  envmap_u_camera_position    = gl.getUniformLocation(envmap_shader_program, 'u_camera_position')
+  envmap_u_perspective_matrix = gl.getUniformLocation(envmap_shader_program, 'u_perspective_matrix')
+  envmap_u_model_world_matrix = gl.getUniformLocation(envmap_shader_program, 'u_model_world_matrix')
+  gl.uniformMatrix4fv(envmap_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
 // Screen Shader
@@ -305,6 +347,7 @@ function update () {
   if (has_resized) { handle_resize() }
   update_pick()
   update_monkey()
+  update_sphere()
   update_tower()
   update_cube()
   update_sky()
@@ -443,6 +486,17 @@ function update_pick () {
   }
 }
 
+function update_sphere () {
+  matrix_mult_4(sphere_rotation, sphere_translation_rate, sphere_rotation)
+  matrix_mult_4(sphere_rotation, sphere_rotation_rate, sphere_rotation)
+
+  matrix_mult_4(sphere_model_world_matrix, sphere_translation, sphere_rotation)
+  matrix_mult_4(sphere_model_view_matrix, camera_world_view_matrix, sphere_model_world_matrix)
+  matrix_transpose_4(sphere_inverse_rotation, sphere_rotation)
+  matrix_mult_4(sphere_world_model_matrix, sphere_inverse_rotation, sphere_inverse_translation)
+  matrix_transpose_4(sphere_world_model_transpose_matrix, sphere_world_model_matrix)
+}
+
 function update_monkey () {
   if (monkey_is_selected) {
     monkey_light_target = 1.0
@@ -562,6 +616,10 @@ function update_camera () {
   camera_ty = camera_animation_tween * (camera_ty_target) + (1-camera_animation_tween) * camera_ty
   camera_tz = camera_animation_tween * (camera_tz_target) + (1-camera_animation_tween) * camera_tz
 
+  camera_position[0] = camera_tx
+  camera_position[1] = camera_ty
+  camera_position[2] = camera_tz
+
   camera_translation[12] = camera_tx
   camera_translation[13] = camera_ty
   camera_translation[14] = camera_tz
@@ -592,11 +650,14 @@ function update_camera () {
 const asset_urls = {
   screen_obj: '/obj/screen.obj',
   cube_obj: '/obj/cube.obj',
+  sphere_obj: '/obj/sphere.obj',
   monkey_obj: '/obj/monkey.obj',
   tower_obj: '/obj/tower.obj',
   sky_obj: '/obj/sky.obj',
   skybox_vertex: '/shaders/skybox.vert',
   skybox_fragment: '/shaders/skybox.frag',
+  envmap_vertex: '/shaders/envmap.vert',
+  envmap_fragment: '/shaders/envmap.frag',
   screen_vertex: '/shaders/screen.vert',
   screen_fragment: '/shaders/screen.frag',
   basic_vertex: '/shaders/basic.vert',
@@ -638,6 +699,19 @@ function main () {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.cube_tex_png)
 
 
+  model_buffers.sphere = load_obj(gl, assets.sphere_obj)
+  model_buffers.sphere.texture_id = 3
+  model_buffers.sphere.texture = load_texture_cube(
+    gl,
+    images.sky_png,
+    images.sky_png,
+    images.sky_png,
+    images.sky_png,
+    images.sky_png,
+    images.sky_png,
+    model_buffers.sphere.texture_id
+  )
+
   model_buffers.monkey = load_obj(gl, assets.monkey_obj)
 
   model_buffers.tower = load_obj(gl, assets.tower_obj)
@@ -653,6 +727,7 @@ function main () {
 
   compile_skybox_shader()
   compile_screen_shader()
+  compile_envmap_shader()
   compile_basic_shader()
   compile_plain_shader()
 

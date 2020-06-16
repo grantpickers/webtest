@@ -3,6 +3,7 @@ function render () {
 
   render_screen()
   render_cube()
+  render_sphere()
   render_monkey()
   render_tower()
   render_sky()
@@ -101,6 +102,31 @@ function render_cube () {
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
+}
+
+function render_sphere () {
+  gl.useProgram(envmap_shader_program)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sphere.vertices)
+  gl.enableVertexAttribArray(envmap_a_pos)
+  gl.vertexAttribPointer(envmap_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sphere.normals)
+  gl.enableVertexAttribArray(envmap_a_normal)
+  gl.vertexAttribPointer(envmap_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, sphere_model_view_matrix)
+
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.sphere.texture_id)
+  gl.uniform1i(envmap_u_sampler, model_buffers.sphere.texture_id)
+
+  gl.uniform3fv(envmap_u_camera_position, camera_position)
+
+  gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, sphere_model_view_matrix)
+  gl.uniformMatrix4fv(envmap_u_model_world_matrix, false, sphere_model_world_matrix)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sphere.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.sphere.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
 function render_monkey () {

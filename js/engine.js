@@ -10,6 +10,7 @@ const pick_ray = new Float32Array(4)
  * Camera
  ***************************/
 
+const camera_position = new Float32Array(3)
 const camera_world_view_matrix = new Float32Array(16)
 const camera_view_world_matrix = new Float32Array(16)
 const camera_view_world_transpose_matrix = new Float32Array(16)
