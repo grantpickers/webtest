@@ -2,12 +2,11 @@
  * Sphere
  ***************************/
 
-const sphere_translation = create_translation_matrix(2,0,2)
-const sphere_inverse_translation = create_translation_matrix(-2,0,-2)
+const sphere_translation = create_translation_matrix(new Float32Array(16), 2,0,2)
+const sphere_inverse_translation = create_translation_matrix(new Float32Array(16), -2,0,-2)
 
-const sphere_rotation = create_x_rotation_matrix(0)
-const sphere_rotation_rate = create_y_rotation_matrix(0.02)
-const sphere_translation_rate = create_translation_matrix(-0.001,0,-0.001)
+const sphere_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
+const sphere_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0.002)
 const sphere_inverse_rotation = new Float32Array(16)
 
 const sphere_model_world_matrix = new Float32Array(16)
@@ -21,11 +20,10 @@ const sphere_model_view_matrix = new Float32Array(16)
  * Monkey
  ***************************/
 
-const monkey_translation = create_translation_matrix(-2,0,-2)
-const monkey_inverse_translation = create_translation_matrix(2,0,2)
+const monkey_translation = create_translation_matrix(new Float32Array(16), -2,0,-5)
+const monkey_inverse_translation = create_translation_matrix(new Float32Array(16), 2,0,5)
 
-const monkey_rotation = create_x_rotation_matrix(0)
-const monkey_rotation_rate = create_y_rotation_matrix(0.01)
+const monkey_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const monkey_inverse_rotation = new Float32Array(16)
 
 const monkey_model_world_matrix = new Float32Array(16)
@@ -50,11 +48,10 @@ let monkey_is_selected = false
  * Tower
  ***************************/
 
-const tower_translation = create_translation_matrix(-3,0,2)
-const tower_inverse_translation = create_translation_matrix(3,0,-2)
+const tower_translation = create_translation_matrix(new Float32Array(16), -3,0,2)
+const tower_inverse_translation = create_translation_matrix(new Float32Array(16), 3,0,-2)
 
-const tower_rotation = create_x_rotation_matrix(0)
-const tower_rotation_rate = create_y_rotation_matrix(0.01)
+const tower_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const tower_inverse_rotation = new Float32Array(16)
 
 const tower_model_world_matrix = new Float32Array(16)
@@ -79,11 +76,10 @@ let tower_is_selected = false
  * sky
  ***************************/
 
-const sky_translation = create_translation_matrix(-1,0,1)
-const sky_inverse_translation = create_translation_matrix(1,0,-1)
+const sky_translation = create_translation_matrix(new Float32Array(16), -1,0,1)
+const sky_inverse_translation = create_translation_matrix(new Float32Array(16), 1,0,-1)
 
-const sky_rotation = create_x_rotation_matrix(0)
-const sky_rotation_rate = create_y_rotation_matrix(0.001)
+const sky_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const sky_inverse_rotation = new Float32Array(16)
 
 const sky_model_world_matrix = new Float32Array(16)
@@ -104,11 +100,11 @@ const sky_inv_ray = new Float32Array(3)
  * It demonstrates how to set up data for a 3d object that can move, rotate, and be clicked
  ***************************/
 
-const cube_translation = create_translation_matrix(2,0,-1)
-const cube_inverse_translation = create_translation_matrix(-2,0,1)
+const cube_translation = create_translation_matrix(new Float32Array(16), 2,0,-3)
+const cube_inverse_translation = create_translation_matrix(new Float32Array(16), -2,0,3)
 
-const cube_rotation = matrix_mult_4(new Float32Array(16), matrix_mult_4(new Float32Array(16), create_z_rotation_matrix(1), create_y_rotation_matrix(3)), create_x_rotation_matrix(1))
-const cube_rotation_rate = create_y_rotation_matrix(0.01)
+const cube_rotation = matrix_mult_4(new Float32Array(16), matrix_mult_4(new Float32Array(16), create_z_rotation_matrix(new Float32Array(16), 1), create_y_rotation_matrix(new Float32Array(16), 3)), create_x_rotation_matrix(new Float32Array(16), 1))
+const cube_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
 const cube_inverse_rotation = new Float32Array(16)
 
 const cube_model_world_matrix = new Float32Array(16)
@@ -143,8 +139,8 @@ const screen_model_width = 1.493445
 const screen_model_height = 0.867261
 const screen_pick_p = new Float32Array([0, 0, 0, 1])
 const screen_light = 1.7
-const screen_translation = create_translation_matrix(0,0,0)
-const screen_inverse_translation = create_translation_matrix(0,0,0)
+const screen_translation = create_translation_matrix(new Float32Array(16), 0,0,0)
+const screen_inverse_translation = create_translation_matrix(new Float32Array(16), 0,0,0)
 
 const screen_rotation = new Float32Array([
   1, 0, 0, 0,
@@ -487,8 +483,7 @@ function update_pick () {
 }
 
 function update_sphere () {
-  matrix_mult_4(sphere_rotation, sphere_translation_rate, sphere_rotation)
-  matrix_mult_4(sphere_rotation, sphere_rotation_rate, sphere_rotation)
+  create_y_rotation_matrix(sphere_rotation, prev_timestamp*0.0005)
 
   matrix_mult_4(sphere_model_world_matrix, sphere_translation, sphere_rotation)
   matrix_mult_4(sphere_model_view_matrix, camera_world_view_matrix, sphere_model_world_matrix)
@@ -509,7 +504,7 @@ function update_monkey () {
   }
   monkey_light += (monkey_light_target - monkey_light)*0.1
 
-  matrix_mult_4(monkey_rotation, monkey_rotation_rate, monkey_rotation)
+  create_y_rotation_matrix(monkey_rotation, prev_timestamp*0.0005)
 
   matrix_mult_4(monkey_model_world_matrix, monkey_translation, monkey_rotation)
   matrix_mult_4(monkey_model_view_matrix, camera_world_view_matrix, monkey_model_world_matrix)
@@ -530,7 +525,7 @@ function update_tower () {
   }
   tower_light += (tower_light_target - tower_light)*0.1
 
-  matrix_mult_4(tower_rotation, tower_rotation_rate, tower_rotation)
+  create_y_rotation_matrix(tower_rotation, prev_timestamp*0.0005)
 
   matrix_mult_4(tower_model_world_matrix, tower_translation, tower_rotation)
   matrix_mult_4(tower_model_view_matrix, camera_world_view_matrix, tower_model_world_matrix)
@@ -541,8 +536,6 @@ function update_tower () {
 
 
 function update_sky () {
-  matrix_mult_4(sky_rotation, sky_rotation_rate, sky_rotation)
-
   matrix_mult_4(sky_model_world_matrix, sky_translation, sky_rotation)
   matrix_mult_4(sky_model_view_matrix, camera_world_view_matrix, sky_model_world_matrix)
   matrix_transpose_4(sky_inverse_rotation, sky_rotation)
@@ -560,6 +553,7 @@ function update_cube () {
   }
   cube_light += (cube_light_target - cube_light)*0.1
 
+  create_y_rotation_matrix(cube_rotation_rate, dt*0.0005)
   matrix_mult_4(cube_rotation, cube_rotation_rate, cube_rotation)
 
   matrix_mult_4(cube_model_world_matrix, cube_translation, cube_rotation)
@@ -608,7 +602,7 @@ function update_screen () {
 
 function update_camera () {
   if (camera_animation_tween < 1) {
-    camera_animation_tween += 0.01
+    camera_animation_tween += dt*0.00016
   }
 
   camera_ry = camera_animation_tween * (camera_ry_target) + (1-camera_animation_tween) * camera_ry

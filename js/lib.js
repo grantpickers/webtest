@@ -83,44 +83,41 @@ function matrix_operate_4 (w, m, v) {
   return w
 }
 
-// TODO: create_[xyz]_rotation_matrix (m, t) to not alloc memory
-function create_x_rotation_matrix (t) {
+function create_x_rotation_matrix (m, t) {
   const c = Math.cos(t)
   const s = Math.sin(t)
-  return new Float32Array([
-    1, 0, 0, 0,
-    0, c, s, 0,
-    0,-s, c, 0,
-    0, 0, 0, 1,
-  ])
+  m[0]  = 1; m[1]  = 0; m[2]  = 0; m[3]  = 0;
+  m[4]  = 0; m[5]  = c; m[6]  = s; m[7]  = 0;
+  m[8]  = 0; m[9]  =-s; m[10] = c; m[11] = 0;
+  m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m
 }
-function create_y_rotation_matrix (t) {
+
+function create_y_rotation_matrix (m, t) {
   const c = Math.cos(t)
   const s = Math.sin(t)
-  return new Float32Array([
-    c, 0,-s, 0,
-    0, 1, 0, 0,
-    s, 0, c, 0,
-    0, 0, 0, 1,
-  ])
+  m[0]  = c; m[1]  = 0; m[2]  =-s; m[3]  = 0;
+  m[4]  = 0; m[5]  = 1; m[6]  = 0; m[7]  = 0;
+  m[8]  = s; m[9]  = 0; m[10] = c; m[11] = 0;
+  m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m
+
 }
-function create_z_rotation_matrix (t) {
+function create_z_rotation_matrix (m, t) {
   const c = Math.cos(t)
   const s = Math.sin(t)
-  return new Float32Array([
-    c, s, 0, 0,
-   -s, c, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-  ])
+  m[0]  = c; m[1]  = s; m[2]  = 0; m[3]  = 0;
+  m[4]  =-s; m[5]  = c; m[6]  = 0; m[7]  = 0;
+  m[8]  = 0; m[9]  = 0; m[10] = 1; m[11] = 0;
+  m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m
 }
-function create_translation_matrix (x,y,z) {
-  return new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    x, y, z, 1,
-  ])
+function create_translation_matrix (m, x,y,z) {
+  m[0]  = 1; m[1]  = 0; m[2]  = 0; m[3]  = 0;
+  m[4]  = 0; m[5]  = 1; m[6]  = 0; m[7]  = 0;
+  m[8]  = 0; m[9]  = 0; m[10] = 1; m[11] = 0;
+  m[12] = x; m[13] = y; m[14] = z; m[15] = 1;
+  return m
 }
 
 
