@@ -120,7 +120,7 @@ function render_sphere () {
   gl.activeTexture(gl.TEXTURE0 + model_buffers.sphere.texture_id)
   gl.uniform1i(envmap_u_sampler, model_buffers.sphere.texture_id)
 
-  gl.uniform4fv(envmap_u_camera_position, camera_0)
+  gl.uniform4fv(envmap_u_camera_position, camera_position)
 
   gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, sphere_model_view_matrix)
   gl.uniformMatrix4fv(envmap_u_model_world_matrix, false, sphere_model_world_matrix)

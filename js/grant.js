@@ -34,7 +34,7 @@ const monkey_model_view_matrix = new Float32Array(16)
 
 
 const monkey_pick_ray = new Float32Array(3)
-const monkey_camera_0 = new Float32Array(4)
+const monkey_camera_position = new Float32Array(4)
 const monkey_half_width = 0.684
 const monkey_half_height = 0.426
 const monkey_half_depth = 0.492
@@ -62,7 +62,7 @@ const tower_model_view_matrix = new Float32Array(16)
 
 
 const tower_pick_ray = new Float32Array(3)
-const tower_camera_0 = new Float32Array(4)
+const tower_camera_position = new Float32Array(4)
 const tower_half_width = 1.12
 const tower_half_height = 1.804
 const tower_half_depth = 1.12
@@ -88,7 +88,7 @@ const sky_model_view_matrix = new Float32Array(16)
 
 
 const sky_pick_ray = new Float32Array(3)
-const sky_camera_0 = new Float32Array(4)
+const sky_camera_position = new Float32Array(4)
 const sky_half_width = 0.56
 const sky_half_height = 0.908
 const sky_half_depth = 0.56
@@ -114,7 +114,7 @@ const cube_world_model_transpose_matrix = new Float32Array(16)
 const cube_model_view_matrix = new Float32Array(16)
 
 const cube_pick_ray = new Float32Array(3)
-const cube_camera_0 = new Float32Array(4)
+const cube_camera_position = new Float32Array(4)
 const cube_half_width = 0.25
 const cube_inv_ray = new Float32Array(3)
 let cube_light = 0.0
@@ -343,6 +343,7 @@ function compile_plain_shader () {
 
 function update () {
   if (has_resized) { handle_resize() }
+  update_camera()
   update_pick()
   update_monkey()
   update_sphere()
@@ -350,7 +351,6 @@ function update () {
   update_cube()
   update_sky()
   update_screen()
-  update_camera()
   
 
   has_clicked = false
@@ -369,6 +369,38 @@ function handle_resize () {
 }
 
 
+
+function update_camera () {
+  if (camera_animation_tween < 1) {
+    camera_animation_tween += dt*0.00016
+  }
+
+  camera_ry = camera_animation_tween * (camera_ry_target) + (1-camera_animation_tween) * camera_ry
+
+  camera_position[0] = camera_animation_tween * (camera_tx_target) + (1-camera_animation_tween) * camera_position[0]
+  camera_position[1] = camera_animation_tween * (camera_ty_target) + (1-camera_animation_tween) * camera_position[1]
+  camera_position[2] = camera_animation_tween * (camera_tz_target) + (1-camera_animation_tween) * camera_position[2]
+
+  camera_rotation[0] = Math.cos(camera_ry)
+  camera_rotation[2] = -Math.sin(camera_ry)
+  camera_rotation[8] = Math.sin(camera_ry)
+  camera_rotation[10] = Math.cos(camera_ry)
+
+  // This doesn't really get used since pick ray has w=0 and is the only user....
+  camera_translation[12] = camera_position[0]
+  camera_translation[13] = camera_position[1]
+  camera_translation[14] = camera_position[2]
+
+  camera_inverse_translation[12] = -camera_position[0]
+  camera_inverse_translation[13] = -camera_position[1]
+  camera_inverse_translation[14] = -camera_position[2]
+
+  matrix_transpose_4(camera_inverse_rotation, camera_rotation)
+
+
+  matrix_mult_4(camera_world_view_matrix, camera_inverse_rotation, camera_inverse_translation)
+  matrix_mult_4(camera_view_world_matrix, camera_rotation, camera_translation)
+}
 
 function ray_box_collide (half_width, half_height, half_depth, ray_0, inv_ray) {
   const pa_0 = -half_width
@@ -411,12 +443,12 @@ function update_pick () {
   // Monkey pick
 
   matrix_operate_4(monkey_pick_ray, monkey_world_model_matrix, pick_ray)
-  matrix_operate_4(monkey_camera_0, monkey_world_model_matrix, camera_0)
+  matrix_operate_4(monkey_camera_position, monkey_world_model_matrix, camera_position)
 
   monkey_inv_ray[0] = 1/monkey_pick_ray[0]
   monkey_inv_ray[1] = 1/monkey_pick_ray[1]
   monkey_inv_ray[2] = 1/monkey_pick_ray[2]
-  if (ray_box_collide(monkey_half_width, monkey_half_height, monkey_half_depth, monkey_camera_0, monkey_inv_ray)) {
+  if (ray_box_collide(monkey_half_width, monkey_half_height, monkey_half_depth, monkey_camera_position, monkey_inv_ray)) {
     monkey_is_hovered = true
     if (has_clicked) {
       monkey_is_selected = true
@@ -431,12 +463,12 @@ function update_pick () {
   // tower pick
 
   matrix_operate_4(tower_pick_ray, tower_world_model_matrix, pick_ray)
-  matrix_operate_4(tower_camera_0, tower_world_model_matrix, camera_0)
+  matrix_operate_4(tower_camera_position, tower_world_model_matrix, camera_position)
 
   tower_inv_ray[0] = 1/tower_pick_ray[0]
   tower_inv_ray[1] = 1/tower_pick_ray[1]
   tower_inv_ray[2] = 1/tower_pick_ray[2]
-  if (ray_box_collide(tower_half_width, tower_half_height, tower_half_depth, tower_camera_0, tower_inv_ray)) {
+  if (ray_box_collide(tower_half_width, tower_half_height, tower_half_depth, tower_camera_position, tower_inv_ray)) {
     tower_is_hovered = true
     if (has_clicked) {
       tower_is_selected = true
@@ -451,12 +483,12 @@ function update_pick () {
   // Cube pick
 
   matrix_operate_4(cube_pick_ray, cube_world_model_matrix, pick_ray)
-  matrix_operate_4(cube_camera_0, cube_world_model_matrix, camera_0)
+  matrix_operate_4(cube_camera_position, cube_world_model_matrix, camera_position)
 
   cube_inv_ray[0] = 1/cube_pick_ray[0]
   cube_inv_ray[1] = 1/cube_pick_ray[1]
   cube_inv_ray[2] = 1/cube_pick_ray[2]
-  if (ray_box_collide(cube_half_width, cube_half_width, cube_half_width, cube_camera_0, cube_inv_ray)) {
+  if (ray_box_collide(cube_half_width, cube_half_width, cube_half_width, cube_camera_position, cube_inv_ray)) {
     cube_is_hovered = true
     if (has_clicked) {
       cube_is_selected = true
@@ -473,11 +505,8 @@ function update_pick () {
 
   const denom = dot3(pick_ray, screen_n)
   if (denom != 0) {
-    camera_0[0] = -camera_translation[12]
-    camera_0[1] = -camera_translation[13]
-    camera_0[2] = -camera_translation[14]
-    const t = dot3(screen_n, sub3(temp0, screen_bot_left, camera_0)) / denom
-    sum3(screen_pick_p, camera_0, scl3(temp0, t, pick_ray))
+    const t = dot3(screen_n, sub3(temp0, screen_bot_left, camera_position)) / denom
+    sum3(screen_pick_p, camera_position, scl3(temp0, t, pick_ray))
     matrix_operate_4(screen_pick_p, screen_display_inverse_translation, screen_pick_p)
     matrix_operate_4(screen_pick_p, screen_display_inverse_rotation, screen_pick_p)
     matrix_operate_4(screen_pick_p, screen_display_inverse_scale, screen_pick_p)
@@ -582,16 +611,16 @@ function update_screen () {
       if (current_page !== previous_page) {
         if (current_page == screen_pages.works) {
           camera_ry_target = Math.PI/2 - 1*Math.PI/7
-          camera_tx_target = -4.4*Math.sin(camera_ry_target)
+          camera_tx_target = 4.4*Math.sin(camera_ry_target)
           camera_ty_target = 0
-          camera_tz_target = 0.5-4.4*Math.cos(camera_ry_target)
+          camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
           camera_animation_tween = 0
         }
         if (current_page == screen_pages.about || current_page == screen_pages.contact) {
           camera_ry_target = Math.PI/2
-          camera_tx_target = -0.78
-          camera_ty_target = -0.020
-          camera_tz_target = 0.004
+          camera_tx_target = 0.78
+          camera_ty_target = 0.020
+          camera_tz_target = -0.004
           camera_animation_tween = 0
         }
       }
@@ -603,42 +632,6 @@ function update_screen () {
   matrix_transpose_4(screen_inverse_rotation, screen_rotation)
   matrix_mult_4(screen_world_model_matrix, screen_inverse_rotation, screen_inverse_translation)
   matrix_transpose_4(screen_world_model_transpose_matrix, screen_world_model_matrix)
-}
-
-function update_camera () {
-  if (camera_animation_tween < 1) {
-    camera_animation_tween += dt*0.00016
-  }
-
-  camera_ry = camera_animation_tween * (camera_ry_target) + (1-camera_animation_tween) * camera_ry
-  camera_tx = camera_animation_tween * (camera_tx_target) + (1-camera_animation_tween) * camera_tx
-  camera_ty = camera_animation_tween * (camera_ty_target) + (1-camera_animation_tween) * camera_ty
-  camera_tz = camera_animation_tween * (camera_tz_target) + (1-camera_animation_tween) * camera_tz
-
-  camera_position[0] = camera_tx
-  camera_position[1] = camera_ty
-  camera_position[2] = camera_tz
-
-  camera_translation[12] = camera_tx
-  camera_translation[13] = camera_ty
-  camera_translation[14] = camera_tz
-
-  camera_rotation[0] = Math.cos(camera_ry)
-  camera_rotation[2] = Math.sin(camera_ry)
-  camera_rotation[8] = -Math.sin(camera_ry)
-  camera_rotation[10] = Math.cos(camera_ry)
-
-  matrix_mult_4(camera_world_view_matrix, camera_rotation, camera_translation)
-
-
-  matrix_transpose_4(camera_inverse_rotation, camera_rotation)
-
-  camera_inverse_translation[12] = -camera_tx
-  camera_inverse_translation[13] = -camera_ty
-  camera_inverse_translation[14] = -camera_tz
-
-  matrix_mult_4(camera_view_world_matrix, camera_inverse_rotation, camera_inverse_translation)
-  matrix_transpose_4(camera_view_world_transpose_matrix, camera_view_world_matrix)
 }
 
 
@@ -685,9 +678,9 @@ function main () {
   camera_update_perspective()
 
   camera_ry_target = Math.PI/2
-  camera_tx_target = -0.78
-  camera_ty_target = -0.020
-  camera_tz_target = 0.004
+  camera_tx_target = 0.78
+  camera_ty_target = 0.020
+  camera_tz_target = -0.004
 
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)
