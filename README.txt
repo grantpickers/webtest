@@ -95,3 +95,41 @@ Make shit happen
 ----------------
 1. js/grant.js: Add a update_something() call in update()
 2. js/grant.js: Declare and set data for your thing at the top of the file
+
+Sitemap
+-------
+
+
+Desktop:
+--------
+
+
+Painting (cat)
+3d (tbd) (folder?)
+Animation (static)
+Illustration (flames) 
+
+Shortcuts:
+Contact
+Instagram
+
+Zip (tbd) (virus)
+
+
+Animation:
+----------
+Explorer window - vid thumb icons
+Double clicking runs custom video player
+
+
+Painting and Illustration:
+----------
+
+Explorer window - thumb icons
+Double clicking runs custom img viewer
+
+Contact:
+--------
+Custom Email client with email form
+Name/emailadd/message
+

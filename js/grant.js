@@ -2,10 +2,10 @@
  * Sphere
  ***************************/
 
-const sphere_translation = create_translation_matrix(new Float32Array(16), 1,0,-1)
-const sphere_inverse_translation = create_translation_matrix(new Float32Array(16), -1,0,1)
+const sphere_translation = create_translation_matrix(new Float32Array(16), -15,8,-10)
+const sphere_inverse_translation = create_translation_matrix(new Float32Array(16), 15,-8,10)
 
-const sphere_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
+const sphere_rotation = create_y_rotation_matrix(new Float32Array(16), Math.PI/2 - 1*Math.PI/7)
 const sphere_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
 const sphere_inverse_rotation = new Float32Array(16)
 
@@ -48,8 +48,8 @@ let monkey_is_selected = false
  * Tower
  ***************************/
 
-const tower_translation = create_translation_matrix(new Float32Array(16), -3,0,2)
-const tower_inverse_translation = create_translation_matrix(new Float32Array(16), 3,0,-2)
+const tower_translation = create_translation_matrix(new Float32Array(16), -40,6,2)
+const tower_inverse_translation = create_translation_matrix(new Float32Array(16), 40,-6,-2)
 
 const tower_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const tower_inverse_rotation = new Float32Array(16)
@@ -514,9 +514,6 @@ function update_pick () {
 }
 
 function update_sphere () {
-  create_y_rotation_matrix(sphere_rotation_rate, dt*0.0005)
-  matrix_mult_4(sphere_rotation, sphere_rotation_rate, sphere_rotation)
-
   matrix_mult_4(sphere_model_world_matrix, sphere_translation, sphere_rotation)
 
   matrix_mult_4(sphere_model_view_matrix, camera_world_view_matrix, sphere_model_world_matrix)
@@ -559,7 +556,6 @@ function update_tower () {
   }
   tower_light += (tower_light_target - tower_light)*0.1
 
-  create_y_rotation_matrix(tower_rotation, prev_timestamp*0.0005)
 
   matrix_mult_4(tower_model_world_matrix, tower_translation, tower_rotation)
   matrix_mult_4(tower_model_view_matrix, camera_world_view_matrix, tower_model_world_matrix)
@@ -642,7 +638,7 @@ function update_screen () {
 const asset_urls = {
   screen_obj: '/obj/screen.obj',
   cube_obj: '/obj/cube.obj',
-  sphere_obj: '/obj/sphere.obj',
+  sphere_obj: '/obj/words.obj',
   monkey_obj: '/obj/monkey.obj',
   tower_obj: '/obj/tower.obj',
   sky_obj: '/obj/sky.obj',

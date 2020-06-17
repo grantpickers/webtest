@@ -2,9 +2,9 @@ function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
   render_screen()
-  render_cube()
+  //render_cube()
   render_sphere()
-  render_monkey()
+  //render_monkey()
   render_tower()
   render_sky()
 }
