@@ -2,11 +2,11 @@
  * Sphere
  ***************************/
 
-const sphere_translation = create_translation_matrix(new Float32Array(16), 2,0,2)
-const sphere_inverse_translation = create_translation_matrix(new Float32Array(16), -2,0,-2)
+const sphere_translation = create_translation_matrix(new Float32Array(16), 1,0,-1)
+const sphere_inverse_translation = create_translation_matrix(new Float32Array(16), -1,0,1)
 
 const sphere_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
-const sphere_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0.002)
+const sphere_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
 const sphere_inverse_rotation = new Float32Array(16)
 
 const sphere_model_world_matrix = new Float32Array(16)
@@ -246,6 +246,7 @@ let envmap_u_perspective_matrix = null
 let envmap_u_sampler = null
 let envmap_u_camera_position = null
 let envmap_u_model_world_matrix = null
+let envmap_u_world_model_transpose_matrix = null
 function compile_envmap_shader () {
   envmap_shader_program = create_shader_program(gl, assets.envmap_vertex, assets.envmap_fragment)
   gl.useProgram(envmap_shader_program)
@@ -257,6 +258,7 @@ function compile_envmap_shader () {
   envmap_u_camera_position    = gl.getUniformLocation(envmap_shader_program, 'u_camera_position')
   envmap_u_perspective_matrix = gl.getUniformLocation(envmap_shader_program, 'u_perspective_matrix')
   envmap_u_model_world_matrix = gl.getUniformLocation(envmap_shader_program, 'u_model_world_matrix')
+  envmap_u_world_model_transpose_matrix = gl.getUniformLocation(envmap_shader_program, 'u_world_model_transpose_matrix')
   gl.uniformMatrix4fv(envmap_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -483,10 +485,13 @@ function update_pick () {
 }
 
 function update_sphere () {
-  create_y_rotation_matrix(sphere_rotation, prev_timestamp*0.0005)
+  create_y_rotation_matrix(sphere_rotation_rate, dt*0.0005)
+  matrix_mult_4(sphere_rotation, sphere_rotation_rate, sphere_rotation)
 
   matrix_mult_4(sphere_model_world_matrix, sphere_translation, sphere_rotation)
+
   matrix_mult_4(sphere_model_view_matrix, camera_world_view_matrix, sphere_model_world_matrix)
+
   matrix_transpose_4(sphere_inverse_rotation, sphere_rotation)
   matrix_mult_4(sphere_world_model_matrix, sphere_inverse_rotation, sphere_inverse_translation)
   matrix_transpose_4(sphere_world_model_transpose_matrix, sphere_world_model_matrix)
@@ -663,6 +668,12 @@ const image_urls = {
   theloop_png: '/img/theloop.png',
   cube_tex_png: '/img/cube_tex.png',
   sky_png: '/img/sky.png',
+  sky_px_png: '/img/px.png',
+  sky_nx_png: '/img/nx.png',
+  sky_py_png: '/img/py.png',
+  sky_ny_png: '/img/ny.png',
+  sky_pz_png: '/img/pz.png',
+  sky_nz_png: '/img/nx.png',
 }
 
 const model_buffers = {}
@@ -697,12 +708,12 @@ function main () {
   model_buffers.sphere.texture_id = 3
   model_buffers.sphere.texture = load_texture_cube(
     gl,
-    images.sky_png,
-    images.sky_png,
-    images.sky_png,
-    images.sky_png,
-    images.sky_png,
-    images.sky_png,
+    images.sky_px_png,
+    images.sky_nx_png,
+    images.sky_py_png,
+    images.sky_ny_png,
+    images.sky_pz_png,
+    images.sky_nz_png,
     model_buffers.sphere.texture_id
   )
 

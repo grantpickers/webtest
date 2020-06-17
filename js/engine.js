@@ -2,6 +2,7 @@
  * Pick
  ***************************/
 
+//todo: merge these into camera
 const camera_0 = new Float32Array([0,0,0,1])
 const pick_ray = new Float32Array(4)
 
