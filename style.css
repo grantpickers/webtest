@@ -28,33 +28,9 @@ body {
   margin: 0;
   background: #000;
   font-family: Helvetica Neue;
+  display: flex; align-items: center; justify-content: center;
+  height: 100vh;
 }
 canvas {
   display: block;
-  width: 100%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-canvas:after {
-  content: " ";
-  height: 0;
-  display: block;
-  width: 100%;
-  padding-top: 56.25%;
-}
-@media (min-aspect-ratio: 16/9) {
-  canvas {
-    height: 100%;
-    width: auto;
-  }
-  canvas:after {
-    content: " ";
-    height: 0;
-    display: block;
-    height: 100%;
-    width: 100%;
-    padding-right: 177.7%;
-  }
 }

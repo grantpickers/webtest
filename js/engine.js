@@ -88,8 +88,20 @@ let has_resized = true
 
 function init_canvas (width, height) {
   document.body.appendChild(canvas)
-  canvas.width = window.devicePixelRatio * canvas.offsetWidth
-  canvas.height = height/width*canvas.width
+  let w,h
+  if (window.innerWidth/window.innerHeight > width/height) {
+    w = Math.floor(window.innerHeight * width/height)
+    h = Math.floor(window.innerHeight)
+  }
+  else {
+    w = Math.floor(window.innerWidth)
+    h = Math.floor(window.innerWidth * height/width)
+  }
+  canvas.style.width = w+"px"
+  canvas.style.height = h+"px"
+  canvas.width = w
+  canvas.height = h
+
   gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0,0,0,1)
   gl.enable(gl.DEPTH_TEST)

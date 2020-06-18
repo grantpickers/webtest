@@ -280,7 +280,7 @@ function compile_plain_shader () {
  ***************************/
 
 function update () {
-  if (has_resized) { handle_resize() }
+  if (has_resized) { handle_resize(screen_pixel_width, screen_pixel_height) }
   update_camera()
   update_pick()
   update_welcometext()
@@ -293,9 +293,21 @@ function update () {
   has_resized = false
 }
 
-function handle_resize () {
-  canvas.width = window.devicePixelRatio * canvas.offsetWidth
-  canvas.height = 1115/1920*canvas.width
+function handle_resize (width, height) {
+  let w,h
+  if (window.innerWidth/window.innerHeight > width/height) {
+    w = Math.floor(window.innerHeight * width/height)
+    h = Math.floor(window.innerHeight)
+  }
+  else {
+    w = Math.floor(window.innerWidth)
+    h = Math.floor(window.innerWidth * height/width)
+  }
+  canvas.style.width = w+"px"
+  canvas.style.height = h+"px"
+  canvas.width = w
+  canvas.height = h
+
   gl.viewport(0, 0, canvas.width, canvas.height)
   camera_update_perspective()
   gl.useProgram(basic_shader_program)
