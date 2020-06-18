@@ -51,7 +51,7 @@ let camera_tz = camera_tz_target
 let camera_animation_tween = 1
 
 function camera_update_perspective () {
-  const aspect = canvas.width / canvas.height
+  const aspect = canvas.width/canvas.height
   const fov = Math.PI/3
   const near = 0.5
   const far = 100
@@ -88,21 +88,7 @@ let has_resized = true
 
 function init_canvas (width, height) {
   document.body.appendChild(canvas)
-  let w,h
-  if (window.innerWidth/window.innerHeight > width/height) {
-    w = Math.floor(window.innerHeight * width/height)
-    h = Math.floor(window.innerHeight)
-  }
-  else {
-    w = Math.floor(window.innerWidth)
-    h = Math.floor(window.innerWidth * height/width)
-  }
-  canvas.style.width = w+"px"
-  canvas.style.height = h+"px"
-  canvas.width = w
-  canvas.height = h
 
-  gl.viewport(0, 0, canvas.width, canvas.height)
   gl.clearColor(0,0,0,1)
   gl.enable(gl.DEPTH_TEST)
   gl.enable(gl.CULL_FACE)

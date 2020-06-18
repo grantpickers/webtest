@@ -307,13 +307,17 @@ function handle_resize (width, height) {
   canvas.style.height = h+"px"
   canvas.width = w
   canvas.height = h
+  gl.viewport(0, 0, w, h)
 
-  gl.viewport(0, 0, canvas.width, canvas.height)
   camera_update_perspective()
   gl.useProgram(basic_shader_program)
   gl.uniformMatrix4fv(basic_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(plain_shader_program)
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
+  gl.useProgram(screen_shader_program)
+  gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
+  gl.useProgram(envmap_shader_program)
+  gl.uniformMatrix4fv(envmap_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
 
@@ -532,7 +536,7 @@ const images = {}
 
 function main () {
   init_canvas(screen_pixel_width, screen_pixel_height)
-  camera_update_perspective()
+  camera_update_perspective(screen_pixel_width, screen_pixel_height)
 
   camera_ry_target = Math.PI/2
   camera_tx_target = 0.78
