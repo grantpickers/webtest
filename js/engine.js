@@ -113,7 +113,7 @@ let prev_timestamp = null
 const TARGET_FRAME_TIME = 1000/60
 let dt = 0
 let total_time = 0
-const limit_fps = true
+const limit_fps = false
 
 function main_loop (timestamp) {
   if (!limit_fps) {

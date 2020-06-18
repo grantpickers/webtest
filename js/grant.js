@@ -453,6 +453,7 @@ function update_pick () {
 }
 
 function update_welcometext () {
+  create_y_rotation_matrix(welcometext_rotation, prev_timestamp*0.0004)
   matrix_mult_4(welcometext_model_world_matrix, welcometext_translation, welcometext_rotation)
 
   matrix_mult_4(welcometext_model_view_matrix, camera_world_view_matrix, welcometext_model_world_matrix)
