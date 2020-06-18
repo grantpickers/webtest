@@ -70,7 +70,6 @@ function render_screen () {
 
   gl.uniformMatrix4fv(screen_u_model_view_matrix, false, screen_model_view_matrix)
   gl.uniformMatrix4fv(screen_u_world_model_transpose_matrix, false, screen_world_model_transpose_matrix)
-  gl.uniform1f(screen_u_light, screen_light)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)

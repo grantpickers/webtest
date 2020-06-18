@@ -2,8 +2,8 @@
  * welcometext
  ***************************/
 
-const welcometext_translation = create_translation_matrix(new Float32Array(16), -15,8,-10)
-const welcometext_inverse_translation = create_translation_matrix(new Float32Array(16), 15,-8,10)
+const welcometext_translation = create_translation_matrix(new Float32Array(16), -2,3,-5)
+const welcometext_inverse_translation = create_translation_matrix(new Float32Array(16), 2,-3,5)
 
 const welcometext_rotation = create_y_rotation_matrix(new Float32Array(16), Math.PI/2 - 1*Math.PI/7)
 const welcometext_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
@@ -69,9 +69,6 @@ const sky_inv_ray = new Float32Array(3)
 
 /****************************
  * Screen
- * If you replace the screen model, be sure to update the pixel and model width and height
- * data here so that clicking it works. Also set screen_bot_left, screen_top_left and
- * screen_bot_right to the 3D coordinates in model space.
  ***************************/
 
 const screen_pixel_width = 1920
@@ -82,7 +79,6 @@ const screen_bot_right = new Float32Array([0.033758, -0.413442, -0.748019 ])
 const screen_model_width = 1.493445
 const screen_model_height = 0.867261
 const screen_pick_p = new Float32Array([0, 0, 0, 1])
-const screen_light = 1.7
 const screen_translation = create_translation_matrix(new Float32Array(16), 0,0,0)
 const screen_inverse_translation = create_translation_matrix(new Float32Array(16), 0,0,0)
 
@@ -216,7 +212,6 @@ let screen_u_model_view_matrix = null
 let screen_u_perspective_matrix = null
 let screen_u_sampler = null
 let screen_u_world_model_transpose_matrix = null
-let screen_u_light = null
 function compile_screen_shader () {
   screen_shader_program = create_shader_program(gl, assets.screen_vertex, assets.screen_fragment)
   gl.useProgram(screen_shader_program)
@@ -227,7 +222,6 @@ function compile_screen_shader () {
   screen_u_sampler            = gl.getUniformLocation(screen_shader_program, 'u_sampler')
   screen_u_perspective_matrix = gl.getUniformLocation(screen_shader_program, 'u_perspective_matrix')
   screen_u_world_model_transpose_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_model_transpose_matrix')
-  screen_u_light = gl.getUniformLocation(screen_shader_program, 'u_light')
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
