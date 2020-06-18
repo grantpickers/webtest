@@ -133,8 +133,8 @@ const screen_pages = {
     "Aenean massa.",
   ],
 }
-const buttons = [
-  { x: 150, y: 100, w: 500, h: 100, txt: "3D WORKS", page: screen_pages.works, },
+const screen_folders = [
+  { x: 150, y: 100, w: 500, h: 100, txt: "3d",       page: screen_pages.works, },
   { x: 150, y: 240, w: 500, h: 100, txt: "ABOUT",    page: screen_pages.about, },
   { x: 150, y: 380, w: 500, h: 100, txt: "CONTACT",  page: screen_pages.contact, },
 ]
@@ -451,8 +451,8 @@ function update_screen () {
 
   const screen_mouse_x = screen_pick_p[0]
   const screen_mouse_y = screen_pick_p[1]
-  for (let i=0; i<buttons.length; i++) {
-    const b = buttons[i]
+  for (let i=0; i<screen_folders.length; i++) {
+    const b = screen_folders[i]
     const is_hovered = screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h
     b.is_hovered = is_hovered
     if (is_hovered && has_clicked) {
@@ -505,7 +505,6 @@ const asset_urls = {
   plain_fragment: '/shaders/plain.frag',
 }
 const image_urls = {
-  theloop_png: '/img/theloop.png',
   sky_png: '/img/sky.png',
   sky_px_png: '/img/px.png',
   sky_nx_png: '/img/nx.png',

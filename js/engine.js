@@ -114,15 +114,32 @@ video_el.play()
 let prev_timestamp = null
 const TARGET_FRAME_TIME = 1000/60
 let dt = 0
+let total_time = 0
+const limit_fps = true
 
 function main_loop (timestamp) {
-  if (prev_timestamp == null) {
+  if (!limit_fps) {
+    if (prev_timestamp == null) {
+      prev_timestamp = timestamp
+    }
+    dt = timestamp - prev_timestamp
     prev_timestamp = timestamp
+    update()
+    render()
+    window.requestAnimationFrame(main_loop)
+  } else {
+    dt = timestamp - prev_timestamp
+    prev_timestamp = timestamp
+    total_time += dt
+    if (total_time > TARGET_FRAME_TIME*3) {
+      total_time = TARGET_FRAME_TIME
+    }
+    while (total_time >= TARGET_FRAME_TIME) {
+      update()
+      render()
+      total_time -= TARGET_FRAME_TIME
+    }
+    window.requestAnimationFrame(main_loop)
   }
-  dt = timestamp - prev_timestamp
-  prev_timestamp = timestamp
-  update()
-  render()
-  window.requestAnimationFrame(main_loop)
 }
 
