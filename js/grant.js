@@ -45,6 +45,34 @@ let tower_is_hovered = false
 let tower_is_selected = false
 
 /****************************
+ * table
+ ***************************/
+
+const table_translation = create_translation_matrix(new Float32Array(16), -0,0,0)
+const table_inverse_translation = create_translation_matrix(new Float32Array(16), 0,-0,-0)
+
+const table_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
+const table_inverse_rotation = new Float32Array(16)
+
+const table_model_world_matrix = new Float32Array(16)
+const table_world_model_matrix = new Float32Array(16)
+const table_world_model_transpose_matrix = new Float32Array(16)
+
+const table_model_view_matrix = new Float32Array(16)
+
+
+const table_pick_ray = new Float32Array(3)
+const table_camera_position = new Float32Array(4)
+const table_half_width = 1.12
+const table_half_height = 1.804
+const table_half_depth = 1.12
+const table_inv_ray = new Float32Array(3)
+let table_light = 0.0
+let table_light_target = table_light
+let table_is_hovered = false
+let table_is_selected = false
+
+/****************************
  * sky
  ***************************/
 
@@ -285,6 +313,7 @@ function update () {
   update_pick()
   update_welcometext()
   update_tower()
+  update_table()
   update_sky()
   update_screen()
   
@@ -438,6 +467,25 @@ function update_tower () {
   matrix_transpose_4(tower_world_model_transpose_matrix, tower_world_model_matrix)
 }
 
+function update_table () {
+  if (table_is_selected) {
+    table_light_target = 1.0
+  }
+  else if (table_is_hovered) {
+    table_light_target = 0.5
+  }
+  else {
+    table_light_target = 0.0
+  }
+  table_light += (table_light_target - table_light)*0.1
+
+
+  matrix_mult_4(table_model_world_matrix, table_translation, table_rotation)
+  matrix_mult_4(table_model_view_matrix, camera_world_view_matrix, table_model_world_matrix)
+  matrix_transpose_4(table_inverse_rotation, table_rotation)
+  matrix_mult_4(table_world_model_matrix, table_inverse_rotation, table_inverse_translation)
+  matrix_transpose_4(table_world_model_transpose_matrix, table_world_model_matrix)
+}
 
 function update_sky () {
   matrix_mult_4(sky_model_world_matrix, sky_translation, sky_rotation)
@@ -492,6 +540,7 @@ const asset_urls = {
   screen_obj: '/obj/screen.obj',
   welcometext_obj: '/obj/words.obj',
   tower_obj: '/obj/tower.obj',
+  table_obj: '/obj/table.obj',
   sky_obj: '/obj/sky.obj',
   skybox_vertex: '/shaders/skybox.vert',
   skybox_fragment: '/shaders/skybox.frag',
@@ -548,6 +597,7 @@ function main () {
 
 
   model_buffers.tower = load_obj(gl, assets.tower_obj)
+  model_buffers.table = load_obj(gl, assets.table_obj)
 
   model_buffers.sky = load_obj(gl, assets.sky_obj)
   model_buffers.sky.texture_id = 2

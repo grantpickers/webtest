@@ -4,6 +4,7 @@ function render () {
   render_screen()
   render_welcometext()
   render_tower()
+  render_table()
   render_sky()
 }
 
@@ -113,6 +114,25 @@ function render_tower () {
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.tower.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.tower.num_indices, gl.UNSIGNED_SHORT, 0)
+}
+
+function render_table () {
+  gl.useProgram(plain_shader_program)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.vertices)
+  gl.enableVertexAttribArray(plain_a_pos)
+  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.normals)
+  gl.enableVertexAttribArray(plain_a_normal)
+  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, table_model_view_matrix)
+  gl.uniformMatrix4fv(plain_u_world_model_transpose_matrix, false, table_world_model_transpose_matrix)
+  gl.uniform1f(plain_u_light, table_light)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
 function render_sky () {
