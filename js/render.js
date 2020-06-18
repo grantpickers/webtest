@@ -2,9 +2,7 @@ function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
   render_screen()
-  //render_cube()
-  render_sphere()
-  //render_monkey()
+  render_welcometext()
   render_tower()
   render_sky()
 }
@@ -78,75 +76,30 @@ function render_screen () {
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
-function render_cube () {
-  gl.useProgram(basic_shader_program)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.vertices)
-  gl.enableVertexAttribArray(basic_a_pos)
-  gl.vertexAttribPointer(basic_a_pos, 3, gl.FLOAT, false, 0, 0)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.normals)
-  gl.enableVertexAttribArray(basic_a_normal)
-  gl.vertexAttribPointer(basic_a_normal, 3, gl.FLOAT, false, 0, 0)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.cube.uvs)
-  gl.vertexAttribPointer(basic_a_uv, 2, gl.FLOAT, false, 0, 0)
-  gl.enableVertexAttribArray(basic_a_uv)
-
-  gl.activeTexture(gl.TEXTURE0 + model_buffers.cube.texture_id)
-  gl.uniform1i(basic_u_sampler, model_buffers.cube.texture_id)
-
-  gl.uniformMatrix4fv(basic_u_model_view_matrix, false, cube_model_view_matrix)
-  gl.uniformMatrix4fv(basic_u_world_model_transpose_matrix, false, cube_world_model_transpose_matrix)
-  gl.uniform1f(basic_u_light, cube_light)
-
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.cube.indices)
-  gl.drawElements(gl.TRIANGLES, model_buffers.cube.num_indices, gl.UNSIGNED_SHORT, 0)
-}
-
-function render_sphere () {
+function render_welcometext () {
   gl.useProgram(envmap_shader_program)
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sphere.vertices)
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.welcometext.vertices)
   gl.enableVertexAttribArray(envmap_a_pos)
   gl.vertexAttribPointer(envmap_a_pos, 3, gl.FLOAT, false, 0, 0)
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sphere.normals)
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.welcometext.normals)
   gl.enableVertexAttribArray(envmap_a_normal)
   gl.vertexAttribPointer(envmap_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, sphere_model_view_matrix)
+  gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, welcometext_model_view_matrix)
 
-  gl.activeTexture(gl.TEXTURE0 + model_buffers.sphere.texture_id)
-  gl.uniform1i(envmap_u_sampler, model_buffers.sphere.texture_id)
+  gl.activeTexture(gl.TEXTURE0 + model_buffers.welcometext.texture_id)
+  gl.uniform1i(envmap_u_sampler, model_buffers.welcometext.texture_id)
 
   gl.uniform4fv(envmap_u_camera_position, camera_position)
 
-  gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, sphere_model_view_matrix)
-  gl.uniformMatrix4fv(envmap_u_model_world_matrix, false, sphere_model_world_matrix)
-  gl.uniformMatrix4fv(envmap_u_world_model_transpose_matrix, false, sphere_world_model_transpose_matrix)
+  gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, welcometext_model_view_matrix)
+  gl.uniformMatrix4fv(envmap_u_model_world_matrix, false, welcometext_model_world_matrix)
+  gl.uniformMatrix4fv(envmap_u_world_model_transpose_matrix, false, welcometext_world_model_transpose_matrix)
 
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sphere.indices)
-  gl.drawElements(gl.TRIANGLES, model_buffers.sphere.num_indices, gl.UNSIGNED_SHORT, 0)
-}
-
-function render_monkey () {
-  gl.useProgram(plain_shader_program)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.monkey.vertices)
-  gl.enableVertexAttribArray(plain_a_pos)
-  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.monkey.normals)
-  gl.enableVertexAttribArray(plain_a_normal)
-  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
-
-  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, monkey_model_view_matrix)
-  gl.uniformMatrix4fv(plain_u_world_model_transpose_matrix, false, monkey_world_model_transpose_matrix)
-  gl.uniform1f(plain_u_light, monkey_light)
-
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.monkey.indices)
-  gl.drawElements(gl.TRIANGLES, model_buffers.monkey.num_indices, gl.UNSIGNED_SHORT, 0)
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.welcometext.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.welcometext.num_indices, gl.UNSIGNED_SHORT, 0)
 }
 
 function render_tower () {

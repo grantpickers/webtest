@@ -1,48 +1,20 @@
 /****************************
- * Sphere
+ * welcometext
  ***************************/
 
-const sphere_translation = create_translation_matrix(new Float32Array(16), -15,8,-10)
-const sphere_inverse_translation = create_translation_matrix(new Float32Array(16), 15,-8,10)
+const welcometext_translation = create_translation_matrix(new Float32Array(16), -15,8,-10)
+const welcometext_inverse_translation = create_translation_matrix(new Float32Array(16), 15,-8,10)
 
-const sphere_rotation = create_y_rotation_matrix(new Float32Array(16), Math.PI/2 - 1*Math.PI/7)
-const sphere_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
-const sphere_inverse_rotation = new Float32Array(16)
+const welcometext_rotation = create_y_rotation_matrix(new Float32Array(16), Math.PI/2 - 1*Math.PI/7)
+const welcometext_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
+const welcometext_inverse_rotation = new Float32Array(16)
 
-const sphere_model_world_matrix = new Float32Array(16)
-const sphere_world_model_matrix = new Float32Array(16)
-const sphere_world_model_transpose_matrix = new Float32Array(16)
+const welcometext_model_world_matrix = new Float32Array(16)
+const welcometext_world_model_matrix = new Float32Array(16)
+const welcometext_world_model_transpose_matrix = new Float32Array(16)
 
-const sphere_model_view_matrix = new Float32Array(16)
+const welcometext_model_view_matrix = new Float32Array(16)
 
-
-/****************************
- * Monkey
- ***************************/
-
-const monkey_translation = create_translation_matrix(new Float32Array(16), -2,0,-5)
-const monkey_inverse_translation = create_translation_matrix(new Float32Array(16), 2,0,5)
-
-const monkey_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
-const monkey_inverse_rotation = new Float32Array(16)
-
-const monkey_model_world_matrix = new Float32Array(16)
-const monkey_world_model_matrix = new Float32Array(16)
-const monkey_world_model_transpose_matrix = new Float32Array(16)
-
-const monkey_model_view_matrix = new Float32Array(16)
-
-
-const monkey_pick_ray = new Float32Array(3)
-const monkey_camera_position = new Float32Array(4)
-const monkey_half_width = 0.684
-const monkey_half_height = 0.426
-const monkey_half_depth = 0.492
-const monkey_inv_ray = new Float32Array(3)
-let monkey_light = 0.0
-let monkey_light_target = monkey_light
-let monkey_is_hovered = false
-let monkey_is_selected = false
 
 /****************************
  * Tower
@@ -93,34 +65,6 @@ const sky_half_width = 0.56
 const sky_half_height = 0.908
 const sky_half_depth = 0.56
 const sky_inv_ray = new Float32Array(3)
-
-/****************************
- * Cube
- * This is an example object that should be replaced.
- * It demonstrates how to set up data for a 3d object that can move, rotate, and be clicked
- ***************************/
-
-const cube_translation = create_translation_matrix(new Float32Array(16), 2,0,-3)
-const cube_inverse_translation = create_translation_matrix(new Float32Array(16), -2,0,3)
-
-const cube_rotation = matrix_mult_4(new Float32Array(16), matrix_mult_4(new Float32Array(16), create_z_rotation_matrix(new Float32Array(16), 1), create_y_rotation_matrix(new Float32Array(16), 3)), create_x_rotation_matrix(new Float32Array(16), 1))
-const cube_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
-const cube_inverse_rotation = new Float32Array(16)
-
-const cube_model_world_matrix = new Float32Array(16)
-const cube_world_model_matrix = new Float32Array(16)
-const cube_world_model_transpose_matrix = new Float32Array(16)
-
-const cube_model_view_matrix = new Float32Array(16)
-
-const cube_pick_ray = new Float32Array(3)
-const cube_camera_position = new Float32Array(4)
-const cube_half_width = 0.25
-const cube_inv_ray = new Float32Array(3)
-let cube_light = 0.0
-let cube_light_target = cube_light
-let cube_is_hovered = false
-let cube_is_selected = false
 
 
 /****************************
@@ -345,10 +289,8 @@ function update () {
   if (has_resized) { handle_resize() }
   update_camera()
   update_pick()
-  update_monkey()
-  update_sphere()
+  update_welcometext()
   update_tower()
-  update_cube()
   update_sky()
   update_screen()
   
@@ -440,26 +382,6 @@ function update_pick () {
   matrix_operate_4(pick_ray, camera_view_world_matrix, pick_ray)
 
 
-  // Monkey pick
-
-  matrix_operate_4(monkey_pick_ray, monkey_world_model_matrix, pick_ray)
-  matrix_operate_4(monkey_camera_position, monkey_world_model_matrix, camera_position)
-
-  monkey_inv_ray[0] = 1/monkey_pick_ray[0]
-  monkey_inv_ray[1] = 1/monkey_pick_ray[1]
-  monkey_inv_ray[2] = 1/monkey_pick_ray[2]
-  if (ray_box_collide(monkey_half_width, monkey_half_height, monkey_half_depth, monkey_camera_position, monkey_inv_ray)) {
-    monkey_is_hovered = true
-    if (has_clicked) {
-      monkey_is_selected = true
-      cube_is_selected = false
-      tower_is_selected = false
-    }
-  }
-  else {
-    monkey_is_hovered = false
-  }
-
   // tower pick
 
   matrix_operate_4(tower_pick_ray, tower_world_model_matrix, pick_ray)
@@ -472,32 +394,10 @@ function update_pick () {
     tower_is_hovered = true
     if (has_clicked) {
       tower_is_selected = true
-      cube_is_selected = false
-      monkey_is_selected = false
     }
   }
   else {
     tower_is_hovered = false
-  }
-
-  // Cube pick
-
-  matrix_operate_4(cube_pick_ray, cube_world_model_matrix, pick_ray)
-  matrix_operate_4(cube_camera_position, cube_world_model_matrix, camera_position)
-
-  cube_inv_ray[0] = 1/cube_pick_ray[0]
-  cube_inv_ray[1] = 1/cube_pick_ray[1]
-  cube_inv_ray[2] = 1/cube_pick_ray[2]
-  if (ray_box_collide(cube_half_width, cube_half_width, cube_half_width, cube_camera_position, cube_inv_ray)) {
-    cube_is_hovered = true
-    if (has_clicked) {
-      cube_is_selected = true
-      monkey_is_selected = false
-      tower_is_selected = false
-    }
-  }
-  else {
-    cube_is_hovered = false
   }
 
 
@@ -513,36 +413,16 @@ function update_pick () {
   }
 }
 
-function update_sphere () {
-  matrix_mult_4(sphere_model_world_matrix, sphere_translation, sphere_rotation)
+function update_welcometext () {
+  matrix_mult_4(welcometext_model_world_matrix, welcometext_translation, welcometext_rotation)
 
-  matrix_mult_4(sphere_model_view_matrix, camera_world_view_matrix, sphere_model_world_matrix)
+  matrix_mult_4(welcometext_model_view_matrix, camera_world_view_matrix, welcometext_model_world_matrix)
 
-  matrix_transpose_4(sphere_inverse_rotation, sphere_rotation)
-  matrix_mult_4(sphere_world_model_matrix, sphere_inverse_rotation, sphere_inverse_translation)
-  matrix_transpose_4(sphere_world_model_transpose_matrix, sphere_world_model_matrix)
+  matrix_transpose_4(welcometext_inverse_rotation, welcometext_rotation)
+  matrix_mult_4(welcometext_world_model_matrix, welcometext_inverse_rotation, welcometext_inverse_translation)
+  matrix_transpose_4(welcometext_world_model_transpose_matrix, welcometext_world_model_matrix)
 }
 
-function update_monkey () {
-  if (monkey_is_selected) {
-    monkey_light_target = 1.0
-  }
-  else if (monkey_is_hovered) {
-    monkey_light_target = 0.5
-  }
-  else {
-    monkey_light_target = 0.0
-  }
-  monkey_light += (monkey_light_target - monkey_light)*0.1
-
-  create_y_rotation_matrix(monkey_rotation, prev_timestamp*0.0005)
-
-  matrix_mult_4(monkey_model_world_matrix, monkey_translation, monkey_rotation)
-  matrix_mult_4(monkey_model_view_matrix, camera_world_view_matrix, monkey_model_world_matrix)
-  matrix_transpose_4(monkey_inverse_rotation, monkey_rotation)
-  matrix_mult_4(monkey_world_model_matrix, monkey_inverse_rotation, monkey_inverse_translation)
-  matrix_transpose_4(monkey_world_model_transpose_matrix, monkey_world_model_matrix)
-}
 
 function update_tower () {
   if (tower_is_selected) {
@@ -571,27 +451,6 @@ function update_sky () {
   matrix_transpose_4(sky_inverse_rotation, sky_rotation)
 }
 
-function update_cube () {
-  if (cube_is_selected) {
-    cube_light_target = 1.0
-  }
-  else if (cube_is_hovered) {
-    cube_light_target = 0.5
-  }
-  else {
-    cube_light_target = 0.0
-  }
-  cube_light += (cube_light_target - cube_light)*0.1
-
-  create_y_rotation_matrix(cube_rotation_rate, dt*0.0005)
-  matrix_mult_4(cube_rotation, cube_rotation_rate, cube_rotation)
-
-  matrix_mult_4(cube_model_world_matrix, cube_translation, cube_rotation)
-  matrix_mult_4(cube_model_view_matrix, camera_world_view_matrix, cube_model_world_matrix)
-  matrix_transpose_4(cube_inverse_rotation, cube_rotation)
-  matrix_mult_4(cube_world_model_matrix, cube_inverse_rotation, cube_inverse_translation)
-  matrix_transpose_4(cube_world_model_transpose_matrix, cube_world_model_matrix)
-}
 
 function update_screen () {
   const previous_page = current_page
@@ -637,9 +496,7 @@ function update_screen () {
 
 const asset_urls = {
   screen_obj: '/obj/screen.obj',
-  cube_obj: '/obj/cube.obj',
-  sphere_obj: '/obj/words.obj',
-  monkey_obj: '/obj/monkey.obj',
+  welcometext_obj: '/obj/words.obj',
   tower_obj: '/obj/tower.obj',
   sky_obj: '/obj/sky.obj',
   skybox_vertex: '/shaders/skybox.vert',
@@ -655,7 +512,6 @@ const asset_urls = {
 }
 const image_urls = {
   theloop_png: '/img/theloop.png',
-  cube_tex_png: '/img/cube_tex.png',
   sky_png: '/img/sky.png',
   sky_px_png: '/img/px.png',
   sky_nx_png: '/img/nx.png',
@@ -684,18 +540,9 @@ function main () {
   model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
 
 
-  model_buffers.cube = load_obj(gl, assets.cube_obj)
-  model_buffers.cube.texture_id = 1
-  model_buffers.cube.texture = load_texture(gl, images.cube_tex_png, model_buffers.cube.texture_id)
-
-  gl.useProgram(basic_shader_program)
-  gl.activeTexture(gl.TEXTURE0 + model_buffers.cube.texture_id)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.cube_tex_png)
-
-
-  model_buffers.sphere = load_obj(gl, assets.sphere_obj)
-  model_buffers.sphere.texture_id = 3
-  model_buffers.sphere.texture = load_texture_cube(
+  model_buffers.welcometext = load_obj(gl, assets.welcometext_obj)
+  model_buffers.welcometext.texture_id = 3
+  model_buffers.welcometext.texture = load_texture_cube(
     gl,
     images.sky_px_png,
     images.sky_nx_png,
@@ -703,10 +550,9 @@ function main () {
     images.sky_ny_png,
     images.sky_pz_png,
     images.sky_nz_png,
-    model_buffers.sphere.texture_id
+    model_buffers.welcometext.texture_id
   )
 
-  model_buffers.monkey = load_obj(gl, assets.monkey_obj)
 
   model_buffers.tower = load_obj(gl, assets.tower_obj)
 
