@@ -13,20 +13,35 @@ function render_screen () {
   screen_ctx.fillStyle = "#3a6fa6"
   screen_ctx.fillRect(0, 0, screen_canvas.width, screen_canvas.height)
 
-  screen_ctx.font = "500 25px 'Helvetica Neue'"
+  screen_ctx.font = "400 25px 'Helvetica Neue'"
   for (let i=0; i<screen_folders.length; i++) {
-    const b = screen_folders[i]
+    const folder = screen_folders[i]
+
+
+    // Render icon
+    screen_ctx.drawImage(images.folder_png, folder.x, folder.y, 2*48, 2*43)
+    screen_ctx.globalCompositeOperation = "source-over"
+
     screen_ctx.textAlign = "center"
 
-    screen_ctx.strokeStyle = '#000'
-    screen_ctx.lineWidth = 3
-    screen_ctx.strokeText(b.txt, b.x + 0.5*b.w, b.y + b.h)
+    if (folder == screen_selected_folder) {
+      // Render selection
+      screen_ctx.fillStyle = "#000080"
+      const w = folder.txt.length * 25
+      screen_ctx.fillRect(folder.x + (folder.w - w)*0.5, folder.y + folder.h - 25 + 5, w, 31)
+
+      screen_ctx.fillStyle = "#3a6fa644"
+      screen_ctx.fillRect(folder.x, folder.y, folder.w, folder.h - 25 + 5);
+    } else {
+      // Render text shadow
+      screen_ctx.strokeStyle = '#000'
+      screen_ctx.lineWidth = 3
+      screen_ctx.strokeText(folder.txt, folder.x + 0.5*folder.w, folder.y + folder.h + 5)
+    }
 
     screen_ctx.shadowBlur = 0;
     screen_ctx.fillStyle = "#fff"
-    screen_ctx.fillText(b.txt, b.x + 0.5*b.w, b.y + b.h)
-
-    screen_ctx.drawImage(images.folder_png, b.x, b.y, 2*48, 2*43)
+    screen_ctx.fillText(folder.txt, folder.x + 0.5*folder.w, folder.y + folder.h + 5)
   }
 
   // GL

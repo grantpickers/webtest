@@ -154,6 +154,7 @@ const screen_folders = [
     h: 110,
   }
 ]
+let screen_selected_folder = null
 
 
 /****************************
@@ -495,24 +496,32 @@ function update_screen () {
   const screen_mouse_x = screen_pick_p[0]
   const screen_mouse_y = screen_pick_p[1]
   if (screen_mouse_x > 0 && screen_mouse_y > 0 && screen_mouse_x < screen_pixel_width && screen_mouse_y < screen_pixel_height) {
-    let should_pan_to_screen = true
+    let has_clicked_desktop = has_clicked
     for (let i=0; i<screen_folders.length; i++) {
-      const b = screen_folders[i]
-      const is_hovered = screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h
+      const folder = screen_folders[i]
+      const is_hovered = screen_mouse_x > folder.x && screen_mouse_y > folder.y && screen_mouse_x < folder.x+folder.w && screen_mouse_y < folder.y+folder.h
       if (is_hovered) {
         if (has_clicked) {
-          should_pan_to_screen = false
-          if (b.txt == '3d') {
-            camera_ry_target = Math.PI/2 - 1*Math.PI/7
-            camera_tx_target = 4.4*Math.sin(camera_ry_target)
-            camera_ty_target = 0
-            camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
-            camera_animation_tween = 0
+          has_clicked_desktop = false
+          if (!folder.last_click_time || prev_timestamp - folder.last_click_time > 500) {
+            folder.last_click_time = prev_timestamp
+            screen_selected_folder = folder
+          }
+          else {
+            // Double clicked
+            if (folder.txt == '3d') {
+              camera_ry_target = Math.PI/2 - 1*Math.PI/7
+              camera_tx_target = 4.4*Math.sin(camera_ry_target)
+              camera_ty_target = 0
+              camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
+              camera_animation_tween = 0
+            }
           }
         }
       }
     }
-    if (should_pan_to_screen && has_clicked) {
+    if (has_clicked_desktop) {
+      screen_selected_folder = null
       camera_ry_target = Math.PI/2
       camera_tx_target = 0.78
       camera_ty_target = 0.020
