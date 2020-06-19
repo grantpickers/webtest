@@ -143,10 +143,10 @@ const screen_display_inverse_scale = new Float32Array([
 ])
 
 const screen_desktop_items = [
-  { x: 150, y: 100, w: 100, h: 110, txt: 'Painting'},
-  { x: 380, y: 100, w: 100, h: 110, txt: '3d'},
-  { x: 610, y: 100, w: 100, h: 110, txt: 'Animation'},
-  { x: 840, y: 100, w: 100, h: 110, txt: 'Illustration'},
+  { x: 150, y: 100, w: 70, h: 70, txt: 'Painting'},
+  { x: 150+180*1, y: 100, w: 70, h: 70, txt: '3d'},
+  { x: 150+180*2, y: 100, w: 70, h: 70, txt: 'Animation'},
+  { x: 150+180*3, y: 100, w: 70, h: 70, txt: 'Illustration'},
 ]
 let screen_selected_desktop_item = null
 
@@ -498,6 +498,9 @@ function update_screen () {
               camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
               camera_animation_tween = 0
             }
+            else if (desktop_item.txt == 'Animation') {
+              console.log('hello')
+            }
           }
         }
       }
@@ -550,6 +553,14 @@ const image_urls = {
   sky_pz_png: '/img/pz.png',
   sky_nz_png: '/img/nx.png',
   folder_png: '/img/folder.png',
+  window_frame_t_l_png: '/img/window_frame_t_l.png',
+  window_frame_t_r_png: '/img/window_frame_t_r.png',
+  window_frame_b_l_png: '/img/window_frame_b_l.png',
+  window_frame_b_r_png: '/img/window_frame_b_r.png',
+  window_frame_t_png: '/img/window_frame_t.png',
+  window_frame_r_png: '/img/window_frame_r.png',
+  window_frame_b_png: '/img/window_frame_b.png',
+  window_frame_l_png: '/img/window_frame_l.png',
 }
 
 const model_buffers = {}

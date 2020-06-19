@@ -13,36 +13,49 @@ function render_screen () {
   screen_ctx.fillStyle = "#3a6fa6"
   screen_ctx.fillRect(0, 0, screen_canvas.width, screen_canvas.height)
 
-  screen_ctx.font = "400 25px 'Helvetica Neue'"
+  screen_ctx.font = "400 15px 'Helvetica Neue'"
   for (let i=0; i<screen_desktop_items.length; i++) {
     const desktop_item = screen_desktop_items[i]
 
-
     // Render icon
-    screen_ctx.drawImage(images.folder_png, desktop_item.x, desktop_item.y, 2*48, 2*43)
-    screen_ctx.globalCompositeOperation = "source-over"
+    screen_ctx.drawImage(images.folder_png, desktop_item.x + desktop_item.w*0.5 - 25, desktop_item.y, 48, 43)
 
     screen_ctx.textAlign = "center"
 
     if (desktop_item == screen_selected_desktop_item) {
       // Render selection
       screen_ctx.fillStyle = "#000080"
-      const w = 13 + desktop_item.txt.length * 12
-      screen_ctx.fillRect(desktop_item.x + (desktop_item.w - w)*0.5, desktop_item.y + desktop_item.h - 25 + 5, w, 31)
+      const w = 8 + desktop_item.txt.length * 7
+      screen_ctx.fillRect(desktop_item.x + (desktop_item.w - w)*0.5, desktop_item.y + desktop_item.h - 25+5, w, 26)
 
       screen_ctx.fillStyle = "#3a6fa644"
-      screen_ctx.fillRect(desktop_item.x, desktop_item.y, desktop_item.w, desktop_item.h - 25 + 5);
+      screen_ctx.fillRect(desktop_item.x, desktop_item.y, desktop_item.w, desktop_item.h - 25);
     } else {
       // Render text shadow
       screen_ctx.strokeStyle = 'rgba(0,0,0,0.4)'
       screen_ctx.lineWidth = 3
-      screen_ctx.strokeText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h + 5)
+      screen_ctx.strokeText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h)
     }
 
     screen_ctx.shadowBlur = 0;
     screen_ctx.fillStyle = "#fff"
-    screen_ctx.fillText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h + 5)
+    screen_ctx.fillText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h)
   }
+
+  const win_x = 200
+  const win_y = 250
+  const win_w = 1200
+  const win_h = 700
+  screen_ctx.fillStyle = '#fff'
+  screen_ctx.fillRect(win_x, win_y, win_w, win_h)
+  screen_ctx.drawImage(images.window_frame_t_l_png, win_x, win_y, 5, 30)
+  screen_ctx.drawImage(images.window_frame_t_r_png, win_x+win_w-26, win_y, 26, 30)
+  screen_ctx.drawImage(images.window_frame_b_l_png, win_x, win_y+win_h-5, 5, 5)
+  screen_ctx.drawImage(images.window_frame_b_r_png, win_x+win_w-5, win_y+win_h-5, 5, 5)
+  screen_ctx.drawImage(images.window_frame_t_png, win_x+5, win_y, win_w-26-5, 30)
+  screen_ctx.drawImage(images.window_frame_r_png, win_x+win_w-5, win_y+30, 5, win_h-30-5)
+  screen_ctx.drawImage(images.window_frame_b_png, win_x+5, win_y+win_h-5, win_w-10, 5)
+  screen_ctx.drawImage(images.window_frame_l_png, win_x, win_y+30, 5, win_h-30-5)
 
   // GL
 
