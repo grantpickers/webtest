@@ -68,9 +68,6 @@ const table_half_height = 1.804
 const table_half_depth = 1.12
 const table_inv_ray = new Float32Array(3)
 let table_light = 0.0
-let table_light_target = table_light
-let table_is_hovered = false
-let table_is_selected = false
 
 /****************************
  * sky
@@ -463,18 +460,6 @@ function update_tower () {
 }
 
 function update_table () {
-  if (table_is_selected) {
-    table_light_target = 1.0
-  }
-  else if (table_is_hovered) {
-    table_light_target = 0.5
-  }
-  else {
-    table_light_target = 0.0
-  }
-  table_light += (table_light_target - table_light)*0.1
-
-
   matrix_mult_4(table_model_world_matrix, table_translation, table_rotation)
   matrix_mult_4(table_model_view_matrix, camera_world_view_matrix, table_model_world_matrix)
   matrix_transpose_4(table_inverse_rotation, table_rotation)
