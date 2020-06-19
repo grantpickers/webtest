@@ -145,13 +145,13 @@ const screen_display_inverse_scale = new Float32Array([
   0, 0, 0, 1,
 ])
 
-const screen_folders = [
+const screen_desktop_items = [
   { x: 150, y: 100, w: 100, h: 110, txt: 'Painting'},
   { x: 380, y: 100, w: 100, h: 110, txt: '3d'},
   { x: 610, y: 100, w: 100, h: 110, txt: 'Animation'},
   { x: 840, y: 100, w: 100, h: 110, txt: 'Illustration'},
 ]
-let screen_selected_folder = null
+let screen_selected_desktop_item = null
 
 
 /****************************
@@ -494,19 +494,19 @@ function update_screen () {
   const screen_mouse_y = screen_pick_p[1]
   if (screen_mouse_x > 0 && screen_mouse_y > 0 && screen_mouse_x < screen_pixel_width && screen_mouse_y < screen_pixel_height) {
     let has_clicked_desktop = has_clicked
-    for (let i=0; i<screen_folders.length; i++) {
-      const folder = screen_folders[i]
-      const is_hovered = screen_mouse_x > folder.x && screen_mouse_y > folder.y && screen_mouse_x < folder.x+folder.w && screen_mouse_y < folder.y+folder.h
+    for (let i=0; i<screen_desktop_items.length; i++) {
+      const desktop_item = screen_desktop_items[i]
+      const is_hovered = screen_mouse_x > desktop_item.x && screen_mouse_y > desktop_item.y && screen_mouse_x < desktop_item.x+desktop_item.w && screen_mouse_y < desktop_item.y+desktop_item.h
       if (is_hovered) {
         if (has_clicked) {
           has_clicked_desktop = false
-          if (!folder.last_click_time || prev_timestamp - folder.last_click_time > 500) {
-            folder.last_click_time = prev_timestamp
-            screen_selected_folder = folder
+          if (!desktop_item.last_click_time || prev_timestamp - desktop_item.last_click_time > 500) {
+            desktop_item.last_click_time = prev_timestamp
+            screen_selected_desktop_item = desktop_item
           }
           else {
             // Double clicked
-            if (folder.txt == '3d') {
+            if (desktop_item.txt == '3d') {
               camera_ry_target = Math.PI/2 - 1*Math.PI/7
               camera_tx_target = 4.4*Math.sin(camera_ry_target)
               camera_ty_target = 0
@@ -518,7 +518,7 @@ function update_screen () {
       }
     }
     if (has_clicked_desktop) {
-      screen_selected_folder = null
+      screen_selected_desktop_item = null
       camera_ry_target = Math.PI/2
       camera_tx_target = 0.78
       camera_ty_target = 0.020
