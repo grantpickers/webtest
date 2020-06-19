@@ -146,13 +146,10 @@ const screen_display_inverse_scale = new Float32Array([
 ])
 
 const screen_folders = [
-  {
-    txt: '3d',
-    x: 150,
-    y: 100,
-    w: 100,
-    h: 110,
-  }
+  { x: 150, y: 100, w: 100, h: 110, txt: 'Painting'},
+  { x: 380, y: 100, w: 100, h: 110, txt: '3d'},
+  { x: 610, y: 100, w: 100, h: 110, txt: 'Animation'},
+  { x: 840, y: 100, w: 100, h: 110, txt: 'Illustration'},
 ]
 let screen_selected_folder = null
 

@@ -27,14 +27,14 @@ function render_screen () {
     if (folder == screen_selected_folder) {
       // Render selection
       screen_ctx.fillStyle = "#000080"
-      const w = folder.txt.length * 25
+      const w = 13 + folder.txt.length * 12
       screen_ctx.fillRect(folder.x + (folder.w - w)*0.5, folder.y + folder.h - 25 + 5, w, 31)
 
       screen_ctx.fillStyle = "#3a6fa644"
       screen_ctx.fillRect(folder.x, folder.y, folder.w, folder.h - 25 + 5);
     } else {
       // Render text shadow
-      screen_ctx.strokeStyle = '#000'
+      screen_ctx.strokeStyle = 'rgba(0,0,0,0.4)'
       screen_ctx.lineWidth = 3
       screen_ctx.strokeText(folder.txt, folder.x + 0.5*folder.w, folder.y + folder.h + 5)
     }
