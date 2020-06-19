@@ -10,39 +10,24 @@ function render () {
 
 function render_screen () {
   screen_ctx.clearRect(0, 0, screen_canvas.width, screen_canvas.height)
-  screen_ctx.fillStyle = "#fff"
+  screen_ctx.fillStyle = "#3a6fa6"
   screen_ctx.fillRect(0, 0, screen_canvas.width, screen_canvas.height)
 
-  screen_ctx.font = "bold 20px 'Helvetica Neue'"
+  screen_ctx.font = "500 25px 'Helvetica Neue'"
   for (let i=0; i<screen_folders.length; i++) {
     const b = screen_folders[i]
-    let bg, fg
-    if (b.page == current_page) {
-      bg = button_active_bg
-      fg = button_active_fg
-    }
-    else if (b.is_hovered) {
-      bg = button_hover_bg
-      fg = button_hover_fg
-    }
-    else {
-      bg = button_bg
-      fg = button_fg
-    }
+    screen_ctx.textAlign = "center"
 
-    screen_ctx.fillStyle = bg
-    screen_ctx.fillRect(b.x,b.y,b.w,b.h)
+    screen_ctx.strokeStyle = '#000'
+    screen_ctx.lineWidth = 3
+    screen_ctx.strokeText(b.txt, b.x + 0.5*b.w, b.y + b.h)
 
-    screen_ctx.fillStyle = fg
-    screen_ctx.fillText(b.txt, b.x+20, b.y+80)
+    screen_ctx.shadowBlur = 0;
+    screen_ctx.fillStyle = "#fff"
+    screen_ctx.fillText(b.txt, b.x + 0.5*b.w, b.y + b.h)
+
+    screen_ctx.drawImage(images.folder_png, b.x, b.y, 2*48, 2*43)
   }
-
-  screen_ctx.fillStyle = '#222'
-  screen_ctx.font = "100 20px Helvetica Neue"
-  for (let i=0; i<current_page.length; i++) {
-    screen_ctx.fillText(current_page[i], 700, 280+30*i)
-  }
-
 
   // GL
 

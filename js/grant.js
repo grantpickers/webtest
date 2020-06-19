@@ -128,6 +128,7 @@ const screen_model_view_matrix = new Float32Array(16)
 const screen_canvas = document.createElement('canvas')
 screen_canvas.width = screen_pixel_width
 screen_canvas.height = screen_pixel_height
+
 const screen_ctx = screen_canvas.getContext('2d')
 const screen_n = cross3(new Float32Array(3), sub3([], screen_bot_right, screen_bot_left), sub3([], screen_top_left, screen_bot_left))
 const screen_display_inverse_rotation = matrix_mult_4(new Float32Array(16), ROTATION_X_PI, ROTATION_Y_HALF_PI)
@@ -143,37 +144,16 @@ const screen_display_inverse_scale = new Float32Array([
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-const screen_pages = {
-  works: [
-    "Aenean commodo ligula eget dolor.",
-    "Cum sociis natoque penatibus et magnis dis.",
-  ],
-  about: [
-    'grant.gl',
-    '',
-    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.",
-    "Aenean commodo ligula eget dolor.",
-    "Aenean massa.",
-    "Cum sociis natoque penatibus et magnis dis.",
-  ],
-  contact: [
-    "Aenean commodo ligula eget dolor.",
-    "Aenean massa.",
-  ],
-}
-const screen_folders = [
-  { x: 150, y: 100, w: 500, h: 100, txt: "3d",       page: screen_pages.works, },
-  { x: 150, y: 240, w: 500, h: 100, txt: "ABOUT",    page: screen_pages.about, },
-  { x: 150, y: 380, w: 500, h: 100, txt: "CONTACT",  page: screen_pages.contact, },
-]
-const button_bg = '#eee'
-const button_fg = '#00f'
-const button_hover_bg = '#aaa'
-const button_hover_fg = '#00f'
-const button_active_bg = '#000'
-const button_active_fg = '#fff'
-let current_page = screen_pages.about
 
+const screen_folders = [
+  {
+    txt: '3d',
+    x: 150,
+    y: 100,
+    w: 100,
+    h: 110,
+  }
+]
 
 
 /****************************
@@ -512,32 +492,32 @@ function update_sky () {
 
 
 function update_screen () {
-  const previous_page = current_page
-
   const screen_mouse_x = screen_pick_p[0]
   const screen_mouse_y = screen_pick_p[1]
-  for (let i=0; i<screen_folders.length; i++) {
-    const b = screen_folders[i]
-    const is_hovered = screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h
-    b.is_hovered = is_hovered
-    if (is_hovered && has_clicked) {
-      current_page = b.page
-      if (current_page !== previous_page) {
-        if (current_page == screen_pages.works) {
-          camera_ry_target = Math.PI/2 - 1*Math.PI/7
-          camera_tx_target = 4.4*Math.sin(camera_ry_target)
-          camera_ty_target = 0
-          camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
-          camera_animation_tween = 0
-        }
-        if (current_page == screen_pages.about || current_page == screen_pages.contact) {
-          camera_ry_target = Math.PI/2
-          camera_tx_target = 0.78
-          camera_ty_target = 0.020
-          camera_tz_target = -0.004
-          camera_animation_tween = 0
+  if (screen_mouse_x > 0 && screen_mouse_y > 0 && screen_mouse_x < screen_pixel_width && screen_mouse_y < screen_pixel_height) {
+    let should_pan_to_screen = true
+    for (let i=0; i<screen_folders.length; i++) {
+      const b = screen_folders[i]
+      const is_hovered = screen_mouse_x > b.x && screen_mouse_y > b.y && screen_mouse_x < b.x+b.w && screen_mouse_y < b.y+b.h
+      if (is_hovered) {
+        if (has_clicked) {
+          should_pan_to_screen = false
+          if (b.txt == '3d') {
+            camera_ry_target = Math.PI/2 - 1*Math.PI/7
+            camera_tx_target = 4.4*Math.sin(camera_ry_target)
+            camera_ty_target = 0
+            camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
+            camera_animation_tween = 0
+          }
         }
       }
+    }
+    if (should_pan_to_screen && has_clicked) {
+      camera_ry_target = Math.PI/2
+      camera_tx_target = 0.78
+      camera_ty_target = 0.020
+      camera_tz_target = -0.004
+      camera_animation_tween = 0
     }
   }
 
@@ -578,6 +558,7 @@ const image_urls = {
   sky_ny_png: '/img/ny.png',
   sky_pz_png: '/img/pz.png',
   sky_nz_png: '/img/nx.png',
+  folder_png: '/img/folder.png',
 }
 
 const model_buffers = {}
