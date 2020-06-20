@@ -169,6 +169,8 @@ const screen_win_h = 700
 
 let screen_explorer_title = ""
 
+let screen_hovered_desktop_item = null
+
 
 /****************************
  * Shaders
@@ -302,6 +304,8 @@ function compile_plain_shader () {
  ***************************/
 
 function update () {
+
+  screen_is_3d_hovered = false
   if (has_resized) { handle_resize(screen_pixel_width, screen_pixel_height) }
   update_camera()
   update_pick()
@@ -310,6 +314,7 @@ function update () {
   update_table()
   update_sky()
   update_screen()
+
   
 
   has_clicked = false
@@ -527,10 +532,13 @@ function update_screen () {
       }
     }
 
+    screen_hovered_desktop_item = null
     for (let i=0; i<screen_desktop_items.length; i++) {
       const desktop_item = screen_desktop_items[i]
       const is_hovered = screen_mouse_x > desktop_item.x && screen_mouse_y > desktop_item.y && screen_mouse_x < desktop_item.x+desktop_item.w && screen_mouse_y < desktop_item.y+desktop_item.h
       if (is_hovered) {
+        screen_hovered_desktop_item = desktop_item
+        
         if (has_clicked) {
           has_clicked_desktop = false
           if (!desktop_item.last_click_time || prev_timestamp - desktop_item.last_click_time > 500) {
