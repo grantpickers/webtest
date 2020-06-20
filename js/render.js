@@ -136,8 +136,21 @@ function render_screen () {
     /*
     img looks like this: {width: 1234, height: 5677, ...}
     */
-    screen_ctx.drawImage(img, 30, 40, img.width, img.height )
-    screen_ctx.drawImage(images.window_frame_t_r_png, 30 + img.width - 26 + 5, 40 - 30, 26, 30)
+
+    screen_preview_x = 30
+    screen_preview_y = 40
+    screen_preview_w = img.width + 10
+    screen_preview_h = img.height + 35
+    screen_ctx.drawImage(img, screen_preview_x + 5, screen_preview_y + 30, img.width, img.height )
+
+    screen_ctx.drawImage(images.window_frame_t_l_png, screen_preview_x, screen_preview_y, 5, 30)
+    screen_ctx.drawImage(images.window_frame_t_r_png, screen_preview_x+screen_preview_w-26, screen_preview_y, 26, 30)
+    screen_ctx.drawImage(images.window_frame_b_l_png, screen_preview_x, screen_preview_y+screen_preview_h-5, 5, 5)
+    screen_ctx.drawImage(images.window_frame_b_r_png, screen_preview_x+screen_preview_w-5, screen_preview_y+screen_preview_h-5, 5, 5)
+    screen_ctx.drawImage(images.window_frame_t_png, screen_preview_x+5, screen_preview_y, screen_preview_w-26-5, 30)
+    screen_ctx.drawImage(images.window_frame_r_png, screen_preview_x+screen_preview_w-5, screen_preview_y+30, 5, screen_preview_h-30-5)
+    screen_ctx.drawImage(images.window_frame_b_png, screen_preview_x+5, screen_preview_y+screen_preview_h-5, screen_preview_w-10, 5)
+    screen_ctx.drawImage(images.window_frame_l_png, screen_preview_x, screen_preview_y+30, 5, screen_preview_h-30-5)
   }
 
   if (screen_hovered_desktop_item && screen_hovered_desktop_item.txt == 'Painting') {

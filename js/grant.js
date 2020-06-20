@@ -174,6 +174,12 @@ let screen_hovered_desktop_item = null
 
 let screen_preview_image = null
 
+let screen_preview_x = 0
+let screen_preview_y = 0
+let screen_preview_w = 0
+let screen_preview_h = 0
+
+
 let video_catblue_mp4= document.createElement('video')
 video_catblue_mp4.src = 'img/catblue.mp4'
 video_catblue_mp4.muted = true
@@ -584,10 +590,10 @@ function update_screen () {
     if (screen_preview_image) {
       let has_clicked_close = false
       if (has_clicked) {
-        const x = 30 + images[screen_preview_image].width - 26 + 5
-        const y = 40 - 30
         const w = 26
         const h = 30
+        const x = screen_preview_x + screen_preview_w - w
+        const y = screen_preview_y
         has_clicked_close = screen_mouse_x > x && screen_mouse_y > y && screen_mouse_x < x + w && screen_mouse_y < y + h
       }
       if (has_clicked_close) {
