@@ -143,10 +143,11 @@ const screen_display_inverse_scale = new Float32Array([
 ])
 
 const screen_desktop_items = [
-  { x: 150, y: 100, w: 70, h: 70, txt: 'Painting'},
-  { x: 150+180*1, y: 100, w: 70, h: 70, txt: '3d'},
-  { x: 150+180*2, y: 100, w: 70, h: 70, txt: 'Animation'},
-  { x: 150+180*3, y: 100, w: 70, h: 70, txt: 'Illustration'},
+  { x: 150, y: 100, w: 70, h: 70, txt: 'Painting', thumb: "folder_png"},
+  { x: 150+180*1, y: 100, w: 70, h: 70, txt: '3d', thumb: "folder_png"},
+  { x: 150+180*2, y: 100, w: 70, h: 70, txt: 'Animation', thumb: "folder_png"},
+  { x: 150+180*3, y: 100, w: 70, h: 70, txt: 'Illustration', thumb: "folder_png"},
+  { x: 150+180*4, y: 100, w: 70, h: 70, txt: 'contact', thumb: "snake_png"},
 ]
 let screen_selected_item = null
 
@@ -561,6 +562,9 @@ function update_screen () {
             else if (desktop_item.txt == 'Animation') {
               screen_explorer_item_set = screen_explorer_item_sets.animation
               screen_explorer_title = "/Desktop/Animation"
+            }
+            else if (desktop_item.txt == 'contact') {
+              window.location.href = "mailto:mail@example.org";
             }
           }
         }

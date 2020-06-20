@@ -18,7 +18,24 @@ function render_screen () {
     const desktop_item = screen_desktop_items[i]
 
     // Render icon
-    screen_ctx.drawImage(images.folder_png, desktop_item.x + desktop_item.w*0.5 - 25, desktop_item.y, 48, 43)
+    let thumb_width = 0    
+    let thumb_height = 0
+    if (images[desktop_item.thumb].width > images[desktop_item.thumb].height) {
+      thumb_width = 50
+      thumb_height = thumb_width/images[desktop_item.thumb].width*images[desktop_item.thumb].height
+    }
+    else {
+      thumb_height = 50
+      thumb_width = thumb_height/images[desktop_item.thumb].height*images[desktop_item.thumb].width
+    }
+    screen_ctx.drawImage(
+      images[desktop_item.thumb],
+      desktop_item.x + 0.5*desktop_item.w - 0.5*thumb_width,
+      desktop_item.y + 25 - 0.5*thumb_height,
+      thumb_width,
+      thumb_height
+    )
+
 
     screen_ctx.textAlign = "center"
 
@@ -29,7 +46,7 @@ function render_screen () {
       screen_ctx.fillRect(desktop_item.x + (desktop_item.w - w)*0.5, desktop_item.y + desktop_item.h - 25+5, w, 26)
 
       screen_ctx.fillStyle = "#3a6fa644"
-      screen_ctx.fillRect(desktop_item.x, desktop_item.y, desktop_item.w, desktop_item.h - 25);
+      screen_ctx.fillRect(desktop_item.x, desktop_item.y, desktop_item.w, desktop_item.h - 20);
     } else {
       // Render text shadow
       screen_ctx.strokeStyle = 'rgba(0,0,0,0.4)'
