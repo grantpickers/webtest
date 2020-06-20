@@ -22,7 +22,7 @@ function render_screen () {
 
     screen_ctx.textAlign = "center"
 
-    if (desktop_item == screen_selected_desktop_item) {
+    if (desktop_item == screen_selected_item) {
       // Render selection
       screen_ctx.fillStyle = "#000080"
       const w = 8 + desktop_item.txt.length * 7
@@ -43,41 +43,57 @@ function render_screen () {
   }
 
   if (screen_explorer_item_set) {
-    const win_x = 200
-    const win_y = 250
-    const win_w = 1200
-    const win_h = 700
     screen_ctx.fillStyle = '#fff'
-    screen_ctx.fillRect(win_x, win_y, win_w, win_h)
-    screen_ctx.drawImage(images.window_frame_t_l_png, win_x, win_y, 5, 30)
-    screen_ctx.drawImage(images.window_frame_t_r_png, win_x+win_w-26, win_y, 26, 30)
-    screen_ctx.drawImage(images.window_frame_b_l_png, win_x, win_y+win_h-5, 5, 5)
-    screen_ctx.drawImage(images.window_frame_b_r_png, win_x+win_w-5, win_y+win_h-5, 5, 5)
-    screen_ctx.drawImage(images.window_frame_t_png, win_x+5, win_y, win_w-26-5, 30)
-    screen_ctx.drawImage(images.window_frame_r_png, win_x+win_w-5, win_y+30, 5, win_h-30-5)
-    screen_ctx.drawImage(images.window_frame_b_png, win_x+5, win_y+win_h-5, win_w-10, 5)
-    screen_ctx.drawImage(images.window_frame_l_png, win_x, win_y+30, 5, win_h-30-5)
+    screen_ctx.fillRect(screen_win_x, screen_win_y, screen_win_w, screen_win_h)
+    screen_ctx.drawImage(images.window_frame_t_l_png, screen_win_x, screen_win_y, 5, 30)
+    screen_ctx.drawImage(images.window_frame_t_r_png, screen_win_x+screen_win_w-26, screen_win_y, 26, 30)
+    screen_ctx.drawImage(images.window_frame_b_l_png, screen_win_x, screen_win_y+screen_win_h-5, 5, 5)
+    screen_ctx.drawImage(images.window_frame_b_r_png, screen_win_x+screen_win_w-5, screen_win_y+screen_win_h-5, 5, 5)
+    screen_ctx.drawImage(images.window_frame_t_png, screen_win_x+5, screen_win_y, screen_win_w-26-5, 30)
+    screen_ctx.drawImage(images.window_frame_r_png, screen_win_x+screen_win_w-5, screen_win_y+30, 5, screen_win_h-30-5)
+    screen_ctx.drawImage(images.window_frame_b_png, screen_win_x+5, screen_win_y+screen_win_h-5, screen_win_w-10, 5)
+    screen_ctx.drawImage(images.window_frame_l_png, screen_win_x, screen_win_y+30, 5, screen_win_h-30-5)
 
     for (let i=0; i<screen_explorer_item_set.length; i++) {
       const explorer_item = screen_explorer_item_set[i]
 
       // Render icon
-      screen_ctx.drawImage(images.folder_png, explorer_item.x + explorer_item.w*0.5 - 25 + win_x, explorer_item.y + win_y, 48, 43)
+      screen_ctx.drawImage(images.folder_png, explorer_item.x + explorer_item.w*0.5 - 25 + screen_win_x, explorer_item.y + screen_win_y, 48, 43)
 
       screen_ctx.textAlign = "center"
 
-      if (explorer_item == screen_selected_explorer_item) {
+      if (explorer_item == screen_selected_item) {
         // Render selection
         screen_ctx.fillStyle = "#000080"
         const w = 8 + explorer_item.txt.length * 7
-        screen_ctx.fillRect(explorer_item.x + (explorer_item.w - w)*0.5 + win_x, explorer_item.y + explorer_item.h - 25+5 + win_y, w, 26)
+        screen_ctx.fillRect(explorer_item.x + (explorer_item.w - w)*0.5 + screen_win_x, explorer_item.y + explorer_item.h - 25+5 + screen_win_y, w, 26)
 
+        /*
         screen_ctx.fillStyle = "#3a6fa644"
-        screen_ctx.fillRect(explorer_item.x + win_x, explorer_item.y + win_y, explorer_item.w, explorer_item.h - 25);
-      }
+        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
+        */
 
-      screen_ctx.fillStyle = "#000"
-      screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + win_x, explorer_item.y + explorer_item.h + win_y)
+        screen_ctx.globalCompositeOperation = "color-burn"
+        screen_ctx.fillStyle = "hsla(0,50%,80%,0.4)";
+        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
+
+        screen_ctx.globalCompositeOperation = "saturation";
+        screen_ctx.fillStyle = "hsla(0,100%,50%,0.4)";
+        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
+
+        screen_ctx.globalCompositeOperation = "hue";
+        screen_ctx.fillStyle = "hsla(211,1%,50%,0.4)";
+        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
+
+        screen_ctx.globalCompositeOperation = "source-over";
+
+        screen_ctx.fillStyle = "#fff"
+        screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win_x, explorer_item.y + explorer_item.h + screen_win_y)
+      }
+      else {
+        screen_ctx.fillStyle = "#000"
+        screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win_x, explorer_item.y + explorer_item.h + screen_win_y)
+      }
     }
   }
 

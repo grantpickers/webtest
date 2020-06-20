@@ -148,7 +148,7 @@ const screen_desktop_items = [
   { x: 150+180*2, y: 100, w: 70, h: 70, txt: 'Animation'},
   { x: 150+180*3, y: 100, w: 70, h: 70, txt: 'Illustration'},
 ]
-let screen_selected_desktop_item = null
+let screen_selected_item = null
 
 const screen_explorer_item_sets = {
   painting: [
@@ -159,7 +159,11 @@ const screen_explorer_item_sets = {
   ],
 }
 let screen_explorer_item_set = null
-let screen_selected_explorer_item = null
+
+const screen_win_x = 200
+const screen_win_y = 250
+const screen_win_w = 1200
+const screen_win_h = 700
 
 
 /****************************
@@ -490,6 +494,35 @@ function update_screen () {
   const screen_mouse_y = screen_pick_p[1]
   if (screen_mouse_x > 0 && screen_mouse_y > 0 && screen_mouse_x < screen_pixel_width && screen_mouse_y < screen_pixel_height) {
     let has_clicked_desktop = has_clicked
+
+    if (screen_explorer_item_set) {
+      let has_clicked_close = false
+      if (has_clicked) {
+        has_clicked_close = screen_mouse_x > screen_win_x + screen_win_w - 26 && screen_mouse_y > screen_win_y && screen_mouse_x < screen_win_x + screen_win_w && screen_mouse_y < screen_win_y + 30
+      }
+      if (has_clicked_close) {
+        screen_explorer_item_set = null
+      }
+      else {
+        for (let i=0; i<screen_explorer_item_set.length; i++) {
+          const explorer_item = screen_explorer_item_set[i]
+          const is_hovered = screen_mouse_x > explorer_item.x + screen_win_x && screen_mouse_y > explorer_item.y + screen_win_y && screen_mouse_x < explorer_item.x+explorer_item.w + screen_win_x && screen_mouse_y < explorer_item.y+explorer_item.h + screen_win_y
+          if (is_hovered) {
+            if (has_clicked) {
+              has_clicked_desktop = false
+              if (!explorer_item.last_click_time || prev_timestamp - explorer_item.last_click_time > 500) {
+                explorer_item.last_click_time = prev_timestamp
+                screen_selected_item = explorer_item
+              }
+              else {
+                // Double clicked
+              }
+            }
+          }
+        }
+      }
+    }
+
     for (let i=0; i<screen_desktop_items.length; i++) {
       const desktop_item = screen_desktop_items[i]
       const is_hovered = screen_mouse_x > desktop_item.x && screen_mouse_y > desktop_item.y && screen_mouse_x < desktop_item.x+desktop_item.w && screen_mouse_y < desktop_item.y+desktop_item.h
@@ -498,7 +531,7 @@ function update_screen () {
           has_clicked_desktop = false
           if (!desktop_item.last_click_time || prev_timestamp - desktop_item.last_click_time > 500) {
             desktop_item.last_click_time = prev_timestamp
-            screen_selected_desktop_item = desktop_item
+            screen_selected_item = desktop_item
           }
           else {
             // Double clicked
@@ -516,8 +549,9 @@ function update_screen () {
         }
       }
     }
+
     if (has_clicked_desktop) {
-      screen_selected_desktop_item = null
+      screen_selected_item = null
       camera_ry_target = Math.PI/2
       camera_tx_target = 0.78
       camera_ty_target = 0.020
