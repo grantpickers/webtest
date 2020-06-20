@@ -172,6 +172,8 @@ let screen_explorer_title = ""
 
 let screen_hovered_desktop_item = null
 
+let screen_preview_image = null
+
 
 /****************************
  * Shaders
@@ -526,6 +528,7 @@ function update_screen () {
               }
               else {
                 // Double clicked
+                screen_preview_image = explorer_item.thumb
               }
             }
           }
@@ -568,6 +571,20 @@ function update_screen () {
             }
           }
         }
+      }
+    }
+
+    if (screen_preview_image) {
+      let has_clicked_close = false
+      if (has_clicked) {
+        const x = 30 + images[screen_preview_image].width - 26 + 5
+        const y = 40 - 30
+        const w = 26
+        const h = 30
+        has_clicked_close = screen_mouse_x > x && screen_mouse_y > y && screen_mouse_x < x + w && screen_mouse_y < y + h
+      }
+      if (has_clicked_close) {
+        screen_preview_image = null
       }
     }
 

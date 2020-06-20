@@ -58,7 +58,9 @@ function render_screen () {
     screen_ctx.fillStyle = "#fff"
     screen_ctx.fillText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h)
   }
-
+ /* ********
+  DRAWING UI
+*/ 
   if (screen_explorer_item_set) {
     screen_ctx.fillStyle = '#fff'
     screen_ctx.fillRect(screen_win_x, screen_win_y, screen_win_w, screen_win_h)
@@ -125,6 +127,17 @@ function render_screen () {
         screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win_x, explorer_item.y + explorer_item.h + screen_win_y)
       }
     }
+  }
+/*
+TODO: Centre and resize images and add frame
+*/
+  if (screen_preview_image) {
+    const img = images[screen_preview_image]
+    /*
+    img looks like this: {width: 1234, height: 5677, ...}
+    */
+    screen_ctx.drawImage(img, 30, 40, img.width, img.height )
+    screen_ctx.drawImage(images.window_frame_t_r_png, 30 + img.width - 26 + 5, 40 - 30, 26, 30)
   }
 
   // GL
