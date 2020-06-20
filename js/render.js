@@ -128,9 +128,9 @@ function render_screen () {
       }
     }
   }
-/*
-TODO: Centre and resize images and add frame
-*/
+  /*
+  TODO: Centre and resize images and add frame
+  */
   if (screen_preview_image) {
     const img = images[screen_preview_image]
     /*
@@ -138,6 +138,10 @@ TODO: Centre and resize images and add frame
     */
     screen_ctx.drawImage(img, 30, 40, img.width, img.height )
     screen_ctx.drawImage(images.window_frame_t_r_png, 30 + img.width - 26 + 5, 40 - 30, 26, 30)
+  }
+
+  if (screen_hovered_desktop_item && screen_hovered_desktop_item.txt == 'Painting') {
+    screen_ctx.drawImage(video_catblue_mp4,screen_hovered_desktop_item.x, screen_hovered_desktop_item.y, 60, 52)
   }
 
   // GL

@@ -99,12 +99,6 @@ function init_canvas (width, height) {
   canvas.addEventListener('click', function (e) { has_clicked = true; mouse_x = e.offsetX; mouse_y = e.offsetY })
 }
 
-let video_el= document.createElement('video')
-video_el.src = 'img/moon.mp4'
-video_el.muted = true
-video_el.autoplay = true
-video_el.play()
-
 /****************************
  * Main Loop
  ***************************/

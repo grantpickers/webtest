@@ -94,3 +94,4 @@ Contact:
 Custom Email client with email form
 Name/emailadd/message
 
+ffmpeg -f gif -i Catblue.gif -pix_fmt yuv420p -c:v libx264 -preset veryslow -movflags +faststart -crf 1 catblue.mp4

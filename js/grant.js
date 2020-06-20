@@ -174,6 +174,13 @@ let screen_hovered_desktop_item = null
 
 let screen_preview_image = null
 
+let video_catblue_mp4= document.createElement('video')
+video_catblue_mp4.src = 'img/catblue.mp4'
+video_catblue_mp4.muted = true
+video_catblue_mp4.autoplay = true
+video_catblue_mp4.loop = true
+video_catblue_mp4.play()
+
 
 /****************************
  * Shaders
