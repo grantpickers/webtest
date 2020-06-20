@@ -152,10 +152,12 @@ let screen_selected_item = null
 
 const screen_explorer_item_sets = {
   painting: [
-    { x: 60, y: 80, w: 70, h: 70, txt: 'example'},
-    { x: 60+130*1, y: 80, w: 70, h: 70, txt: 'untitled'},
-    { x: 60+130*2, y: 80, w: 70, h: 70, txt: 'thing'},
-    { x: 60+130*3, y: 80, w: 70, h: 70, txt: 'hello'},
+    { x: 60, y: 80, w: 70, h: 70, txt: 'wizard.png', thumb: "wizard_png"},
+    { x: 60+130*1, y: 80, w: 70, h: 70, txt: 'snake.png', thumb: "snake_png"},
+  ],
+  animation: [
+    { x: 60, y: 80, w: 70, h: 70, txt: 'wizard 2', thumb: "wizard_png"},
+    { x: 60+130*1, y: 80, w: 70, h: 70, txt: 'snake 2', thumb: "snake_png"},
   ],
 }
 let screen_explorer_item_set = null
@@ -164,6 +166,8 @@ const screen_win_x = 200
 const screen_win_y = 250
 const screen_win_w = 1200
 const screen_win_h = 700
+
+let screen_explorer_title = ""
 
 
 /****************************
@@ -544,6 +548,11 @@ function update_screen () {
             }
             else if (desktop_item.txt == 'Painting') {
               screen_explorer_item_set = screen_explorer_item_sets.painting
+              screen_explorer_title = "/Desktop/Painting"
+            }
+            else if (desktop_item.txt == 'Animation') {
+              screen_explorer_item_set = screen_explorer_item_sets.animation
+              screen_explorer_title = "/Desktop/Animation"
             }
           }
         }
@@ -598,6 +607,8 @@ const image_urls = {
   sky_pz_png: '/img/pz.png',
   sky_nz_png: '/img/nx.png',
   folder_png: '/img/folder.png',
+  wizard_png: '/img/wizard.png',
+  snake_png: '/img/snake.png',
   window_frame_t_l_png: '/img/window_frame_t_l.png',
   window_frame_t_r_png: '/img/window_frame_t_r.png',
   window_frame_b_l_png: '/img/window_frame_b_l.png',
