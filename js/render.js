@@ -53,12 +53,25 @@ function render_screen () {
     screen_ctx.drawImage(images.window_frame_r_png, screen_win_x+screen_win_w-5, screen_win_y+30, 5, screen_win_h-30-5)
     screen_ctx.drawImage(images.window_frame_b_png, screen_win_x+5, screen_win_y+screen_win_h-5, screen_win_w-10, 5)
     screen_ctx.drawImage(images.window_frame_l_png, screen_win_x, screen_win_y+30, 5, screen_win_h-30-5)
+    
+    screen_ctx.textAlign = "left"
+    screen_ctx.fillText(screen_explorer_title, screen_win_x + 35, screen_win_y + 19)
 
     for (let i=0; i<screen_explorer_item_set.length; i++) {
       const explorer_item = screen_explorer_item_set[i]
 
       // Render icon
-      screen_ctx.drawImage(images.folder_png, explorer_item.x + explorer_item.w*0.5 - 25 + screen_win_x, explorer_item.y + screen_win_y, 48, 43)
+      let thumb_width = 0    
+      let thumb_height = 0
+      if (images[explorer_item.thumb].width > images[explorer_item.thumb].height) {
+        thumb_width = 50
+        thumb_height = thumb_width/images[explorer_item.thumb].width*images[explorer_item.thumb].height
+      }
+      else {
+        thumb_height = 50
+        thumb_width = thumb_height/images[explorer_item.thumb].height*images[explorer_item.thumb].width
+      }
+      screen_ctx.drawImage(images[explorer_item.thumb], explorer_item.x + screen_win_x + 0.5*explorer_item.w - 0.5*thumb_width, explorer_item.y + screen_win_y + 25 - 0.5*thumb_height, thumb_width, thumb_height)
 
       screen_ctx.textAlign = "center"
 
