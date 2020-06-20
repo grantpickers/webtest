@@ -114,7 +114,7 @@ function main_loop (timestamp) {
     if (prev_timestamp == null) {
       prev_timestamp = timestamp
     }
-    dt = timestamp - prev_timestamp
+    dt = Math.min(32, timestamp - prev_timestamp)
     prev_timestamp = timestamp
     update()
     render()
