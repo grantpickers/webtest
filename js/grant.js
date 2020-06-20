@@ -150,6 +150,17 @@ const screen_desktop_items = [
 ]
 let screen_selected_desktop_item = null
 
+const screen_explorer_item_sets = {
+  painting: [
+    { x: 60, y: 80, w: 70, h: 70, txt: 'example'},
+    { x: 60+130*1, y: 80, w: 70, h: 70, txt: 'untitled'},
+    { x: 60+130*2, y: 80, w: 70, h: 70, txt: 'thing'},
+    { x: 60+130*3, y: 80, w: 70, h: 70, txt: 'hello'},
+  ],
+}
+let screen_explorer_item_set = null
+let screen_selected_explorer_item = null
+
 
 /****************************
  * Shaders
@@ -498,8 +509,8 @@ function update_screen () {
               camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
               camera_animation_tween = 0
             }
-            else if (desktop_item.txt == 'Animation') {
-              console.log('hello')
+            else if (desktop_item.txt == 'Painting') {
+              screen_explorer_item_set = screen_explorer_item_sets.painting
             }
           }
         }

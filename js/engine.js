@@ -96,7 +96,7 @@ function init_canvas (width, height) {
 
   window.addEventListener('resize', function (e) { has_resized = true })
   canvas.addEventListener('mousemove', function (e) { mouse_x = e.offsetX; mouse_y = e.offsetY })
-  canvas.addEventListener('click', function (e) { has_clicked = true })
+  canvas.addEventListener('click', function (e) { has_clicked = true; mouse_x = e.offsetX; mouse_y = e.offsetY })
 }
 
 let video_el= document.createElement('video')

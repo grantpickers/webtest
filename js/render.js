@@ -42,20 +42,44 @@ function render_screen () {
     screen_ctx.fillText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h)
   }
 
-  const win_x = 200
-  const win_y = 250
-  const win_w = 1200
-  const win_h = 700
-  screen_ctx.fillStyle = '#fff'
-  screen_ctx.fillRect(win_x, win_y, win_w, win_h)
-  screen_ctx.drawImage(images.window_frame_t_l_png, win_x, win_y, 5, 30)
-  screen_ctx.drawImage(images.window_frame_t_r_png, win_x+win_w-26, win_y, 26, 30)
-  screen_ctx.drawImage(images.window_frame_b_l_png, win_x, win_y+win_h-5, 5, 5)
-  screen_ctx.drawImage(images.window_frame_b_r_png, win_x+win_w-5, win_y+win_h-5, 5, 5)
-  screen_ctx.drawImage(images.window_frame_t_png, win_x+5, win_y, win_w-26-5, 30)
-  screen_ctx.drawImage(images.window_frame_r_png, win_x+win_w-5, win_y+30, 5, win_h-30-5)
-  screen_ctx.drawImage(images.window_frame_b_png, win_x+5, win_y+win_h-5, win_w-10, 5)
-  screen_ctx.drawImage(images.window_frame_l_png, win_x, win_y+30, 5, win_h-30-5)
+  if (screen_explorer_item_set) {
+    const win_x = 200
+    const win_y = 250
+    const win_w = 1200
+    const win_h = 700
+    screen_ctx.fillStyle = '#fff'
+    screen_ctx.fillRect(win_x, win_y, win_w, win_h)
+    screen_ctx.drawImage(images.window_frame_t_l_png, win_x, win_y, 5, 30)
+    screen_ctx.drawImage(images.window_frame_t_r_png, win_x+win_w-26, win_y, 26, 30)
+    screen_ctx.drawImage(images.window_frame_b_l_png, win_x, win_y+win_h-5, 5, 5)
+    screen_ctx.drawImage(images.window_frame_b_r_png, win_x+win_w-5, win_y+win_h-5, 5, 5)
+    screen_ctx.drawImage(images.window_frame_t_png, win_x+5, win_y, win_w-26-5, 30)
+    screen_ctx.drawImage(images.window_frame_r_png, win_x+win_w-5, win_y+30, 5, win_h-30-5)
+    screen_ctx.drawImage(images.window_frame_b_png, win_x+5, win_y+win_h-5, win_w-10, 5)
+    screen_ctx.drawImage(images.window_frame_l_png, win_x, win_y+30, 5, win_h-30-5)
+
+    for (let i=0; i<screen_explorer_item_set.length; i++) {
+      const explorer_item = screen_explorer_item_set[i]
+
+      // Render icon
+      screen_ctx.drawImage(images.folder_png, explorer_item.x + explorer_item.w*0.5 - 25 + win_x, explorer_item.y + win_y, 48, 43)
+
+      screen_ctx.textAlign = "center"
+
+      if (explorer_item == screen_selected_explorer_item) {
+        // Render selection
+        screen_ctx.fillStyle = "#000080"
+        const w = 8 + explorer_item.txt.length * 7
+        screen_ctx.fillRect(explorer_item.x + (explorer_item.w - w)*0.5 + win_x, explorer_item.y + explorer_item.h - 25+5 + win_y, w, 26)
+
+        screen_ctx.fillStyle = "#3a6fa644"
+        screen_ctx.fillRect(explorer_item.x + win_x, explorer_item.y + win_y, explorer_item.w, explorer_item.h - 25);
+      }
+
+      screen_ctx.fillStyle = "#000"
+      screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + win_x, explorer_item.y + explorer_item.h + win_y)
+    }
+  }
 
   // GL
 
