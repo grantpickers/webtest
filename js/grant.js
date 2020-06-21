@@ -61,14 +61,6 @@ const table_world_model_transpose_matrix = new Float32Array(16)
 const table_model_view_matrix = new Float32Array(16)
 
 
-const table_pick_ray = new Float32Array(3)
-const table_camera_position = new Float32Array(4)
-const table_half_width = 1.12
-const table_half_height = 1.804
-const table_half_depth = 1.12
-const table_inv_ray = new Float32Array(3)
-let table_light = 0.0
-
 /****************************
  * folder
  ***************************/
@@ -214,8 +206,62 @@ video_catblue_mp4.play()
 
 
 /****************************
+ * Shadow
+ ***************************/
+
+let shadow_framebuffer = null
+let shadow_depth_texture = null
+let shadow_color_texture = null
+const shadow_depth_texture_id = 4
+const shadow_color_texture_id = 5
+
+const point0_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const point0_inverse_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const point0_inverse_translation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const point0_ry = Math.PI/2 + 6*Math.PI/8
+const point0_position = new Float32Array([4.4*Math.sin(point0_ry), 1.0, -0.5+4.4*Math.cos(point0_ry),])
+
+
+const point0_world_light_matrix = new Float32Array(16)
+const point0_screen_model_light_matrix = new Float32Array(16)
+const point0_table_model_light_matrix = new Float32Array(16)
+const point0_perspective_matrix = new Float32Array(16)
+
+
+/****************************
  * Shaders
  ***************************/
+
+// Shadow Shader
+
+let shadow_shader_program = null
+let shadow_a_pos = null
+let shadow_u_model_light_matrix = null
+let shadow_u_perspective_matrix = null
+function compile_shadow_shader () {
+  shadow_shader_program = create_shader_program(gl, assets.shadow_vertex, assets.shadow_fragment)
+  gl.useProgram(shadow_shader_program)
+  shadow_a_pos    = gl.getAttribLocation(shadow_shader_program, 'a_pos')
+  shadow_u_model_light_matrix  = gl.getUniformLocation(shadow_shader_program, 'u_model_light_matrix')
+  shadow_u_perspective_matrix  = gl.getUniformLocation(shadow_shader_program, 'u_perspective_matrix')
+  gl.uniformMatrix4fv(shadow_u_perspective_matrix, false, camera_perspective_matrix)
+}
+
 
 // Skybox Shader
 
@@ -316,6 +362,33 @@ function compile_basic_shader () {
 }
 
 
+// Simple Shader
+
+let simple_shader_program = null
+let simple_a_pos = null
+let simple_a_normal = null
+let simple_u_model_world_matrix = null
+let simple_u_world_view_matrix = null
+let simple_u_world_light_matrix = null
+let simple_u_perspective_matrix = null
+let simple_u_world_model_transpose_matrix = null
+let simple_u_sampler = null
+function compile_simple_shader () {
+  simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
+  gl.useProgram(simple_shader_program)
+  simple_a_pos = gl.getAttribLocation(simple_shader_program, 'a_pos')
+  simple_a_normal = gl.getAttribLocation(simple_shader_program, 'a_normal')
+  simple_a_uv     = gl.getAttribLocation(simple_shader_program, 'a_uv')
+  simple_u_model_world_matrix  = gl.getUniformLocation(simple_shader_program, 'u_model_world_matrix')
+  simple_u_world_view_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_view_matrix')
+  simple_u_world_light_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_light_matrix')
+  simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
+  simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
+  simple_u_sampler = gl.getUniformLocation(simple_shader_program, 'u_sampler')
+  gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
+}
+
+
 // Plain Shader
 
 let plain_shader_program = null
@@ -347,7 +420,7 @@ function compile_plain_shader () {
 function update () {
 
   screen_is_3d_hovered = false
-  if (has_resized) { handle_resize(screen_pixel_width, screen_pixel_height) }
+  if (has_resized) { handle_resize() }
   update_camera()
   update_pick()
   update_welcometext()
@@ -356,6 +429,7 @@ function update () {
   update_folder()
   update_sky()
   update_screen()
+  update_shadow()
 
   
 
@@ -363,15 +437,15 @@ function update () {
   has_resized = false
 }
 
-function handle_resize (width, height) {
+function handle_resize () {
   let w,h
-  if (window.innerWidth/window.innerHeight > width/height) {
-    w = Math.floor(window.innerHeight * width/height)
+  if (window.innerWidth/window.innerHeight > screen_pixel_width/screen_pixel_height) {
+    w = Math.floor(window.innerHeight * screen_pixel_width/screen_pixel_height)
     h = Math.floor(window.innerHeight)
   }
   else {
     w = Math.floor(window.innerWidth)
-    h = Math.floor(window.innerWidth * height/width)
+    h = Math.floor(window.innerWidth * screen_pixel_height/screen_pixel_width)
   }
   canvas.style.width = w+"px"
   canvas.style.height = h+"px"
@@ -388,6 +462,8 @@ function handle_resize (width, height) {
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(envmap_shader_program)
   gl.uniformMatrix4fv(envmap_u_perspective_matrix, false, camera_perspective_matrix)
+  gl.useProgram(simple_shader_program)
+  gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
 
@@ -656,6 +732,27 @@ function update_screen () {
 }
 
 
+function update_shadow () {
+  for (let i=0; i<camera_perspective_matrix.length; i++) {point0_perspective_matrix[i] = camera_perspective_matrix[i]}
+
+
+  point0_rotation[0] = Math.cos(point0_ry)
+  point0_rotation[2] = -Math.sin(point0_ry)
+  point0_rotation[8] = Math.sin(point0_ry)
+  point0_rotation[10] = Math.cos(point0_ry)
+
+  point0_inverse_translation[12] = -point0_position[0]
+  point0_inverse_translation[13] = -point0_position[1]
+  point0_inverse_translation[14] = -point0_position[2]
+
+  matrix_transpose_4(point0_inverse_rotation, point0_rotation)
+
+  matrix_mult_4(point0_world_light_matrix, point0_inverse_rotation, point0_inverse_translation)
+  matrix_mult_4(point0_screen_model_light_matrix, point0_world_light_matrix, screen_model_world_matrix)
+  matrix_mult_4(point0_table_model_light_matrix, point0_world_light_matrix, table_model_world_matrix)
+}
+
+
 /****************************
  * Main
  ***************************/
@@ -667,6 +764,8 @@ const asset_urls = {
   table_obj: '/obj/table.obj',
   folder_obj: '/obj/folder.obj',
   sky_obj: '/obj/sky.obj',
+  shadow_vertex: '/shaders/shadow.vert',
+  shadow_fragment: '/shaders/shadow.frag',
   skybox_vertex: '/shaders/skybox.vert',
   skybox_fragment: '/shaders/skybox.frag',
   envmap_vertex: '/shaders/envmap.vert',
@@ -677,6 +776,8 @@ const asset_urls = {
   basic_fragment: '/shaders/basic.frag',
   plain_vertex: '/shaders/plain.vert',
   plain_fragment: '/shaders/plain.frag',
+  simple_vertex: '/shaders/simple.vert',
+  simple_fragment: '/shaders/simple.frag',
 }
 const image_urls = {
   sky_png: '/img/sky.png',
@@ -704,13 +805,45 @@ const assets = {}
 const images = {}
 
 function main () {
-  init_canvas(screen_pixel_width, screen_pixel_height)
+  init_canvas()
   camera_update_perspective(screen_pixel_width, screen_pixel_height)
 
+    /*
   camera_ry_target = Math.PI/2
   camera_tx_target = 0.78
   camera_ty_target = 0.020
   camera_tz_target = -0.004
+  */
+              camera_ry_target = Math.PI/2 - 1*Math.PI/7
+              camera_tx_target = 4.4*Math.sin(camera_ry_target)
+              camera_ty_target = 0
+              camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
+
+
+  gl.getExtension('WEBGL_depth_texture')
+  shadow_depth_texture = gl.createTexture()
+  gl.activeTexture(gl.TEXTURE0 + shadow_depth_texture_id)
+  gl.bindTexture(gl.TEXTURE_2D, shadow_depth_texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, 1024, 1024, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  shadow_framebuffer = gl.createFramebuffer()
+  gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_framebuffer)
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, shadow_depth_texture, 0)
+  shadow_color_texture = gl.createTexture()
+  gl.activeTexture(gl.TEXTURE0 + shadow_color_texture_id)
+  gl.bindTexture(gl.TEXTURE_2D, shadow_color_texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadow_color_texture, 0)
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+
 
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)
@@ -745,11 +878,13 @@ function main () {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.sky_png)
 
 
+  compile_shadow_shader()
   compile_skybox_shader()
   compile_screen_shader()
   compile_envmap_shader()
   compile_basic_shader()
   compile_plain_shader()
+  compile_simple_shader()
 
 
   window.requestAnimationFrame(main_loop)

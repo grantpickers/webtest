@@ -1,12 +1,52 @@
 function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+  render_shadow()
   render_screen()
   render_welcometext()
   render_tower()
   render_table()
   render_folder()
   render_sky()
+}
+
+function render_shadow () {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_framebuffer)
+  gl.viewport(0, 0, 1024, 1024)
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+
+  gl.useProgram(shadow_shader_program)
+
+
+  // Screen shadow
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.vertices)
+  gl.enableVertexAttribArray(shadow_a_pos)
+  gl.vertexAttribPointer(shadow_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(shadow_u_model_light_matrix, false, point0_screen_model_light_matrix)
+  gl.uniformMatrix4fv(shadow_u_perspective_matrix, false, point0_perspective_matrix)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
+
+
+
+  // Table shadow
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.vertices)
+  gl.enableVertexAttribArray(shadow_a_pos)
+  gl.vertexAttribPointer(shadow_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(shadow_u_model_light_matrix, false, point0_table_model_light_matrix)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)
+
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+  gl.viewport(0, 0, canvas.width, canvas.height)
 }
 
 function render_screen () {
@@ -231,19 +271,22 @@ function render_tower () {
 }
 
 function render_table () {
-  gl.useProgram(plain_shader_program)
+  gl.useProgram(simple_shader_program)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.vertices)
-  gl.enableVertexAttribArray(plain_a_pos)
-  gl.vertexAttribPointer(plain_a_pos, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(simple_a_pos)
+  gl.vertexAttribPointer(simple_a_pos, 3, gl.FLOAT, false, 0, 0)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.normals)
-  gl.enableVertexAttribArray(plain_a_normal)
-  gl.vertexAttribPointer(plain_a_normal, 3, gl.FLOAT, false, 0, 0)
+  gl.enableVertexAttribArray(simple_a_normal)
+  gl.vertexAttribPointer(simple_a_normal, 3, gl.FLOAT, false, 0, 0)
 
-  gl.uniformMatrix4fv(plain_u_model_view_matrix, false, table_model_view_matrix)
-  gl.uniformMatrix4fv(plain_u_world_model_transpose_matrix, false, table_world_model_transpose_matrix)
-  gl.uniform1f(plain_u_light, table_light)
+  gl.uniformMatrix4fv(simple_u_model_world_matrix, false, table_model_world_matrix)
+  gl.uniformMatrix4fv(simple_u_world_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(simple_u_world_model_transpose_matrix, false, table_world_model_transpose_matrix)
+  gl.uniformMatrix4fv(simple_u_world_light_matrix, false, point0_world_light_matrix)
+  gl.activeTexture(gl.TEXTURE0 + shadow_depth_texture_id)
+  gl.uniform1i(simple_u_sampler, shadow_depth_texture_id)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)

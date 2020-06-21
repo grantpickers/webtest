@@ -86,7 +86,7 @@ let mouse_y = 0
 let has_clicked = false
 let has_resized = true
 
-function init_canvas (width, height) {
+function init_canvas () {
   document.body.appendChild(canvas)
 
   gl.clearColor(0,0,0,1)
@@ -107,7 +107,7 @@ let prev_timestamp = null
 const TARGET_FRAME_TIME = 1000/60
 let dt = 0
 let total_time = 0
-const limit_fps = false
+const limit_fps = true
 
 function main_loop (timestamp) {
   if (!limit_fps) {
