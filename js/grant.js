@@ -70,6 +70,31 @@ const table_inv_ray = new Float32Array(3)
 let table_light = 0.0
 
 /****************************
+ * folder
+ ***************************/
+
+const folder_translation = create_translation_matrix(new Float32Array(16), .28,.005,.3)
+const folder_inverse_translation = create_translation_matrix(new Float32Array(16), -.28,-.005,-.3)
+
+const folder_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
+const folder_inverse_rotation = new Float32Array(16)
+
+const folder_model_world_matrix = new Float32Array(16)
+const folder_world_model_matrix = new Float32Array(16)
+const folder_world_model_transpose_matrix = new Float32Array(16)
+
+const folder_model_view_matrix = new Float32Array(16)
+
+
+const folder_pick_ray = new Float32Array(3)
+const folder_camera_position = new Float32Array(4)
+const folder_half_width = 1.12
+const folder_half_height = 1.804
+const folder_half_depth = 1.12
+const folder_inv_ray = new Float32Array(3)
+let folder_light = 0.0
+
+/****************************
  * sky
  ***************************/
 
@@ -328,6 +353,7 @@ function update () {
   update_welcometext()
   update_tower()
   update_table()
+  update_folder()
   update_sky()
   update_screen()
 
@@ -507,6 +533,17 @@ function update_table () {
   matrix_transpose_4(table_world_model_transpose_matrix, table_world_model_matrix)
 }
 
+function update_folder () {
+  create_y_rotation_matrix(folder_rotation, prev_timestamp*0.0004)
+  matrix_mult_4(folder_model_world_matrix, folder_translation, folder_rotation)
+
+  matrix_mult_4(folder_model_view_matrix, camera_world_view_matrix, folder_model_world_matrix)
+
+  matrix_transpose_4(folder_inverse_rotation, folder_rotation)
+  matrix_mult_4(folder_world_model_matrix, folder_inverse_rotation, folder_inverse_translation)
+  matrix_transpose_4(folder_world_model_transpose_matrix, folder_world_model_matrix)
+}
+
 function update_sky () {
   matrix_mult_4(sky_model_world_matrix, sky_translation, sky_rotation)
   matrix_mult_4(sky_model_view_matrix, camera_world_view_matrix, sky_model_world_matrix)
@@ -628,6 +665,7 @@ const asset_urls = {
   welcometext_obj: '/obj/words.obj',
   tower_obj: '/obj/tower.obj',
   table_obj: '/obj/table.obj',
+  folder_obj: '/obj/folder.obj',
   sky_obj: '/obj/sky.obj',
   skybox_vertex: '/shaders/skybox.vert',
   skybox_fragment: '/shaders/skybox.frag',
@@ -696,6 +734,7 @@ function main () {
 
   model_buffers.tower = load_obj(gl, assets.tower_obj)
   model_buffers.table = load_obj(gl, assets.table_obj)
+  model_buffers.folder = load_obj(gl, assets.folder_obj)
 
   model_buffers.sky = load_obj(gl, assets.sky_obj)
   model_buffers.sky.texture_id = 2
