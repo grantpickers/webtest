@@ -6,7 +6,6 @@ const welcometext_translation = create_translation_matrix(new Float32Array(16), 
 const welcometext_inverse_translation = create_translation_matrix(new Float32Array(16), 2,-3,5)
 
 const welcometext_rotation = create_y_rotation_matrix(new Float32Array(16), Math.PI/2 - 1*Math.PI/7)
-const welcometext_rotation_rate = create_y_rotation_matrix(new Float32Array(16), 0)
 const welcometext_inverse_rotation = new Float32Array(16)
 
 const welcometext_model_world_matrix = new Float32Array(16)
@@ -233,8 +232,8 @@ const point0_inverse_translation = new Float32Array([
   0, 0, 1, 0,
   0, 0, 0, 1,
 ])
-const point0_ry = Math.PI/2 + 6*Math.PI/8
-const point0_position = new Float32Array([4.4*Math.sin(point0_ry), 1.0, -0.5+4.4*Math.cos(point0_ry),])
+let point0_ry = Math.PI/2 + 6*Math.PI/8
+const point0_position = new Float32Array(3)
 
 
 const point0_world_light_matrix = new Float32Array(16)
@@ -373,6 +372,7 @@ let simple_u_world_light_matrix = null
 let simple_u_perspective_matrix = null
 let simple_u_world_model_transpose_matrix = null
 let simple_u_sampler = null
+let simple_u_light_rotation = null
 function compile_simple_shader () {
   simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
   gl.useProgram(simple_shader_program)
@@ -385,6 +385,7 @@ function compile_simple_shader () {
   simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
   simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
   simple_u_sampler = gl.getUniformLocation(simple_shader_program, 'u_sampler')
+  simple_u_light_rotation = gl.getUniformLocation(simple_shader_program, 'u_light_rotation')
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -736,10 +737,14 @@ function update_shadow () {
   for (let i=0; i<camera_perspective_matrix.length; i++) {point0_perspective_matrix[i] = camera_perspective_matrix[i]}
 
 
-  point0_rotation[0] = Math.cos(point0_ry)
-  point0_rotation[2] = -Math.sin(point0_ry)
-  point0_rotation[8] = Math.sin(point0_ry)
-  point0_rotation[10] = Math.cos(point0_ry)
+  point0_ry = prev_timestamp*0.0004
+  create_x_rotation_matrix(point0_rotation, -Math.PI/3)
+  matrix_mult_4(point0_rotation, create_y_rotation_matrix([], point0_ry), point0_rotation)
+
+  point0_position[0] = 3.0*Math.sin(point0_ry)
+  point0_position[1] = 3.0
+  point0_position[2] = -0.5+3.0*Math.cos(point0_ry)
+
 
   point0_inverse_translation[12] = -point0_position[0]
   point0_inverse_translation[13] = -point0_position[1]

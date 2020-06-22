@@ -1,7 +1,9 @@
 function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+  //gl.cullFace(gl.FRONT)
   render_shadow()
+  //gl.cullFace(gl.BACK)
   render_screen()
   render_welcometext()
   render_tower()
@@ -287,6 +289,7 @@ function render_table () {
   gl.uniformMatrix4fv(simple_u_world_light_matrix, false, point0_world_light_matrix)
   gl.activeTexture(gl.TEXTURE0 + shadow_depth_texture_id)
   gl.uniform1i(simple_u_sampler, shadow_depth_texture_id)
+  gl.uniformMatrix4fv(simple_u_light_rotation, false, point0_rotation)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)
