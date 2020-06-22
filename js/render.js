@@ -1,9 +1,7 @@
 function render () {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-  //gl.cullFace(gl.FRONT)
   render_shadow()
-  //gl.cullFace(gl.BACK)
   render_screen()
   render_welcometext()
   render_tower()
@@ -220,8 +218,13 @@ function render_screen () {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
   gl.uniform1i(screen_u_sampler, model_buffers.screen.texture_id)
 
-  gl.uniformMatrix4fv(screen_u_model_view_matrix, false, screen_model_view_matrix)
+  gl.uniformMatrix4fv(screen_u_model_world_matrix, false, screen_model_world_matrix)
+  gl.uniformMatrix4fv(screen_u_world_view_matrix, false, camera_world_view_matrix)
   gl.uniformMatrix4fv(screen_u_world_model_transpose_matrix, false, screen_world_model_transpose_matrix)
+
+  gl.uniform1i(screen_u_shadow_map, shadow_depth_texture_id)
+  gl.uniformMatrix4fv(screen_u_light_rotation, false, point0_rotation)
+  gl.uniformMatrix4fv(screen_u_world_light_matrix, false, point0_world_light_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -240,7 +243,6 @@ function render_welcometext () {
 
   gl.uniformMatrix4fv(envmap_u_model_view_matrix, false, welcometext_model_view_matrix)
 
-  gl.activeTexture(gl.TEXTURE0 + model_buffers.welcometext.texture_id)
   gl.uniform1i(envmap_u_sampler, model_buffers.welcometext.texture_id)
 
   gl.uniform4fv(envmap_u_camera_position, camera_position)
@@ -287,8 +289,7 @@ function render_table () {
   gl.uniformMatrix4fv(simple_u_world_view_matrix, false, camera_world_view_matrix)
   gl.uniformMatrix4fv(simple_u_world_model_transpose_matrix, false, table_world_model_transpose_matrix)
   gl.uniformMatrix4fv(simple_u_world_light_matrix, false, point0_world_light_matrix)
-  gl.activeTexture(gl.TEXTURE0 + shadow_depth_texture_id)
-  gl.uniform1i(simple_u_sampler, shadow_depth_texture_id)
+  gl.uniform1i(simple_u_shadow_map, shadow_depth_texture_id)
   gl.uniformMatrix4fv(simple_u_light_rotation, false, point0_rotation)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
@@ -325,7 +326,6 @@ function render_sky () {
   gl.vertexAttribPointer(skybox_a_uv, 2, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(skybox_a_uv)
 
-  gl.activeTexture(gl.TEXTURE0 + model_buffers.sky.texture_id)
   gl.uniform1i(skybox_u_sampler, model_buffers.sky.texture_id)
 
   gl.uniformMatrix4fv(skybox_u_model_view_matrix, false, sky_model_view_matrix)

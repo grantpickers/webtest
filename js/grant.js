@@ -318,20 +318,28 @@ let screen_shader_program = null
 let screen_a_pos = null
 let screen_a_normal = null
 let screen_a_uv = null
-let screen_u_model_view_matrix = null
+let screen_u_model_world_matrix = null
+let screen_u_world_view_matrix = null
 let screen_u_perspective_matrix = null
 let screen_u_sampler = null
 let screen_u_world_model_transpose_matrix = null
+let screen_u_shadow_map = null
+let screen_u_light_rotation = null
+let screen_u_world_light_matrix = null
 function compile_screen_shader () {
   screen_shader_program = create_shader_program(gl, assets.screen_vertex, assets.screen_fragment)
   gl.useProgram(screen_shader_program)
   screen_a_pos    = gl.getAttribLocation(screen_shader_program, 'a_pos')
   screen_a_normal = gl.getAttribLocation(screen_shader_program, 'a_normal')
   screen_a_uv     = gl.getAttribLocation(screen_shader_program, 'a_uv')
-  screen_u_model_view_matrix  = gl.getUniformLocation(screen_shader_program, 'u_model_view_matrix')
+  screen_u_model_world_matrix  = gl.getUniformLocation(screen_shader_program, 'u_model_world_matrix')
+  screen_u_world_view_matrix  = gl.getUniformLocation(screen_shader_program, 'u_world_view_matrix')
   screen_u_sampler            = gl.getUniformLocation(screen_shader_program, 'u_sampler')
   screen_u_perspective_matrix = gl.getUniformLocation(screen_shader_program, 'u_perspective_matrix')
   screen_u_world_model_transpose_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_model_transpose_matrix')
+  screen_u_shadow_map = gl.getUniformLocation(screen_shader_program, 'u_shadow_map')
+  screen_u_light_rotation = gl.getUniformLocation(screen_shader_program, 'u_light_rotation')
+  screen_u_world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_light_matrix')
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -371,7 +379,7 @@ let simple_u_world_view_matrix = null
 let simple_u_world_light_matrix = null
 let simple_u_perspective_matrix = null
 let simple_u_world_model_transpose_matrix = null
-let simple_u_sampler = null
+let simple_u_shadow_map = null
 let simple_u_light_rotation = null
 function compile_simple_shader () {
   simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
@@ -384,7 +392,7 @@ function compile_simple_shader () {
   simple_u_world_light_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_light_matrix')
   simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
   simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
-  simple_u_sampler = gl.getUniformLocation(simple_shader_program, 'u_sampler')
+  simple_u_shadow_map = gl.getUniformLocation(simple_shader_program, 'u_shadow_map')
   simple_u_light_rotation = gl.getUniformLocation(simple_shader_program, 'u_light_rotation')
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
 }
