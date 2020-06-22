@@ -10,14 +10,13 @@ varying vec4 light_space_pos;
 
 void main () {
   vec4 tex = texture2D(u_sampler, vec2(uv.x, 1.0-uv.y));
+
   vec3 light_direction = (u_light_rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
   float ambience = 0.01;
   float brightness = 3.0;
   float falloff_linear = 0.7;
   float falloff_quadratic = 1.8;
   float shadow_bias = max(0.002 * (1.0 - dot(normal, light_direction)), 0.0005);
-
-
 
   vec3 scaled_light_space_pos = light_space_pos.xyz / light_space_pos.w;
   scaled_light_space_pos.x += 1.0;
@@ -38,7 +37,6 @@ void main () {
     }
   }
   shadow /= 9.0;
-
 
   bool in_range = scaled_light_space_pos.x >= 0.0 && scaled_light_space_pos.x <= 1.0 && scaled_light_space_pos.y >= 0.0 && scaled_light_space_pos.y <= 1.0;
   float dist = sqrt(dot(scaled_light_space_pos, scaled_light_space_pos));

@@ -89,23 +89,13 @@ let folder_light = 0.0
  * sky
  ***************************/
 
-const sky_translation = create_translation_matrix(new Float32Array(16), -1,0,1)
-const sky_inverse_translation = create_translation_matrix(new Float32Array(16), 1,0,-1)
-
+const sky_translation = create_translation_matrix(new Float32Array(16), -1,2.1,1)
+const sky_inverse_translation = create_translation_matrix(new Float32Array(16), 1,-2.1,-1)
 const sky_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const sky_inverse_rotation = new Float32Array(16)
-
 const sky_model_world_matrix = new Float32Array(16)
-
-const sky_model_view_matrix = new Float32Array(16)
-
-
-const sky_pick_ray = new Float32Array(3)
-const sky_camera_position = new Float32Array(4)
-const sky_half_width = 0.56
-const sky_half_height = 0.908
-const sky_half_depth = 0.56
-const sky_inv_ray = new Float32Array(3)
+const sky_world_model_matrix = new Float32Array(16)
+const sky_world_model_transpose_matrix = new Float32Array(16)
 
 
 /****************************
@@ -268,20 +258,28 @@ let skybox_shader_program = null
 let skybox_a_pos = null
 let skybox_a_normal = null
 let skybox_a_uv = null
-let skybox_u_model_view_matrix = null
+let skybox_u_model_world_matrix = null
+let skybox_u_world_view_matrix = null
 let skybox_u_perspective_matrix = null
 let skybox_u_sampler = null
 let skybox_u_world_model_transpose_matrix = null
+let skybox_u_world_light_matrix = null
+let skybox_u_shadow_map = null
+let skybox_u_light_rotation = null
 function compile_skybox_shader () {
   skybox_shader_program = create_shader_program(gl, assets.skybox_vertex, assets.skybox_fragment)
   gl.useProgram(skybox_shader_program)
   skybox_a_pos    = gl.getAttribLocation(skybox_shader_program, 'a_pos')
   skybox_a_normal = gl.getAttribLocation(skybox_shader_program, 'a_normal')
   skybox_a_uv     = gl.getAttribLocation(skybox_shader_program, 'a_uv')
-  skybox_u_model_view_matrix  = gl.getUniformLocation(skybox_shader_program, 'u_model_view_matrix')
+  skybox_u_model_world_matrix  = gl.getUniformLocation(skybox_shader_program, 'u_model_world_matrix')
+  skybox_u_world_view_matrix  = gl.getUniformLocation(skybox_shader_program, 'u_world_view_matrix')
   skybox_u_sampler            = gl.getUniformLocation(skybox_shader_program, 'u_sampler')
   skybox_u_perspective_matrix = gl.getUniformLocation(skybox_shader_program, 'u_perspective_matrix')
   skybox_u_world_model_transpose_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_model_transpose_matrix')
+  skybox_u_world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_light_matrix')
+  skybox_u_shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_shadow_map')
+  skybox_u_light_rotation = gl.getUniformLocation(skybox_shader_program, 'u_light_rotation')
   gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -473,6 +471,8 @@ function handle_resize () {
   gl.uniformMatrix4fv(envmap_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(simple_shader_program)
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
+  gl.useProgram(skybox_shader_program)
+  gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
 
@@ -631,8 +631,9 @@ function update_folder () {
 
 function update_sky () {
   matrix_mult_4(sky_model_world_matrix, sky_translation, sky_rotation)
-  matrix_mult_4(sky_model_view_matrix, camera_world_view_matrix, sky_model_world_matrix)
   matrix_transpose_4(sky_inverse_rotation, sky_rotation)
+  matrix_mult_4(sky_world_model_matrix, sky_inverse_rotation, sky_inverse_translation)
+  matrix_transpose_4(sky_world_model_transpose_matrix, sky_world_model_matrix)
 }
 
 

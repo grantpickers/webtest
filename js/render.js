@@ -322,13 +322,22 @@ function render_sky () {
   gl.enableVertexAttribArray(skybox_a_pos)
   gl.vertexAttribPointer(skybox_a_pos, 3, gl.FLOAT, false, 0, 0)
 
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sky.normals)
+  gl.enableVertexAttribArray(skybox_a_normal)
+  gl.vertexAttribPointer(skybox_a_normal, 3, gl.FLOAT, false, 0, 0)
+
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.sky.uvs)
   gl.vertexAttribPointer(skybox_a_uv, 2, gl.FLOAT, false, 0, 0)
   gl.enableVertexAttribArray(skybox_a_uv)
 
   gl.uniform1i(skybox_u_sampler, model_buffers.sky.texture_id)
+  gl.uniformMatrix4fv(skybox_u_model_world_matrix, false, sky_model_world_matrix)
+  gl.uniformMatrix4fv(skybox_u_world_view_matrix, false, camera_world_view_matrix)
+  gl.uniformMatrix4fv(skybox_u_world_model_transpose_matrix, false, sky_world_model_transpose_matrix)
+  gl.uniformMatrix4fv(skybox_u_world_light_matrix, false, point0_world_light_matrix)
+  gl.uniform1i(skybox_u_shadow_map, shadow_depth_texture_id)
+  gl.uniformMatrix4fv(skybox_u_light_rotation, false, point0_rotation)
 
-  gl.uniformMatrix4fv(skybox_u_model_view_matrix, false, sky_model_view_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sky.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.sky.num_indices, gl.UNSIGNED_SHORT, 0)
