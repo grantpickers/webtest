@@ -310,11 +310,13 @@ function load_obj (gl, obj) {
 
 
 function load_images (image_urls, images, cb) {
+  document.body.innerHTML = 'loading images'
   for (let k in image_urls) {
     const img = new Image()
     img.src = image_urls[k]
     img.onload = ((k) => () => {
       images[k] = img
+      document.body.innerHTML = 'loading images '+Object.keys(images).length+'/'+Object.keys(image_urls).length
       if (Object.keys(images).length == Object.keys(image_urls).length) {
         cb()
       }
@@ -324,10 +326,12 @@ function load_images (image_urls, images, cb) {
 
 
 function load_assets (asset_urls, assets, cb) {
+  document.body.innerHTML = 'loading assets'
   for (let k in asset_urls) {
     fetch(asset_urls[k]).then(res => res.text())
     .then((k => data => {
       assets[k] = data
+      document.body.innerHTML = 'loading assets '+Object.keys(assets).length+'/'+Object.keys(asset_urls).length
       if (Object.keys(assets).length == Object.keys(asset_urls).length) {
         cb()
       }
@@ -364,4 +368,31 @@ function create_shader_program (gl, vert_source, frag_source) {
   const info_log_link = gl.getProgramInfoLog(program)
   if (info_log_link) { console.log(info_log_link) }
   return program
+}
+
+
+/**********************
+ * Create Shadow Map
+ **********************/
+
+function create_shadow_map (depth_texture, depth_texture_id, color_texture, color_texture_id, framebuffer, resolution) {
+  gl.activeTexture(gl.TEXTURE0 + depth_texture_id)
+  gl.bindTexture(gl.TEXTURE_2D, depth_texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, resolution, resolution, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth_texture, 0)
+  color_texture = gl.createTexture()
+  gl.activeTexture(gl.TEXTURE0 + color_texture_id)
+  gl.bindTexture(gl.TEXTURE_2D, color_texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, resolution, resolution, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, color_texture, 0)
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 }

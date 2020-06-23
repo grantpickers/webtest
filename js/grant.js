@@ -201,9 +201,21 @@ video_catblue_mp4.play()
 let shadow_framebuffer = null
 let shadow_depth_texture = null
 let shadow_color_texture = null
+// TODO: put all texture IDs in one spot
 const shadow_depth_texture_id = 4
 const shadow_color_texture_id = 5
 const shadow_resolution = 2048
+
+let shadow_framebuffer2 = null
+let shadow_depth_texture2 = null
+let shadow_color_texture2 = null
+const shadow_depth_texture_id2 = 6
+const shadow_color_texture_id2 = 7
+const shadow_resolution2 = 2048
+
+/****************************
+ * Lights
+ ***************************/
 
 const point0_rotation = new Float32Array([
   1, 0, 0, 0,
@@ -225,12 +237,36 @@ const point0_inverse_translation = new Float32Array([
 ])
 let point0_ry = Math.PI/2 + 6*Math.PI/8
 const point0_position = new Float32Array(3)
-
-
 const point0_world_light_matrix = new Float32Array(16)
 const point0_screen_model_light_matrix = new Float32Array(16)
 const point0_table_model_light_matrix = new Float32Array(16)
 const point0_perspective_matrix = new Float32Array(16)
+
+
+const point1_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const point1_inverse_rotation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+const point1_inverse_translation = new Float32Array([
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+])
+let point1_ry = Math.PI/2 + 6*Math.PI/8
+const point1_position = new Float32Array(3)
+const point1_world_light_matrix = new Float32Array(16)
+const point1_screen_model_light_matrix = new Float32Array(16)
+const point1_table_model_light_matrix = new Float32Array(16)
+const point1_perspective_matrix = new Float32Array(16)
 
 
 /****************************
@@ -744,8 +780,9 @@ function update_screen () {
 
 
 function update_shadow () {
+  // Point0
+  // TODO: different perspective matrices for lights?
   for (let i=0; i<camera_perspective_matrix.length; i++) {point0_perspective_matrix[i] = camera_perspective_matrix[i]}
-
 
   point0_ry = prev_timestamp*0.0004
   create_x_rotation_matrix(point0_rotation, -Math.PI/3)
@@ -754,7 +791,6 @@ function update_shadow () {
   point0_position[0] = 3.0*Math.sin(point0_ry)
   point0_position[1] = 3.0
   point0_position[2] = -0.5+3.0*Math.cos(point0_ry)
-
 
   point0_inverse_translation[12] = -point0_position[0]
   point0_inverse_translation[13] = -point0_position[1]
@@ -765,6 +801,28 @@ function update_shadow () {
   matrix_mult_4(point0_world_light_matrix, point0_inverse_rotation, point0_inverse_translation)
   matrix_mult_4(point0_screen_model_light_matrix, point0_world_light_matrix, screen_model_world_matrix)
   matrix_mult_4(point0_table_model_light_matrix, point0_world_light_matrix, table_model_world_matrix)
+
+
+  // Point1
+  for (let i=0; i<camera_perspective_matrix.length; i++) {point1_perspective_matrix[i] = camera_perspective_matrix[i]}
+
+  point1_ry = prev_timestamp*0.0004
+  create_x_rotation_matrix(point1_rotation, -Math.PI/3)
+  matrix_mult_4(point1_rotation, create_y_rotation_matrix([], point1_ry), point1_rotation)
+
+  point1_position[0] = 3.0*Math.sin(point1_ry)
+  point1_position[1] = 3.0
+  point1_position[2] = -0.5+3.0*Math.cos(point1_ry)
+
+  point1_inverse_translation[12] = -point1_position[0]
+  point1_inverse_translation[13] = -point1_position[1]
+  point1_inverse_translation[14] = -point1_position[2]
+
+  matrix_transpose_4(point1_inverse_rotation, point1_rotation)
+
+  matrix_mult_4(point1_world_light_matrix, point1_inverse_rotation, point1_inverse_translation)
+  matrix_mult_4(point1_screen_model_light_matrix, point1_world_light_matrix, screen_model_world_matrix)
+  matrix_mult_4(point1_table_model_light_matrix, point1_world_light_matrix, table_model_world_matrix)
 }
 
 
@@ -820,6 +878,7 @@ const assets = {}
 const images = {}
 
 function main () {
+  document.body.innerHTML = ''
   init_canvas()
   camera_update_perspective(screen_pixel_width, screen_pixel_height)
 
@@ -829,36 +888,37 @@ function main () {
   camera_ty_target = 0.020
   camera_tz_target = -0.004
   */
-              camera_ry_target = Math.PI/2 - 1*Math.PI/7
-              camera_tx_target = 4.4*Math.sin(camera_ry_target)
-              camera_ty_target = 0
-              camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
+  camera_ry_target = Math.PI/2 - 1*Math.PI/7
+  camera_tx_target = 4.4*Math.sin(camera_ry_target)
+  camera_ty_target = 0
+  camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
 
 
   gl.getExtension('WEBGL_depth_texture')
+
   shadow_depth_texture = gl.createTexture()
-  gl.activeTexture(gl.TEXTURE0 + shadow_depth_texture_id)
-  gl.bindTexture(gl.TEXTURE_2D, shadow_depth_texture)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, shadow_resolution, shadow_resolution, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-  shadow_framebuffer = gl.createFramebuffer()
-  gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_framebuffer)
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, shadow_depth_texture, 0)
   shadow_color_texture = gl.createTexture()
-  gl.activeTexture(gl.TEXTURE0 + shadow_color_texture_id)
-  gl.bindTexture(gl.TEXTURE_2D, shadow_color_texture)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadow_resolution, shadow_resolution, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, shadow_color_texture, 0)
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+  shadow_framebuffer = gl.createFramebuffer()
+  create_shadow_map(
+    shadow_depth_texture,
+    shadow_depth_texture_id,
+    shadow_color_texture,
+    shadow_color_texture_id,
+    shadow_framebuffer,
+    shadow_resolution
+  )
 
-
+  shadow_depth_texture2 = gl.createTexture()
+  shadow_color_texture2 = gl.createTexture()
+  shadow_framebuffer2 = gl.createFramebuffer()
+  create_shadow_map(
+    shadow_depth_texture2,
+    shadow_depth_texture_id2,
+    shadow_color_texture2,
+    shadow_color_texture_id2,
+    shadow_framebuffer2,
+    shadow_resolution2
+  )
 
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)

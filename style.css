@@ -30,6 +30,7 @@ body {
   font-family: Helvetica Neue;
   display: flex; align-items: center; justify-content: center;
   height: 100vh;
+  color: #fff;
 }
 canvas {
   display: block;
