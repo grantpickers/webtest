@@ -1,20 +1,21 @@
 precision mediump float;
 
 uniform sampler2D u_shadow_map;
+uniform sampler2D u_shadow_map1;
 uniform mat4 u_light_rotation;
+uniform mat4 u_light_rotation1;
 
 varying vec4 light_space_pos;
+varying vec4 light_space_pos1;
 varying vec3 normal;
 
-void main () {
+float get_light (sampler2D u_shadow_map, mat4 u_light_rotation, vec4 light_space_pos) {
   vec3 light_direction = (u_light_rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
   float ambience = 0.01;
   float brightness = 3.0;
   float falloff_linear = 0.7;
   float falloff_quadratic = 1.8;
   float shadow_bias = max(0.002 * (1.0 - dot(normal, light_direction)), 0.0005);
-
-
 
   vec3 scaled_light_space_pos = light_space_pos.xyz / light_space_pos.w;
   scaled_light_space_pos.x += 1.0;
@@ -43,5 +44,12 @@ void main () {
   float dist = sqrt(dot(scaled_light_space_pos, scaled_light_space_pos));
   float falloff = 1.0/(1.0 + falloff_linear * dist + falloff_quadratic * dist * dist);
   float c = ambience + (1.0-shadow) * (brightness*clamp((falloff*dot(light_direction, normal)), 0.0, 1.0));
+
+  return c;
+}
+
+void main () {
+  float c = get_light(u_shadow_map, u_light_rotation, light_space_pos);
+  c += get_light(u_shadow_map1, u_light_rotation1, light_space_pos1);
   gl_FragColor = vec4(c * vec3(1.0, 1.0, 1.0), 1.0);
 }

@@ -2,15 +2,17 @@ precision mediump float;
 
 uniform sampler2D u_sampler;
 uniform sampler2D u_shadow_map;
+uniform sampler2D u_shadow_map1;
 uniform mat4 u_light_rotation;
+uniform mat4 u_light_rotation1;
 
 varying lowp vec3 normal;
 varying highp vec2 uv;
 varying vec4 light_space_pos;
+varying vec4 light_space_pos1;
 
-void main () {
-  vec4 tex = texture2D(u_sampler, vec2(uv.x, 1.0-uv.y));
 
+float get_light (sampler2D u_shadow_map, mat4 u_light_rotation, vec4 light_space_pos) {
   vec3 light_direction = (u_light_rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
   float ambience = 0.01;
   float brightness = 3.0;
@@ -42,6 +44,13 @@ void main () {
   float dist = sqrt(dot(scaled_light_space_pos, scaled_light_space_pos));
   float falloff = 1.0/(1.0 + falloff_linear * dist + falloff_quadratic * dist * dist);
   float c = ambience + (1.0-shadow) * (brightness*clamp((falloff*dot(light_direction, normal)), 0.0, 1.0));
+  return c;
+}
+
+void main () {
+  vec4 tex = texture2D(u_sampler, vec2(uv.x, 1.0-uv.y));
+  float c = get_light(u_shadow_map, u_light_rotation, light_space_pos);
+  c += get_light(u_shadow_map1, u_light_rotation1, light_space_pos1);
   if (uv.x < 0.0) {
     gl_FragColor = vec4(c * vec3(1.0, 1.0, 1.0), 1.0);
   }

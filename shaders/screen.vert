@@ -6,9 +6,11 @@ uniform mat4 u_model_world_matrix;
 uniform mat4 u_world_view_matrix;
 uniform mat4 u_world_model_transpose_matrix;
 uniform mat4 u_world_light_matrix;
+uniform mat4 u_world_light_matrix1;
 
 
 varying vec4 light_space_pos;
+varying vec4 light_space_pos1;
 varying lowp vec3 normal;
 varying highp vec2 uv;
 
@@ -18,6 +20,7 @@ void main () {
 
   gl_Position = u_perspective_matrix * u_world_view_matrix * world_pos;
   light_space_pos = u_perspective_matrix * u_world_light_matrix * world_pos;
+  light_space_pos1 = u_perspective_matrix * u_world_light_matrix1 * world_pos;
   normal = vec3(u_world_model_transpose_matrix * vec4(a_normal, 1.0));
   uv = a_uv;
 }

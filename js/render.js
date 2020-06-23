@@ -11,13 +11,13 @@ function render () {
 }
 
 function render_shadow () {
+  /****
+   * Shadow 0
+   */
   gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_framebuffer)
   gl.viewport(0, 0, shadow_resolution, shadow_resolution)
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-
   gl.useProgram(shadow_shader_program)
-
 
   // Screen shadow
 
@@ -31,8 +31,6 @@ function render_shadow () {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
 
-
-
   // Table shadow
 
   gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.vertices)
@@ -40,6 +38,39 @@ function render_shadow () {
   gl.vertexAttribPointer(shadow_a_pos, 3, gl.FLOAT, false, 0, 0)
 
   gl.uniformMatrix4fv(shadow_u_model_light_matrix, false, point0_table_model_light_matrix)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)
+
+
+
+  /****
+   * Shadow 1
+   */
+  gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_framebuffer1)
+  gl.viewport(0, 0, shadow_resolution1, shadow_resolution1)
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+  gl.useProgram(shadow_shader_program)
+
+  // Screen shadow
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.screen.vertices)
+  gl.enableVertexAttribArray(shadow_a_pos)
+  gl.vertexAttribPointer(shadow_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(shadow_u_model_light_matrix, false, point1_screen_model_light_matrix)
+  gl.uniformMatrix4fv(shadow_u_perspective_matrix, false, point1_perspective_matrix)
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
+  gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
+
+  // Table shadow
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, model_buffers.table.vertices)
+  gl.enableVertexAttribArray(shadow_a_pos)
+  gl.vertexAttribPointer(shadow_a_pos, 3, gl.FLOAT, false, 0, 0)
+
+  gl.uniformMatrix4fv(shadow_u_model_light_matrix, false, point1_table_model_light_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -223,8 +254,11 @@ function render_screen () {
   gl.uniformMatrix4fv(screen_u_world_model_transpose_matrix, false, screen_world_model_transpose_matrix)
 
   gl.uniform1i(screen_u_shadow_map, shadow_depth_texture_id)
+  gl.uniform1i(screen_u_shadow_map1, shadow_depth_texture_id1)
   gl.uniformMatrix4fv(screen_u_light_rotation, false, point0_rotation)
+  gl.uniformMatrix4fv(screen_u_light_rotation1, false, point1_rotation)
   gl.uniformMatrix4fv(screen_u_world_light_matrix, false, point0_world_light_matrix)
+  gl.uniformMatrix4fv(screen_u_world_light_matrix1, false, point1_world_light_matrix)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -289,8 +323,11 @@ function render_table () {
   gl.uniformMatrix4fv(simple_u_world_view_matrix, false, camera_world_view_matrix)
   gl.uniformMatrix4fv(simple_u_world_model_transpose_matrix, false, table_world_model_transpose_matrix)
   gl.uniformMatrix4fv(simple_u_world_light_matrix, false, point0_world_light_matrix)
+  gl.uniformMatrix4fv(simple_u_world_light_matrix1, false, point1_world_light_matrix)
   gl.uniform1i(simple_u_shadow_map, shadow_depth_texture_id)
+  gl.uniform1i(simple_u_shadow_map1, shadow_depth_texture_id1)
   gl.uniformMatrix4fv(simple_u_light_rotation, false, point0_rotation)
+  gl.uniformMatrix4fv(simple_u_light_rotation1, false, point1_rotation)
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.table.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.table.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -334,9 +371,13 @@ function render_sky () {
   gl.uniformMatrix4fv(skybox_u_model_world_matrix, false, sky_model_world_matrix)
   gl.uniformMatrix4fv(skybox_u_world_view_matrix, false, camera_world_view_matrix)
   gl.uniformMatrix4fv(skybox_u_world_model_transpose_matrix, false, sky_world_model_transpose_matrix)
+
   gl.uniformMatrix4fv(skybox_u_world_light_matrix, false, point0_world_light_matrix)
+  gl.uniformMatrix4fv(skybox_u_world_light_matrix1, false, point1_world_light_matrix)
   gl.uniform1i(skybox_u_shadow_map, shadow_depth_texture_id)
+  gl.uniform1i(skybox_u_shadow_map1, shadow_depth_texture_id1)
   gl.uniformMatrix4fv(skybox_u_light_rotation, false, point0_rotation)
+  gl.uniformMatrix4fv(skybox_u_light_rotation1, false, point1_rotation)
 
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sky.indices)

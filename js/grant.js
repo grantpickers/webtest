@@ -206,12 +206,12 @@ const shadow_depth_texture_id = 4
 const shadow_color_texture_id = 5
 const shadow_resolution = 2048
 
-let shadow_framebuffer2 = null
-let shadow_depth_texture2 = null
-let shadow_color_texture2 = null
-const shadow_depth_texture_id2 = 6
-const shadow_color_texture_id2 = 7
-const shadow_resolution2 = 2048
+let shadow_framebuffer1 = null
+let shadow_depth_texture1 = null
+let shadow_color_texture1 = null
+const shadow_depth_texture_id1 = 6
+const shadow_color_texture_id1 = 7
+const shadow_resolution1 = 2048
 
 /****************************
  * Lights
@@ -301,8 +301,11 @@ let skybox_u_perspective_matrix = null
 let skybox_u_sampler = null
 let skybox_u_world_model_transpose_matrix = null
 let skybox_u_world_light_matrix = null
+let skybox_u_world_light_matrix1 = null
 let skybox_u_shadow_map = null
+let skybox_u_shadow_map1 = null
 let skybox_u_light_rotation = null
+let skybox_u_light_rotation1 = null
 function compile_skybox_shader () {
   skybox_shader_program = create_shader_program(gl, assets.skybox_vertex, assets.skybox_fragment)
   gl.useProgram(skybox_shader_program)
@@ -315,8 +318,11 @@ function compile_skybox_shader () {
   skybox_u_perspective_matrix = gl.getUniformLocation(skybox_shader_program, 'u_perspective_matrix')
   skybox_u_world_model_transpose_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_model_transpose_matrix')
   skybox_u_world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_light_matrix')
+  skybox_u_world_light_matrix1 = gl.getUniformLocation(skybox_shader_program, 'u_world_light_matrix1')
   skybox_u_shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_shadow_map')
+  skybox_u_shadow_map1 = gl.getUniformLocation(skybox_shader_program, 'u_shadow_map1')
   skybox_u_light_rotation = gl.getUniformLocation(skybox_shader_program, 'u_light_rotation')
+  skybox_u_light_rotation1 = gl.getUniformLocation(skybox_shader_program, 'u_light_rotation1')
   gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -359,8 +365,11 @@ let screen_u_perspective_matrix = null
 let screen_u_sampler = null
 let screen_u_world_model_transpose_matrix = null
 let screen_u_shadow_map = null
+let screen_u_shadow_map1 = null
 let screen_u_light_rotation = null
+let screen_u_light_rotation1 = null
 let screen_u_world_light_matrix = null
+let screen_u_world_light_matrix1 = null
 function compile_screen_shader () {
   screen_shader_program = create_shader_program(gl, assets.screen_vertex, assets.screen_fragment)
   gl.useProgram(screen_shader_program)
@@ -373,8 +382,11 @@ function compile_screen_shader () {
   screen_u_perspective_matrix = gl.getUniformLocation(screen_shader_program, 'u_perspective_matrix')
   screen_u_world_model_transpose_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_model_transpose_matrix')
   screen_u_shadow_map = gl.getUniformLocation(screen_shader_program, 'u_shadow_map')
+  screen_u_shadow_map1 = gl.getUniformLocation(screen_shader_program, 'u_shadow_map1')
   screen_u_light_rotation = gl.getUniformLocation(screen_shader_program, 'u_light_rotation')
+  screen_u_light_rotation1 = gl.getUniformLocation(screen_shader_program, 'u_light_rotation1')
   screen_u_world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_light_matrix')
+  screen_u_world_light_matrix1 = gl.getUniformLocation(screen_shader_program, 'u_world_light_matrix1')
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -411,11 +423,14 @@ let simple_a_pos = null
 let simple_a_normal = null
 let simple_u_model_world_matrix = null
 let simple_u_world_view_matrix = null
-let simple_u_world_light_matrix = null
 let simple_u_perspective_matrix = null
 let simple_u_world_model_transpose_matrix = null
+let simple_u_world_light_matrix = null
+let simple_u_world_light_matrix1 = null
 let simple_u_shadow_map = null
+let simple_u_shadow_map1 = null
 let simple_u_light_rotation = null
+let simple_u_light_rotation1 = null
 function compile_simple_shader () {
   simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
   gl.useProgram(simple_shader_program)
@@ -425,10 +440,13 @@ function compile_simple_shader () {
   simple_u_model_world_matrix  = gl.getUniformLocation(simple_shader_program, 'u_model_world_matrix')
   simple_u_world_view_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_view_matrix')
   simple_u_world_light_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_light_matrix')
+  simple_u_world_light_matrix1 = gl.getUniformLocation(simple_shader_program, 'u_world_light_matrix1')
   simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
   simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
   simple_u_shadow_map = gl.getUniformLocation(simple_shader_program, 'u_shadow_map')
+  simple_u_shadow_map1 = gl.getUniformLocation(simple_shader_program, 'u_shadow_map1')
   simple_u_light_rotation = gl.getUniformLocation(simple_shader_program, 'u_light_rotation')
+  simple_u_light_rotation1 = gl.getUniformLocation(simple_shader_program, 'u_light_rotation1')
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -806,7 +824,7 @@ function update_shadow () {
   // Point1
   for (let i=0; i<camera_perspective_matrix.length; i++) {point1_perspective_matrix[i] = camera_perspective_matrix[i]}
 
-  point1_ry = prev_timestamp*0.0004
+  point1_ry = prev_timestamp*0.0006
   create_x_rotation_matrix(point1_rotation, -Math.PI/3)
   matrix_mult_4(point1_rotation, create_y_rotation_matrix([], point1_ry), point1_rotation)
 
@@ -908,16 +926,16 @@ function main () {
     shadow_resolution
   )
 
-  shadow_depth_texture2 = gl.createTexture()
-  shadow_color_texture2 = gl.createTexture()
-  shadow_framebuffer2 = gl.createFramebuffer()
+  shadow_depth_texture1 = gl.createTexture()
+  shadow_color_texture1 = gl.createTexture()
+  shadow_framebuffer1 = gl.createFramebuffer()
   create_shadow_map(
-    shadow_depth_texture2,
-    shadow_depth_texture_id2,
-    shadow_color_texture2,
-    shadow_color_texture_id2,
-    shadow_framebuffer2,
-    shadow_resolution2
+    shadow_depth_texture1,
+    shadow_depth_texture_id1,
+    shadow_color_texture1,
+    shadow_color_texture_id1,
+    shadow_framebuffer1,
+    shadow_resolution1
   )
 
 
