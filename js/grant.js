@@ -195,78 +195,46 @@ video_catblue_mp4.play()
 
 
 /****************************
- * Shadow
- ***************************/
-
-let shadow_framebuffer = null
-let shadow_depth_texture = null
-let shadow_color_texture = null
-// TODO: put all texture IDs in one spot
-const shadow_depth_texture_id = 4
-const shadow_color_texture_id = 5
-const shadow_resolution = 2048
-
-let shadow_framebuffer1 = null
-let shadow_depth_texture1 = null
-let shadow_color_texture1 = null
-const shadow_depth_texture_id1 = 6
-const shadow_color_texture_id1 = 7
-const shadow_resolution1 = 2048
-
-/****************************
  * Lights
  ***************************/
 
-const point0_rotation = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-])
-const point0_inverse_rotation = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-])
-const point0_inverse_translation = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-])
+
 let point0_ry = Math.PI/2 + 6*Math.PI/8
-const point0_position = new Float32Array(3)
-const point0_world_light_matrix = new Float32Array(16)
-const point0_screen_model_light_matrix = new Float32Array(16)
-const point0_table_model_light_matrix = new Float32Array(16)
-const point0_perspective_matrix = new Float32Array(16)
-
-
-const point1_rotation = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-])
-const point1_inverse_rotation = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-])
-const point1_inverse_translation = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-])
 let point1_ry = Math.PI/2 + 6*Math.PI/8
-const point1_position = new Float32Array(3)
-const point1_world_light_matrix = new Float32Array(16)
-const point1_screen_model_light_matrix = new Float32Array(16)
-const point1_table_model_light_matrix = new Float32Array(16)
-const point1_perspective_matrix = new Float32Array(16)
+
+// TODO: put all texture IDs in one spot
+
+const point_lights = [
+  {
+    world_light_matrix: new Float32Array(16),
+    shadow_depth_texture_id: 4,
+    shadow_color_texture_id: 5,
+    position: new Float32Array(3),
+    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
+    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    perspective_matrix: new Float32Array(16),
+    shadow_framebuffer: null,
+    shadow_depth_texture: null,
+    shadow_color_texture: null,
+    shadow_resolution: 2048,
+  },
+  {
+    world_light_matrix: new Float32Array(16),
+    shadow_depth_texture_id: 6,
+    shadow_color_texture_id: 7,
+    position: new Float32Array(3),
+    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
+    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    perspective_matrix: new Float32Array(16),
+    shadow_framebuffer: null,
+    shadow_depth_texture: null,
+    shadow_color_texture: null,
+    shadow_resolution: 2048,
+  },
+]
+
 
 
 /****************************
@@ -277,14 +245,16 @@ const point1_perspective_matrix = new Float32Array(16)
 
 let shadow_shader_program = null
 let shadow_a_pos = null
-let shadow_u_model_light_matrix = null
+let shadow_u_model_world_matrix = null
+let shadow_u_world_light_matrix = null
 let shadow_u_perspective_matrix = null
 function compile_shadow_shader () {
   shadow_shader_program = create_shader_program(gl, assets.shadow_vertex, assets.shadow_fragment)
   gl.useProgram(shadow_shader_program)
-  shadow_a_pos    = gl.getAttribLocation(shadow_shader_program, 'a_pos')
-  shadow_u_model_light_matrix  = gl.getUniformLocation(shadow_shader_program, 'u_model_light_matrix')
-  shadow_u_perspective_matrix  = gl.getUniformLocation(shadow_shader_program, 'u_perspective_matrix')
+  shadow_a_pos = gl.getAttribLocation(shadow_shader_program, 'a_pos')
+  shadow_u_model_world_matrix = gl.getUniformLocation(shadow_shader_program, 'u_model_world_matrix')
+  shadow_u_world_light_matrix = gl.getUniformLocation(shadow_shader_program, 'u_world_light_matrix')
+  shadow_u_perspective_matrix = gl.getUniformLocation(shadow_shader_program, 'u_perspective_matrix')
   gl.uniformMatrix4fv(shadow_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -425,28 +395,31 @@ let simple_u_model_world_matrix = null
 let simple_u_world_view_matrix = null
 let simple_u_perspective_matrix = null
 let simple_u_world_model_transpose_matrix = null
-let simple_u_world_light_matrix = null
-let simple_u_world_light_matrix1 = null
-let simple_u_shadow_map = null
-let simple_u_shadow_map1 = null
-let simple_u_light_rotation = null
-let simple_u_light_rotation1 = null
+let simple_NUM_POINT_LIGHTS = 2
+let simple_u_point_lights = []
+for (let i=0; i<simple_NUM_POINT_LIGHTS; i++) {
+  simple_u_point_lights[i] = {
+    world_light_matrix: null,
+    shadow_map: null,
+    rotation: null,
+  }
+}
+
 function compile_simple_shader () {
   simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
   gl.useProgram(simple_shader_program)
   simple_a_pos = gl.getAttribLocation(simple_shader_program, 'a_pos')
   simple_a_normal = gl.getAttribLocation(simple_shader_program, 'a_normal')
-  simple_a_uv     = gl.getAttribLocation(simple_shader_program, 'a_uv')
-  simple_u_model_world_matrix  = gl.getUniformLocation(simple_shader_program, 'u_model_world_matrix')
-  simple_u_world_view_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_view_matrix')
-  simple_u_world_light_matrix  = gl.getUniformLocation(simple_shader_program, 'u_world_light_matrix')
-  simple_u_world_light_matrix1 = gl.getUniformLocation(simple_shader_program, 'u_world_light_matrix1')
+  simple_a_uv = gl.getAttribLocation(simple_shader_program, 'a_uv')
+  simple_u_model_world_matrix = gl.getUniformLocation(simple_shader_program, 'u_model_world_matrix')
+  simple_u_world_view_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_view_matrix')
   simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
   simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
-  simple_u_shadow_map = gl.getUniformLocation(simple_shader_program, 'u_shadow_map')
-  simple_u_shadow_map1 = gl.getUniformLocation(simple_shader_program, 'u_shadow_map1')
-  simple_u_light_rotation = gl.getUniformLocation(simple_shader_program, 'u_light_rotation')
-  simple_u_light_rotation1 = gl.getUniformLocation(simple_shader_program, 'u_light_rotation1')
+  for (let i=0; i<simple_NUM_POINT_LIGHTS; i++) {
+    simple_u_point_lights[i].world_light_matrix = gl.getUniformLocation(simple_shader_program, 'u_point_lights['+i+'].world_light_matrix')
+    simple_u_point_lights[i].shadow_map = gl.getUniformLocation(simple_shader_program, 'u_point_lights['+i+'].shadow_map')
+    simple_u_point_lights[i].rotation = gl.getUniformLocation(simple_shader_program, 'u_point_lights['+i+'].rotation')
+  }
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -800,47 +773,43 @@ function update_screen () {
 function update_shadow () {
   // Point0
   // TODO: different perspective matrices for lights?
-  for (let i=0; i<camera_perspective_matrix.length; i++) {point0_perspective_matrix[i] = camera_perspective_matrix[i]}
+  for (let i=0; i<camera_perspective_matrix.length; i++) {point_lights[0].perspective_matrix[i] = camera_perspective_matrix[i]}
 
   point0_ry = prev_timestamp*0.0004
-  create_x_rotation_matrix(point0_rotation, -Math.PI/3)
-  matrix_mult_4(point0_rotation, create_y_rotation_matrix([], point0_ry), point0_rotation)
+  create_x_rotation_matrix(point_lights[0].rotation, -Math.PI/3)
+  matrix_mult_4(point_lights[0].rotation, create_y_rotation_matrix([], point0_ry), point_lights[0].rotation)
 
-  point0_position[0] = 3.0*Math.sin(point0_ry)
-  point0_position[1] = 3.0
-  point0_position[2] = -0.5+3.0*Math.cos(point0_ry)
+  point_lights[0].position[0] = 3.0*Math.sin(point0_ry)
+  point_lights[0].position[1] = 3.0
+  point_lights[0].position[2] = -0.5+3.0*Math.cos(point0_ry)
 
-  point0_inverse_translation[12] = -point0_position[0]
-  point0_inverse_translation[13] = -point0_position[1]
-  point0_inverse_translation[14] = -point0_position[2]
+  point_lights[0].inverse_translation[12] = -point_lights[0].position[0]
+  point_lights[0].inverse_translation[13] = -point_lights[0].position[1]
+  point_lights[0].inverse_translation[14] = -point_lights[0].position[2]
 
-  matrix_transpose_4(point0_inverse_rotation, point0_rotation)
+  matrix_transpose_4(point_lights[0].inverse_rotation, point_lights[0].rotation)
 
-  matrix_mult_4(point0_world_light_matrix, point0_inverse_rotation, point0_inverse_translation)
-  matrix_mult_4(point0_screen_model_light_matrix, point0_world_light_matrix, screen_model_world_matrix)
-  matrix_mult_4(point0_table_model_light_matrix, point0_world_light_matrix, table_model_world_matrix)
+  matrix_mult_4(point_lights[0].world_light_matrix, point_lights[0].inverse_rotation, point_lights[0].inverse_translation)
 
 
   // Point1
-  for (let i=0; i<camera_perspective_matrix.length; i++) {point1_perspective_matrix[i] = camera_perspective_matrix[i]}
+  for (let i=0; i<camera_perspective_matrix.length; i++) {point_lights[1].perspective_matrix[i] = camera_perspective_matrix[i]}
 
   point1_ry = prev_timestamp*0.0006
-  create_x_rotation_matrix(point1_rotation, -Math.PI/3)
-  matrix_mult_4(point1_rotation, create_y_rotation_matrix([], point1_ry), point1_rotation)
+  create_x_rotation_matrix(point_lights[1].rotation, -Math.PI/3)
+  matrix_mult_4(point_lights[1].rotation, create_y_rotation_matrix([], point1_ry), point_lights[1].rotation)
 
-  point1_position[0] = 3.0*Math.sin(point1_ry)
-  point1_position[1] = 3.0
-  point1_position[2] = -0.5+3.0*Math.cos(point1_ry)
+  point_lights[1].position[0] = 3.0*Math.sin(point1_ry)
+  point_lights[1].position[1] = 3.0
+  point_lights[1].position[2] = -0.5+3.0*Math.cos(point1_ry)
 
-  point1_inverse_translation[12] = -point1_position[0]
-  point1_inverse_translation[13] = -point1_position[1]
-  point1_inverse_translation[14] = -point1_position[2]
+  point_lights[1].inverse_translation[12] = -point_lights[1].position[0]
+  point_lights[1].inverse_translation[13] = -point_lights[1].position[1]
+  point_lights[1].inverse_translation[14] = -point_lights[1].position[2]
 
-  matrix_transpose_4(point1_inverse_rotation, point1_rotation)
+  matrix_transpose_4(point_lights[1].inverse_rotation, point_lights[1].rotation)
 
-  matrix_mult_4(point1_world_light_matrix, point1_inverse_rotation, point1_inverse_translation)
-  matrix_mult_4(point1_screen_model_light_matrix, point1_world_light_matrix, screen_model_world_matrix)
-  matrix_mult_4(point1_table_model_light_matrix, point1_world_light_matrix, table_model_world_matrix)
+  matrix_mult_4(point_lights[1].world_light_matrix, point_lights[1].inverse_rotation, point_lights[1].inverse_translation)
 }
 
 
@@ -914,28 +883,28 @@ function main () {
 
   gl.getExtension('WEBGL_depth_texture')
 
-  shadow_depth_texture = gl.createTexture()
-  shadow_color_texture = gl.createTexture()
-  shadow_framebuffer = gl.createFramebuffer()
+  point_lights[0].shadow_depth_texture = gl.createTexture()
+  point_lights[0].shadow_color_texture = gl.createTexture()
+  point_lights[0].shadow_framebuffer = gl.createFramebuffer()
   create_shadow_map(
-    shadow_depth_texture,
-    shadow_depth_texture_id,
-    shadow_color_texture,
-    shadow_color_texture_id,
-    shadow_framebuffer,
-    shadow_resolution
+    point_lights[0].shadow_depth_texture,
+    point_lights[0].shadow_depth_texture_id,
+    point_lights[0].shadow_color_texture,
+    point_lights[0].shadow_color_texture_id,
+    point_lights[0].shadow_framebuffer,
+    point_lights[0].shadow_resolution
   )
 
-  shadow_depth_texture1 = gl.createTexture()
-  shadow_color_texture1 = gl.createTexture()
-  shadow_framebuffer1 = gl.createFramebuffer()
+  point_lights[1].shadow_depth_texture = gl.createTexture()
+  point_lights[1].shadow_color_texture = gl.createTexture()
+  point_lights[1].shadow_framebuffer = gl.createFramebuffer()
   create_shadow_map(
-    shadow_depth_texture1,
-    shadow_depth_texture_id1,
-    shadow_color_texture1,
-    shadow_color_texture_id1,
-    shadow_framebuffer1,
-    shadow_resolution1
+    point_lights[1].shadow_depth_texture,
+    point_lights[1].shadow_depth_texture_id,
+    point_lights[1].shadow_color_texture,
+    point_lights[1].shadow_color_texture_id,
+    point_lights[1].shadow_framebuffer,
+    point_lights[1].shadow_resolution
   )
 
 

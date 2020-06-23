@@ -1,16 +1,20 @@
 precision mediump float;
 
-uniform sampler2D u_shadow_map;
-uniform sampler2D u_shadow_map1;
-uniform mat4 u_light_rotation;
-uniform mat4 u_light_rotation1;
+#define NUM_POINT_LIGHTS 2
 
-varying vec4 light_space_pos;
-varying vec4 light_space_pos1;
+struct PointLight {
+  sampler2D shadow_map;
+  mat4 world_light_matrix;
+  mat4 rotation;
+};
+
+uniform PointLight u_point_lights[NUM_POINT_LIGHTS];
+
+varying vec4 light_space_pos[NUM_POINT_LIGHTS];
 varying vec3 normal;
 
-float get_light (sampler2D u_shadow_map, mat4 u_light_rotation, vec4 light_space_pos) {
-  vec3 light_direction = (u_light_rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
+float get_light (sampler2D shadow_map, mat4 rotation, vec4 light_space_pos) {
+  vec3 light_direction = (rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
   float ambience = 0.01;
   float brightness = 3.0;
   float falloff_linear = 0.7;
@@ -31,7 +35,7 @@ float get_light (sampler2D u_shadow_map, mat4 u_light_rotation, vec4 light_space
   vec2 texel_size = vec2(1.0 / 1024.0, 1.0 / 1024.0);
   for(int x = -1; x <= 1; x++) {
     for(int y = -1; y <= 1; y++) {
-      float pcf_depth = texture2D(u_shadow_map, scaled_light_space_pos.xy + vec2(x, y) * texel_size).r; 
+      float pcf_depth = texture2D(shadow_map, scaled_light_space_pos.xy + vec2(x, y) * texel_size).r; 
       shadow += shadow_depth - shadow_bias > pcf_depth ? 1.0 : 0.0;        
     }
   }
@@ -49,7 +53,9 @@ float get_light (sampler2D u_shadow_map, mat4 u_light_rotation, vec4 light_space
 }
 
 void main () {
-  float c = get_light(u_shadow_map, u_light_rotation, light_space_pos);
-  c += get_light(u_shadow_map1, u_light_rotation1, light_space_pos1);
+  float c = 0.0;
+  for (int i=0; i<NUM_POINT_LIGHTS; i++) {
+    c += get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
+  }
   gl_FragColor = vec4(c * vec3(1.0, 1.0, 1.0), 1.0);
 }
