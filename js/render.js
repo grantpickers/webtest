@@ -12,7 +12,7 @@ function render () {
 
 function render_shadow () {
   gl.bindFramebuffer(gl.FRAMEBUFFER, shadow_framebuffer)
-  gl.viewport(0, 0, 1024, 1024)
+  gl.viewport(0, 0, shadow_resolution, shadow_resolution)
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 

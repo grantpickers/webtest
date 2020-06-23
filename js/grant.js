@@ -203,6 +203,7 @@ let shadow_depth_texture = null
 let shadow_color_texture = null
 const shadow_depth_texture_id = 4
 const shadow_color_texture_id = 5
+const shadow_resolution = 2048
 
 const point0_rotation = new Float32Array([
   1, 0, 0, 0,
@@ -838,7 +839,7 @@ function main () {
   shadow_depth_texture = gl.createTexture()
   gl.activeTexture(gl.TEXTURE0 + shadow_depth_texture_id)
   gl.bindTexture(gl.TEXTURE_2D, shadow_depth_texture)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, 1024, 1024, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, shadow_resolution, shadow_resolution, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
@@ -849,7 +850,7 @@ function main () {
   shadow_color_texture = gl.createTexture()
   gl.activeTexture(gl.TEXTURE0 + shadow_color_texture_id)
   gl.bindTexture(gl.TEXTURE_2D, shadow_color_texture)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, shadow_resolution, shadow_resolution, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
