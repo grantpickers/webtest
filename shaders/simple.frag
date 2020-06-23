@@ -1,6 +1,6 @@
 precision mediump float;
 
-#define NUM_POINT_LIGHTS 2
+#define NUM_POINT_LIGHTS 4
 
 struct PointLight {
   sampler2D shadow_map;
@@ -55,7 +55,7 @@ float get_light (sampler2D shadow_map, mat4 rotation, vec4 light_space_pos) {
 void main () {
   float c = 0.0;
   for (int i=0; i<NUM_POINT_LIGHTS; i++) {
-    c += get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
+    c += 0.3*get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
   }
   gl_FragColor = vec4(c * vec3(1.0, 1.0, 1.0), 1.0);
 }

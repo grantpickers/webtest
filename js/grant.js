@@ -199,8 +199,6 @@ video_catblue_mp4.play()
  ***************************/
 
 
-let point0_ry = Math.PI/2 + 6*Math.PI/8
-let point1_ry = Math.PI/2 + 6*Math.PI/8
 
 // TODO: put all texture IDs in one spot
 
@@ -218,6 +216,7 @@ const point_lights = [
     shadow_depth_texture: null,
     shadow_color_texture: null,
     shadow_resolution: 2048,
+    ry: Math.PI/2 + 6*Math.PI/8,
   },
   {
     world_light_matrix: new Float32Array(16),
@@ -232,8 +231,41 @@ const point_lights = [
     shadow_depth_texture: null,
     shadow_color_texture: null,
     shadow_resolution: 2048,
+    ry: Math.PI/2 + 6*Math.PI/8,
+  },
+  {
+    world_light_matrix: new Float32Array(16),
+    shadow_depth_texture_id: 8,
+    shadow_color_texture_id: 9,
+    position: new Float32Array(3),
+    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
+    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    perspective_matrix: new Float32Array(16),
+    shadow_framebuffer: null,
+    shadow_depth_texture: null,
+    shadow_color_texture: null,
+    shadow_resolution: 2048,
+    ry: Math.PI/2 + 6*Math.PI/8,
+  },
+  {
+    world_light_matrix: new Float32Array(16),
+    shadow_depth_texture_id: 10,
+    shadow_color_texture_id: 11,
+    position: new Float32Array(3),
+    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
+    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    perspective_matrix: new Float32Array(16),
+    shadow_framebuffer: null,
+    shadow_depth_texture: null,
+    shadow_color_texture: null,
+    shadow_resolution: 2048,
+    ry: Math.PI/2 + 6*Math.PI/8,
   },
 ]
+
+
 
 
 
@@ -270,12 +302,14 @@ let skybox_u_world_view_matrix = null
 let skybox_u_perspective_matrix = null
 let skybox_u_sampler = null
 let skybox_u_world_model_transpose_matrix = null
-let skybox_u_world_light_matrix = null
-let skybox_u_world_light_matrix1 = null
-let skybox_u_shadow_map = null
-let skybox_u_shadow_map1 = null
-let skybox_u_light_rotation = null
-let skybox_u_light_rotation1 = null
+let skybox_u_point_lights = []
+for (let i=0; i<point_lights.length; i++) {
+  skybox_u_point_lights[i] = {
+    world_light_matrix: null,
+    shadow_map: null,
+    rotation: null,
+  }
+}
 function compile_skybox_shader () {
   skybox_shader_program = create_shader_program(gl, assets.skybox_vertex, assets.skybox_fragment)
   gl.useProgram(skybox_shader_program)
@@ -287,12 +321,11 @@ function compile_skybox_shader () {
   skybox_u_sampler            = gl.getUniformLocation(skybox_shader_program, 'u_sampler')
   skybox_u_perspective_matrix = gl.getUniformLocation(skybox_shader_program, 'u_perspective_matrix')
   skybox_u_world_model_transpose_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_model_transpose_matrix')
-  skybox_u_world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_light_matrix')
-  skybox_u_world_light_matrix1 = gl.getUniformLocation(skybox_shader_program, 'u_world_light_matrix1')
-  skybox_u_shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_shadow_map')
-  skybox_u_shadow_map1 = gl.getUniformLocation(skybox_shader_program, 'u_shadow_map1')
-  skybox_u_light_rotation = gl.getUniformLocation(skybox_shader_program, 'u_light_rotation')
-  skybox_u_light_rotation1 = gl.getUniformLocation(skybox_shader_program, 'u_light_rotation1')
+  for (let i=0; i<point_lights.length; i++) {
+    skybox_u_point_lights[i].world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_point_lights['+i+'].world_light_matrix')
+    skybox_u_point_lights[i].shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_point_lights['+i+'].shadow_map')
+    skybox_u_point_lights[i].rotation = gl.getUniformLocation(skybox_shader_program, 'u_point_lights['+i+'].rotation')
+  }
   gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -334,12 +367,14 @@ let screen_u_world_view_matrix = null
 let screen_u_perspective_matrix = null
 let screen_u_sampler = null
 let screen_u_world_model_transpose_matrix = null
-let screen_u_shadow_map = null
-let screen_u_shadow_map1 = null
-let screen_u_light_rotation = null
-let screen_u_light_rotation1 = null
-let screen_u_world_light_matrix = null
-let screen_u_world_light_matrix1 = null
+let screen_u_point_lights = []
+for (let i=0; i<point_lights.length; i++) {
+  screen_u_point_lights[i] = {
+    world_light_matrix: null,
+    shadow_map: null,
+    rotation: null,
+  }
+}
 function compile_screen_shader () {
   screen_shader_program = create_shader_program(gl, assets.screen_vertex, assets.screen_fragment)
   gl.useProgram(screen_shader_program)
@@ -351,12 +386,12 @@ function compile_screen_shader () {
   screen_u_sampler            = gl.getUniformLocation(screen_shader_program, 'u_sampler')
   screen_u_perspective_matrix = gl.getUniformLocation(screen_shader_program, 'u_perspective_matrix')
   screen_u_world_model_transpose_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_model_transpose_matrix')
-  screen_u_shadow_map = gl.getUniformLocation(screen_shader_program, 'u_shadow_map')
-  screen_u_shadow_map1 = gl.getUniformLocation(screen_shader_program, 'u_shadow_map1')
-  screen_u_light_rotation = gl.getUniformLocation(screen_shader_program, 'u_light_rotation')
-  screen_u_light_rotation1 = gl.getUniformLocation(screen_shader_program, 'u_light_rotation1')
-  screen_u_world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_light_matrix')
-  screen_u_world_light_matrix1 = gl.getUniformLocation(screen_shader_program, 'u_world_light_matrix1')
+  for (let i=0; i<point_lights.length; i++) {
+    screen_u_point_lights[i].world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_point_lights['+i+'].world_light_matrix')
+    screen_u_point_lights[i].shadow_map = gl.getUniformLocation(screen_shader_program, 'u_point_lights['+i+'].shadow_map')
+    screen_u_point_lights[i].rotation = gl.getUniformLocation(screen_shader_program, 'u_point_lights['+i+'].rotation')
+  }
+
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -395,16 +430,14 @@ let simple_u_model_world_matrix = null
 let simple_u_world_view_matrix = null
 let simple_u_perspective_matrix = null
 let simple_u_world_model_transpose_matrix = null
-let simple_NUM_POINT_LIGHTS = 2
 let simple_u_point_lights = []
-for (let i=0; i<simple_NUM_POINT_LIGHTS; i++) {
+for (let i=0; i<point_lights.length; i++) {
   simple_u_point_lights[i] = {
     world_light_matrix: null,
     shadow_map: null,
     rotation: null,
   }
 }
-
 function compile_simple_shader () {
   simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
   gl.useProgram(simple_shader_program)
@@ -415,7 +448,7 @@ function compile_simple_shader () {
   simple_u_world_view_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_view_matrix')
   simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
   simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
-  for (let i=0; i<simple_NUM_POINT_LIGHTS; i++) {
+  for (let i=0; i<point_lights.length; i++) {
     simple_u_point_lights[i].world_light_matrix = gl.getUniformLocation(simple_shader_program, 'u_point_lights['+i+'].world_light_matrix')
     simple_u_point_lights[i].shadow_map = gl.getUniformLocation(simple_shader_program, 'u_point_lights['+i+'].shadow_map')
     simple_u_point_lights[i].rotation = gl.getUniformLocation(simple_shader_program, 'u_point_lights['+i+'].rotation')
@@ -464,7 +497,7 @@ function update () {
   update_folder()
   update_sky()
   update_screen()
-  update_shadow()
+  update_point_lights()
 
   
 
@@ -501,6 +534,11 @@ function handle_resize () {
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(skybox_shader_program)
   gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
+
+  for (let i=0; i<point_lights.length; i++) {
+    // TODO: different perspective matrices for lights?
+    for (let j=0; j<camera_perspective_matrix.length; j++) {point_lights[i].perspective_matrix[j] = camera_perspective_matrix[j]}
+  }
 }
 
 
@@ -770,46 +808,25 @@ function update_screen () {
 }
 
 
-function update_shadow () {
-  // Point0
-  // TODO: different perspective matrices for lights?
-  for (let i=0; i<camera_perspective_matrix.length; i++) {point_lights[0].perspective_matrix[i] = camera_perspective_matrix[i]}
+function update_point_lights () {
+  for (let i=0; i<point_lights.length; i++) {
+    point_lights[i].ry = prev_timestamp*(0.0004 + 0.0002*i)
 
-  point0_ry = prev_timestamp*0.0004
-  create_x_rotation_matrix(point_lights[0].rotation, -Math.PI/3)
-  matrix_mult_4(point_lights[0].rotation, create_y_rotation_matrix([], point0_ry), point_lights[0].rotation)
+    create_x_rotation_matrix(point_lights[i].rotation, -Math.PI/3)
+    matrix_mult_4(point_lights[i].rotation, create_y_rotation_matrix([], point_lights[i].ry), point_lights[i].rotation)
 
-  point_lights[0].position[0] = 3.0*Math.sin(point0_ry)
-  point_lights[0].position[1] = 3.0
-  point_lights[0].position[2] = -0.5+3.0*Math.cos(point0_ry)
+    point_lights[i].position[0] = 3.0*Math.sin(point_lights[i].ry)
+    point_lights[i].position[1] = 3.0
+    point_lights[i].position[2] = -0.5+3.0*Math.cos(point_lights[i].ry)
 
-  point_lights[0].inverse_translation[12] = -point_lights[0].position[0]
-  point_lights[0].inverse_translation[13] = -point_lights[0].position[1]
-  point_lights[0].inverse_translation[14] = -point_lights[0].position[2]
+    point_lights[i].inverse_translation[12] = -point_lights[i].position[0]
+    point_lights[i].inverse_translation[13] = -point_lights[i].position[1]
+    point_lights[i].inverse_translation[14] = -point_lights[i].position[2]
 
-  matrix_transpose_4(point_lights[0].inverse_rotation, point_lights[0].rotation)
+    matrix_transpose_4(point_lights[i].inverse_rotation, point_lights[i].rotation)
 
-  matrix_mult_4(point_lights[0].world_light_matrix, point_lights[0].inverse_rotation, point_lights[0].inverse_translation)
-
-
-  // Point1
-  for (let i=0; i<camera_perspective_matrix.length; i++) {point_lights[1].perspective_matrix[i] = camera_perspective_matrix[i]}
-
-  point1_ry = prev_timestamp*0.0006
-  create_x_rotation_matrix(point_lights[1].rotation, -Math.PI/3)
-  matrix_mult_4(point_lights[1].rotation, create_y_rotation_matrix([], point1_ry), point_lights[1].rotation)
-
-  point_lights[1].position[0] = 3.0*Math.sin(point1_ry)
-  point_lights[1].position[1] = 3.0
-  point_lights[1].position[2] = -0.5+3.0*Math.cos(point1_ry)
-
-  point_lights[1].inverse_translation[12] = -point_lights[1].position[0]
-  point_lights[1].inverse_translation[13] = -point_lights[1].position[1]
-  point_lights[1].inverse_translation[14] = -point_lights[1].position[2]
-
-  matrix_transpose_4(point_lights[1].inverse_rotation, point_lights[1].rotation)
-
-  matrix_mult_4(point_lights[1].world_light_matrix, point_lights[1].inverse_rotation, point_lights[1].inverse_translation)
+    matrix_mult_4(point_lights[i].world_light_matrix, point_lights[i].inverse_rotation, point_lights[i].inverse_translation)
+  }
 }
 
 
@@ -883,29 +900,19 @@ function main () {
 
   gl.getExtension('WEBGL_depth_texture')
 
-  point_lights[0].shadow_depth_texture = gl.createTexture()
-  point_lights[0].shadow_color_texture = gl.createTexture()
-  point_lights[0].shadow_framebuffer = gl.createFramebuffer()
-  create_shadow_map(
-    point_lights[0].shadow_depth_texture,
-    point_lights[0].shadow_depth_texture_id,
-    point_lights[0].shadow_color_texture,
-    point_lights[0].shadow_color_texture_id,
-    point_lights[0].shadow_framebuffer,
-    point_lights[0].shadow_resolution
-  )
-
-  point_lights[1].shadow_depth_texture = gl.createTexture()
-  point_lights[1].shadow_color_texture = gl.createTexture()
-  point_lights[1].shadow_framebuffer = gl.createFramebuffer()
-  create_shadow_map(
-    point_lights[1].shadow_depth_texture,
-    point_lights[1].shadow_depth_texture_id,
-    point_lights[1].shadow_color_texture,
-    point_lights[1].shadow_color_texture_id,
-    point_lights[1].shadow_framebuffer,
-    point_lights[1].shadow_resolution
-  )
+  for (let i=0; i<point_lights.length; i++) {
+    point_lights[i].shadow_depth_texture = gl.createTexture()
+    point_lights[i].shadow_color_texture = gl.createTexture()
+    point_lights[i].shadow_framebuffer = gl.createFramebuffer()
+    create_shadow_map(
+      point_lights[i].shadow_depth_texture,
+      point_lights[i].shadow_depth_texture_id,
+      point_lights[i].shadow_color_texture,
+      point_lights[i].shadow_color_texture_id,
+      point_lights[i].shadow_framebuffer,
+      point_lights[i].shadow_resolution
+    )
+  }
 
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)

@@ -220,13 +220,11 @@ function render_screen () {
   gl.uniformMatrix4fv(screen_u_world_view_matrix, false, camera_world_view_matrix)
   gl.uniformMatrix4fv(screen_u_world_model_transpose_matrix, false, screen_world_model_transpose_matrix)
 
-  // TODO: use arrays in screen shader
-  gl.uniform1i(screen_u_shadow_map, point_lights[0].shadow_depth_texture_id)
-  gl.uniform1i(screen_u_shadow_map1, point_lights[1].shadow_depth_texture_id)
-  gl.uniformMatrix4fv(screen_u_light_rotation, false, point_lights[0].rotation)
-  gl.uniformMatrix4fv(screen_u_light_rotation1, false, point_lights[1].rotation)
-  gl.uniformMatrix4fv(screen_u_world_light_matrix, false, point_lights[0].world_light_matrix)
-  gl.uniformMatrix4fv(screen_u_world_light_matrix1, false, point_lights[1].world_light_matrix)
+  for (let i=0; i<point_lights.length; i++) {
+    gl.uniformMatrix4fv(screen_u_point_lights[i].world_light_matrix, false, point_lights[i].world_light_matrix)
+    gl.uniform1i(screen_u_point_lights[i].shadow_map, point_lights[i].shadow_depth_texture_id)
+    gl.uniformMatrix4fv(screen_u_point_lights[i].rotation, false, point_lights[i].rotation)
+  }
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.screen.indices)
   gl.drawElements(gl.TRIANGLES, model_buffers.screen.num_indices, gl.UNSIGNED_SHORT, 0)
@@ -292,7 +290,7 @@ function render_table () {
   gl.uniformMatrix4fv(simple_u_world_view_matrix, false, camera_world_view_matrix)
   gl.uniformMatrix4fv(simple_u_world_model_transpose_matrix, false, table_world_model_transpose_matrix)
 
-  for (let i=0; i<simple_NUM_POINT_LIGHTS; i++) {
+  for (let i=0; i<point_lights.length; i++) {
     gl.uniformMatrix4fv(simple_u_point_lights[i].world_light_matrix, false, point_lights[i].world_light_matrix)
     gl.uniform1i(simple_u_point_lights[i].shadow_map, point_lights[i].shadow_depth_texture_id)
     gl.uniformMatrix4fv(simple_u_point_lights[i].rotation, false, point_lights[i].rotation)
@@ -342,14 +340,11 @@ function render_sky () {
   gl.uniformMatrix4fv(skybox_u_world_model_transpose_matrix, false, sky_world_model_transpose_matrix)
 
 
-  // TODO: skybox shader should use arrays
-  gl.uniformMatrix4fv(skybox_u_world_light_matrix, false, point_lights[0].world_light_matrix)
-  gl.uniform1i(skybox_u_shadow_map, point_lights[0].shadow_depth_texture_id)
-  gl.uniformMatrix4fv(skybox_u_light_rotation, false, point_lights[0].rotation)
-
-  gl.uniformMatrix4fv(skybox_u_world_light_matrix1, false, point_lights[1].world_light_matrix)
-  gl.uniform1i(skybox_u_shadow_map1, point_lights[1].shadow_depth_texture_id)
-  gl.uniformMatrix4fv(skybox_u_light_rotation1, false, point_lights[1].rotation)
+  for (let i=0; i<point_lights.length; i++) {
+    gl.uniformMatrix4fv(skybox_u_point_lights[i].world_light_matrix, false, point_lights[i].world_light_matrix)
+    gl.uniform1i(skybox_u_point_lights[i].shadow_map, point_lights[i].shadow_depth_texture_id)
+    gl.uniformMatrix4fv(skybox_u_point_lights[i].rotation, false, point_lights[i].rotation)
+  }
 
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model_buffers.sky.indices)

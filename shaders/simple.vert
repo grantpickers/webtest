@@ -1,6 +1,6 @@
 precision mediump float;
 
-#define NUM_POINT_LIGHTS 2
+#define NUM_POINT_LIGHTS 4
 
 struct PointLight {
   sampler2D shadow_map;
