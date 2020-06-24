@@ -76,14 +76,8 @@ const folder_world_model_transpose_matrix = new Float32Array(16)
 
 const folder_model_view_matrix = new Float32Array(16)
 
-
-const folder_pick_ray = new Float32Array(3)
-const folder_camera_position = new Float32Array(4)
-const folder_half_width = 1.12
-const folder_half_height = 1.804
-const folder_half_depth = 1.12
-const folder_inv_ray = new Float32Array(3)
 let folder_light = 0.0
+
 
 /****************************
  * sky
@@ -186,7 +180,7 @@ let screen_preview_w = 0
 let screen_preview_h = 0
 
 
-let video_catblue_mp4= document.createElement('video')
+let video_catblue_mp4 = document.createElement('video')
 video_catblue_mp4.src = 'img/catblue.mp4'
 video_catblue_mp4.muted = true
 video_catblue_mp4.autoplay = true
@@ -386,31 +380,6 @@ function compile_screen_shader () {
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
-// Basic Shader
-
-let basic_shader_program = null
-let basic_a_pos = null
-let basic_a_normal = null
-let basic_a_uv = null
-let basic_u_model_view_matrix = null
-let basic_u_perspective_matrix = null
-let basic_u_sampler = null
-let basic_u_world_model_transpose_matrix = null
-let basic_u_light = null
-function compile_basic_shader () {
-  basic_shader_program = create_shader_program(gl, assets.basic_vertex, assets.basic_fragment)
-  gl.useProgram(basic_shader_program)
-  basic_a_pos    = gl.getAttribLocation(basic_shader_program, 'a_pos')
-  basic_a_normal = gl.getAttribLocation(basic_shader_program, 'a_normal')
-  basic_a_uv     = gl.getAttribLocation(basic_shader_program, 'a_uv')
-  basic_u_model_view_matrix  = gl.getUniformLocation(basic_shader_program, 'u_model_view_matrix')
-  basic_u_sampler            = gl.getUniformLocation(basic_shader_program, 'u_sampler')
-  basic_u_perspective_matrix = gl.getUniformLocation(basic_shader_program, 'u_perspective_matrix')
-  basic_u_world_model_transpose_matrix = gl.getUniformLocation(basic_shader_program, 'u_world_model_transpose_matrix')
-  basic_u_light = gl.getUniformLocation(basic_shader_program, 'u_light')
-  gl.uniformMatrix4fv(basic_u_perspective_matrix, false, camera_perspective_matrix)
-}
-
 
 // Simple Shader
 
@@ -496,7 +465,8 @@ function update () {
 }
 
 function handle_resize () {
-  let w,h
+  let w = 0
+  let h = 0
   if (window.innerWidth/window.innerHeight > screen_pixel_width/screen_pixel_height) {
     w = Math.floor(window.innerHeight * screen_pixel_width/screen_pixel_height)
     h = Math.floor(window.innerHeight)
@@ -512,8 +482,6 @@ function handle_resize () {
   gl.viewport(0, 0, w, h)
 
   camera_update_perspective()
-  gl.useProgram(basic_shader_program)
-  gl.uniformMatrix4fv(basic_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(plain_shader_program)
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(screen_shader_program)
@@ -817,8 +785,6 @@ const asset_urls = {
   envmap_fragment: '/shaders/envmap.frag',
   screen_vertex: '/shaders/screen.vert',
   screen_fragment: '/shaders/screen.frag',
-  basic_vertex: '/shaders/basic.vert',
-  basic_fragment: '/shaders/basic.frag',
   plain_vertex: '/shaders/plain.vert',
   plain_fragment: '/shaders/plain.frag',
   simple_vertex: '/shaders/simple.vert',
@@ -910,7 +876,6 @@ function main () {
   model_buffers.sky.texture_id = gen_next_texture_id()
   model_buffers.sky.texture = load_texture(gl, images.sky_png, model_buffers.sky.texture_id)
 
-  gl.useProgram(basic_shader_program)
   gl.activeTexture(gl.TEXTURE0 + model_buffers.sky.texture_id)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images.sky_png)
 
@@ -919,7 +884,6 @@ function main () {
   compile_skybox_shader()
   compile_screen_shader()
   compile_envmap_shader()
-  compile_basic_shader()
   compile_plain_shader()
   compile_simple_shader()
 
