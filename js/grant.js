@@ -3,7 +3,7 @@
  ***************************/
 
 const welcometext_translation = create_translation_matrix(new Float32Array(16), -2,3,-5)
-const welcometext_inverse_translation = create_translation_matrix(new Float32Array(16), 2,-3,5)
+const welcometext_inverse_translation = create_translation_matrix(new Float32Array(16), -welcometext_translation[12], -welcometext_translation[13], -welcometext_translation[14])
 
 const welcometext_rotation = create_y_rotation_matrix(new Float32Array(16), Math.PI/2 - 1*Math.PI/7)
 const welcometext_inverse_rotation = new Float32Array(16)
@@ -20,7 +20,7 @@ const welcometext_model_view_matrix = new Float32Array(16)
  ***************************/
 
 const tower_translation = create_translation_matrix(new Float32Array(16), -40,6,2)
-const tower_inverse_translation = create_translation_matrix(new Float32Array(16), 40,-6,-2)
+const tower_inverse_translation = create_translation_matrix(new Float32Array(16), -tower_translation[12], -tower_translation[13], -tower_translation[14])
 
 const tower_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const tower_inverse_rotation = new Float32Array(16)
@@ -48,7 +48,7 @@ let tower_is_selected = false
  ***************************/
 
 const table_translation = create_translation_matrix(new Float32Array(16), -0,0,0)
-const table_inverse_translation = create_translation_matrix(new Float32Array(16), 0,-0,-0)
+const table_inverse_translation = create_translation_matrix(new Float32Array(16), -table_translation[12], -table_translation[13], -table_translation[14])
 
 const table_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const table_inverse_rotation = new Float32Array(16)
@@ -84,7 +84,7 @@ let folder_light = 0.0
  ***************************/
 
 const sky_translation = create_translation_matrix(new Float32Array(16), -1,2.1,1)
-const sky_inverse_translation = create_translation_matrix(new Float32Array(16), 1,-2.1,-1)
+const sky_inverse_translation = create_translation_matrix(new Float32Array(16), -sky_translation[12], -sky_translation[13], -sky_translation[14])
 const sky_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const sky_inverse_rotation = new Float32Array(16)
 const sky_model_world_matrix = new Float32Array(16)
@@ -105,7 +105,7 @@ const screen_model_width = 1.493445
 const screen_model_height = 0.867261
 const screen_pick_p = new Float32Array([0, 0, 0, 1])
 const screen_translation = create_translation_matrix(new Float32Array(16), 0,0,0)
-const screen_inverse_translation = create_translation_matrix(new Float32Array(16), 0,0,0)
+const screen_inverse_translation = create_translation_matrix(new Float32Array(16), -screen_translation[12], -screen_translation[13], -screen_translation[14])
 
 const screen_rotation = new Float32Array([
   1, 0, 0, 0,
@@ -195,60 +195,24 @@ video_catblue_mp4.play()
 
 
 const point_lights = [
-  {
-    world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: gen_next_texture_id(),
-    shadow_color_texture_id: gen_next_texture_id(),
-    position: new Float32Array([3, 3, 3]),
-    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_x_rotation_matrix(new Float32Array(16), -Math.PI/3),
-    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
-    perspective_matrix: new Float32Array(16),
-    shadow_framebuffer: null,
-    shadow_depth_texture: null,
-    shadow_color_texture: null,
-    shadow_resolution: 2048,
-  },
-  {
-    world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: gen_next_texture_id(),
-    shadow_color_texture_id: gen_next_texture_id(),
-    position: new Float32Array([3, 4, 3]),
-    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_x_rotation_matrix(new Float32Array(16), -Math.PI/3),
-    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
-    perspective_matrix: new Float32Array(16),
-    shadow_framebuffer: null,
-    shadow_depth_texture: null,
-    shadow_color_texture: null,
-    shadow_resolution: 2048,
-  },
-  {
-    world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: gen_next_texture_id(),
-    shadow_color_texture_id: gen_next_texture_id(),
-    position: new Float32Array([3.5, 9, -2.5]),
-    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_x_rotation_matrix(new Float32Array(16), -Math.PI/3),
-    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
-    perspective_matrix: new Float32Array(16),
-    shadow_framebuffer: null,
-    shadow_depth_texture: null,
-    shadow_color_texture: null,
-    shadow_resolution: 2048,
-  },
+  { position: new Float32Array([3, 3, 3]), },
+  { position: new Float32Array([3, 4, 2]), },
+  { position: new Float32Array([3.5, 9, -2.5]), },
 ]
 
 for (let i=0; i<point_lights.length; i++) {
-  create_lookat_rotation_matrix(point_lights[i].rotation, point_lights[i].position, [0,-1.0,0])
+  point_lights[i].inverse_translation = create_translation_matrix(new Float32Array(16), -point_lights[i].position[0], -point_lights[i].position[1], -point_lights[i].position[2])
+  point_lights[i].rotation = create_lookat_rotation_matrix(new Float32Array(16), point_lights[i].position, [0,-1,0])
+  point_lights[i].inverse_rotation = matrix_transpose_4(new Float32Array(16), point_lights[i].rotation)
+  point_lights[i].world_light_matrix = matrix_mult_4(new Float32Array(16), point_lights[i].inverse_rotation, point_lights[i].inverse_translation)
+  point_lights[i].perspective_matrix = new Float32Array(16)
 
-  point_lights[i].inverse_translation[12] = -point_lights[i].position[0]
-  point_lights[i].inverse_translation[13] = -point_lights[i].position[1]
-  point_lights[i].inverse_translation[14] = -point_lights[i].position[2]
-
-  matrix_transpose_4(point_lights[i].inverse_rotation, point_lights[i].rotation)
-
-  matrix_mult_4(point_lights[i].world_light_matrix, point_lights[i].inverse_rotation, point_lights[i].inverse_translation)
+  point_lights[i].shadow_depth_texture_id = gen_next_texture_id()
+  point_lights[i].shadow_color_texture_id = gen_next_texture_id()
+  point_lights[i].shadow_depth_texture = null
+  point_lights[i].shadow_color_texture = null
+  point_lights[i].shadow_framebuffer = null
+  point_lights[i].shadow_resolution = 2048
 }
 
 
@@ -456,8 +420,6 @@ function update () {
   update_sky()
   update_screen()
 
-  
-
   has_clicked = false
   has_resized = false
 }
@@ -479,7 +441,9 @@ function handle_resize () {
   canvas.height = h
   gl.viewport(0, 0, w, h)
 
+  // Since the aspect isn't changing, all this should be able to be done once
   camera_update_perspective()
+
   gl.useProgram(plain_shader_program)
   gl.uniformMatrix4fv(plain_u_perspective_matrix, false, camera_perspective_matrix)
   gl.useProgram(screen_shader_program)
