@@ -95,6 +95,8 @@ let gl = canvas.getContext('webgl')
 let mouse_x = 0
 let mouse_y = 0
 let has_clicked = false
+let has_mousedowned = false
+let has_mouseupped = false
 let has_resized = true
 
 function init_canvas () {
@@ -107,7 +109,19 @@ function init_canvas () {
 
   window.addEventListener('resize', function (e) { has_resized = true })
   canvas.addEventListener('mousemove', function (e) { mouse_x = e.offsetX; mouse_y = e.offsetY })
-  canvas.addEventListener('click', function (e) { has_clicked = true; mouse_x = e.offsetX; mouse_y = e.offsetY })
+  //canvas.addEventListener('click', function (e) { has_clicked = true; mouse_x = e.offsetX; mouse_y = e.offsetY })
+  canvas.addEventListener('mousedown', function (e) {
+    has_mousedowned = true
+    mousedown_x = e.offsetX
+    mousedown_y = e.offsetY
+    mouse_x = e.offsetX
+    mouse_y = e.offsetY
+  })
+  canvas.addEventListener('mouseup', function (e) {
+    has_mouseupped = true
+    mouse_x = e.offsetX
+    mouse_y = e.offsetY
+  })
 }
 
 /****************************
@@ -131,7 +145,7 @@ function main_loop (timestamp) {
     render()
     window.requestAnimationFrame(main_loop)
   } else {
-    dt = timestamp - prev_timestamp
+    dt = Math.min(32, timestamp - prev_timestamp)
     prev_timestamp = timestamp
     total_time += dt
     if (total_time > TARGET_FRAME_TIME*3) {

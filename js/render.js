@@ -97,73 +97,58 @@ function render_screen () {
     screen_ctx.fillStyle = "#fff"
     screen_ctx.fillText(desktop_item.txt, desktop_item.x + 0.5*desktop_item.w, desktop_item.y + desktop_item.h)
   }
- /* ********
-  DRAWING UI
-*/ 
-  if (screen_explorer_item_set) {
-    screen_ctx.fillStyle = '#fff'
-    screen_ctx.fillRect(screen_win_x, screen_win_y, screen_win_w, screen_win_h)
-    screen_ctx.drawImage(images.window_frame_t_l_png, screen_win_x, screen_win_y, 5, 30)
-    screen_ctx.drawImage(images.window_frame_t_r_png, screen_win_x+screen_win_w-26, screen_win_y, 26, 30)
-    screen_ctx.drawImage(images.window_frame_b_l_png, screen_win_x, screen_win_y+screen_win_h-5, 5, 5)
-    screen_ctx.drawImage(images.window_frame_b_r_png, screen_win_x+screen_win_w-5, screen_win_y+screen_win_h-5, 5, 5)
-    screen_ctx.drawImage(images.window_frame_t_png, screen_win_x+5, screen_win_y, screen_win_w-26-5, 30)
-    screen_ctx.drawImage(images.window_frame_r_png, screen_win_x+screen_win_w-5, screen_win_y+30, 5, screen_win_h-30-5)
-    screen_ctx.drawImage(images.window_frame_b_png, screen_win_x+5, screen_win_y+screen_win_h-5, screen_win_w-10, 5)
-    screen_ctx.drawImage(images.window_frame_l_png, screen_win_x, screen_win_y+30, 5, screen_win_h-30-5)
-    
-    screen_ctx.textAlign = "left"
-    screen_ctx.fillText(screen_explorer_title, screen_win_x + 35, screen_win_y + 19)
 
-    for (let i=0; i<screen_explorer_item_set.length; i++) {
-      const explorer_item = screen_explorer_item_set[i]
+  /************
+   * DRAWING UI
+   ************/ 
+  for (let i=0; i<screen_windows.length; i++) {
+    const screen_win = screen_windows[i]
+    if (screen_win.item_set) {
+      screen_ctx.fillStyle = '#fff'
+      screen_ctx.fillRect(screen_win.x, screen_win.y, screen_win.w, screen_win.h)
+      screen_ctx.drawImage(images.window_frame_t_l_png, screen_win.x, screen_win.y, 5, 30)
+      screen_ctx.drawImage(images.window_frame_t_r_png, screen_win.x+screen_win.w-26, screen_win.y, 26, 30)
+      screen_ctx.drawImage(images.window_frame_b_l_png, screen_win.x, screen_win.y+screen_win.h-5, 5, 5)
+      screen_ctx.drawImage(images.window_frame_b_r_png, screen_win.x+screen_win.w-5, screen_win.y+screen_win.h-5, 5, 5)
+      screen_ctx.drawImage(images.window_frame_t_png, screen_win.x+5, screen_win.y, screen_win.w-26-5, 30)
+      screen_ctx.drawImage(images.window_frame_r_png, screen_win.x+screen_win.w-5, screen_win.y+30, 5, screen_win.h-30-5)
+      screen_ctx.drawImage(images.window_frame_b_png, screen_win.x+5, screen_win.y+screen_win.h-5, screen_win.w-10, 5)
+      screen_ctx.drawImage(images.window_frame_l_png, screen_win.x, screen_win.y+30, 5, screen_win.h-30-5)
+      
+      screen_ctx.textAlign = "left"
+      screen_ctx.fillText(screen_win.title, screen_win.x + 35, screen_win.y + 19)
 
-      // Render icon
-      let thumb_width = 0    
-      let thumb_height = 0
-      if (images[explorer_item.thumb].width > images[explorer_item.thumb].height) {
-        thumb_width = 50
-        thumb_height = thumb_width/images[explorer_item.thumb].width*images[explorer_item.thumb].height
-      }
-      else {
-        thumb_height = 50
-        thumb_width = thumb_height/images[explorer_item.thumb].height*images[explorer_item.thumb].width
-      }
-      screen_ctx.drawImage(images[explorer_item.thumb], explorer_item.x + screen_win_x + 0.5*explorer_item.w - 0.5*thumb_width, explorer_item.y + screen_win_y + 25 - 0.5*thumb_height, thumb_width, thumb_height)
+      for (let j=0; j<screen_win.item_set.length; j++) {
+        const explorer_item = screen_win.item_set[j]
 
-      screen_ctx.textAlign = "center"
+        // Render icon
+        let thumb_width = 0    
+        let thumb_height = 0
+        if (images[explorer_item.thumb].width > images[explorer_item.thumb].height) {
+          thumb_width = 50
+          thumb_height = thumb_width/images[explorer_item.thumb].width*images[explorer_item.thumb].height
+        }
+        else {
+          thumb_height = 50
+          thumb_width = thumb_height/images[explorer_item.thumb].height*images[explorer_item.thumb].width
+        }
+        screen_ctx.drawImage(images[explorer_item.thumb], explorer_item.x + screen_win.x + 0.5*explorer_item.w - 0.5*thumb_width, explorer_item.y + screen_win.y + 25 - 0.5*thumb_height, thumb_width, thumb_height)
 
-      if (explorer_item == screen_selected_item) {
-        // Render selection
-        screen_ctx.fillStyle = "#000080"
-        const w = 8 + explorer_item.txt.length * 7
-        screen_ctx.fillRect(explorer_item.x + (explorer_item.w - w)*0.5 + screen_win_x, explorer_item.y + explorer_item.h - 25+5 + screen_win_y, w, 26)
+        screen_ctx.textAlign = "center"
 
-        /*
-        screen_ctx.fillStyle = "#3a6fa644"
-        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
-        */
+        if (explorer_item == screen_selected_item) {
+          // Render selection
+          screen_ctx.fillStyle = "#000080"
+          const w = 8 + explorer_item.txt.length * 7
+          screen_ctx.fillRect(explorer_item.x + (explorer_item.w - w)*0.5 + screen_win.x, explorer_item.y + explorer_item.h - 25+5 + screen_win.y, w, 26)
 
-        screen_ctx.globalCompositeOperation = "color-burn"
-        screen_ctx.fillStyle = "hsla(0,50%,80%,0.4)";
-        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
-
-        screen_ctx.globalCompositeOperation = "saturation";
-        screen_ctx.fillStyle = "hsla(0,100%,50%,0.4)";
-        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
-
-        screen_ctx.globalCompositeOperation = "hue";
-        screen_ctx.fillStyle = "hsla(211,1%,50%,0.4)";
-        screen_ctx.fillRect(explorer_item.x + screen_win_x, explorer_item.y + screen_win_y, explorer_item.w, explorer_item.h - 25);
-
-        screen_ctx.globalCompositeOperation = "source-over";
-
-        screen_ctx.fillStyle = "#fff"
-        screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win_x, explorer_item.y + explorer_item.h + screen_win_y)
-      }
-      else {
-        screen_ctx.fillStyle = "#000"
-        screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win_x, explorer_item.y + explorer_item.h + screen_win_y)
+          screen_ctx.fillStyle = "#fff"
+          screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win.x, explorer_item.y + explorer_item.h + screen_win.y)
+        }
+        else {
+          screen_ctx.fillStyle = "#000"
+          screen_ctx.fillText(explorer_item.txt, explorer_item.x + 0.5*explorer_item.w + screen_win.x, explorer_item.y + explorer_item.h + screen_win.y)
+        }
       }
     }
   }

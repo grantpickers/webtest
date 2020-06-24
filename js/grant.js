@@ -161,14 +161,6 @@ const screen_explorer_item_sets = {
     { x: 60+130*1, y: 80, w: 70, h: 70, txt: 'snake 2', thumb: "snake_png"},
   ],
 }
-let screen_explorer_item_set = null
-
-const screen_win_x = 200
-const screen_win_y = 250
-const screen_win_w = 1200
-const screen_win_h = 700
-
-let screen_explorer_title = ""
 
 let screen_hovered_desktop_item = null
 
@@ -178,6 +170,12 @@ let screen_preview_x = 0
 let screen_preview_y = 0
 let screen_preview_w = 0
 let screen_preview_h = 0
+
+let screen_dragged_window = null
+let screen_drag_mouse_offset_x = 0
+let screen_drag_mouse_offset_y = 0
+
+let screen_windows = []
 
 
 let video_catblue_mp4 = document.createElement('video')
@@ -408,8 +406,17 @@ function compile_plain_shader () {
  ***************************/
 
 function update () {
+  if (has_mouseupped) {
+    if (screen_dragged_window) {
+      screen_dragged_window = null
+    }
+    let dx = (mousedown_x - mouse_x)
+    let dy = (mousedown_y - mouse_y)
+    if (dx*dx + dy*dy < 100) {
+      has_clicked = true
+    }
+  }
 
-  screen_is_3d_hovered = false
   if (has_resized) { handle_resize() }
   update_camera()
   update_pick()
@@ -420,6 +427,8 @@ function update () {
   update_sky()
   update_screen()
 
+  has_mousedowned = false
+  has_mouseupped = false
   has_clicked = false
   has_resized = false
 }
@@ -466,6 +475,9 @@ function handle_resize () {
 function update_camera () {
   if (camera_animation_tween < 1) {
     camera_animation_tween += dt*0.00016
+  }
+  else {
+    camera_animation_tween = 1
   }
 
   camera_ry = camera_animation_tween * (camera_ry_target) + (1-camera_animation_tween) * camera_ry
@@ -622,35 +634,84 @@ function update_sky () {
   matrix_transpose_4(sky_world_model_transpose_matrix, sky_world_model_matrix)
 }
 
+function get_window_by_x_y (x, y) {
+  for (let i=screen_windows.length - 1; i>=0; i--) {
+    const w = screen_windows[i]
+    if (x > w.x && x < w.x + w.w && y > w.y && y < w.y + w.h) {
+      return w
+    }
+  }
+}
+
+function move_window_to_top (w) {
+  for (let i=0; i<screen_windows.length; i++) {
+    if (screen_windows[i] == w) {
+      screen_windows.splice(i,1)
+      screen_windows.push(w)
+      break;
+    }
+  }
+}
+
+function did_click_title_bar (w, x, y) {
+  if (x > w.x && x < w.x + w.w - 26 && y > w.y && y < w.y + 30) {
+    return w
+  }
+}
 
 function update_screen () {
   const screen_mouse_x = screen_pick_p[0]
   const screen_mouse_y = screen_pick_p[1]
+
+  if (has_mousedowned) {
+    if (!screen_dragged_window) {
+      const target_window = get_window_by_x_y(screen_mouse_x, screen_mouse_y)
+      if (target_window) {
+        move_window_to_top(screen_dragged_window)
+        if (did_click_title_bar(target_window, screen_mouse_x, screen_mouse_y)) {
+          screen_dragged_window = target_window
+          screen_drag_mouse_offset_x = screen_mouse_x - screen_dragged_window.x
+          screen_drag_mouse_offset_y = screen_mouse_y - screen_dragged_window.y
+        }
+      }
+    }
+  }
+
+  if (screen_dragged_window) {
+    screen_dragged_window.x = screen_mouse_x - screen_drag_mouse_offset_x
+    screen_dragged_window.y = screen_mouse_y - screen_drag_mouse_offset_y
+  }
+
   if (screen_mouse_x > 0 && screen_mouse_y > 0 && screen_mouse_x < screen_pixel_width && screen_mouse_y < screen_pixel_height) {
     let has_clicked_desktop = has_clicked
 
-    if (screen_explorer_item_set) {
-      let has_clicked_close = false
-      if (has_clicked) {
-        has_clicked_close = screen_mouse_x > screen_win_x + screen_win_w - 26 && screen_mouse_y > screen_win_y && screen_mouse_x < screen_win_x + screen_win_w && screen_mouse_y < screen_win_y + 30
-      }
-      if (has_clicked_close) {
-        screen_explorer_item_set = null
-      }
-      else {
-        for (let i=0; i<screen_explorer_item_set.length; i++) {
-          const explorer_item = screen_explorer_item_set[i]
-          const is_hovered = screen_mouse_x > explorer_item.x + screen_win_x && screen_mouse_y > explorer_item.y + screen_win_y && screen_mouse_x < explorer_item.x+explorer_item.w + screen_win_x && screen_mouse_y < explorer_item.y+explorer_item.h + screen_win_y
-          if (is_hovered) {
-            if (has_clicked) {
-              has_clicked_desktop = false
-              if (!explorer_item.last_click_time || prev_timestamp - explorer_item.last_click_time > 500) {
-                explorer_item.last_click_time = prev_timestamp
-                screen_selected_item = explorer_item
-              }
-              else {
-                // Double clicked
-                screen_preview_image = explorer_item.thumb
+    for (let i=0; i<screen_windows.length; i++) {
+      const screen_win = screen_windows[i]
+
+      if (screen_win.item_set) {
+        let has_clicked_close = false
+        if (has_clicked) {
+          has_clicked_close = screen_mouse_x > screen_win.x + screen_win.w - 26 && screen_mouse_y > screen_win.y && screen_mouse_x < screen_win.x + screen_win.w && screen_mouse_y < screen_win.y + 30
+        }
+        if (has_clicked_close) {
+          screen_windows.splice(screen_windows.indexOf(screen_win), 1)
+        }
+        else {
+          for (let j=0; j<screen_win.item_set.length; j++) {
+            const explorer_item = screen_win.item_set[j]
+            const is_hovered = screen_mouse_x > explorer_item.x + screen_win.x && screen_mouse_y > explorer_item.y + screen_win.y && screen_mouse_x < explorer_item.x+explorer_item.w + screen_win.x && screen_mouse_y < explorer_item.y+explorer_item.h + screen_win.y
+            if (is_hovered) {
+              if (has_clicked) {
+                has_clicked_desktop = false
+                if (!explorer_item.last_click_time || prev_timestamp - explorer_item.last_click_time > 500) {
+                  explorer_item.last_click_time = prev_timestamp
+                  screen_selected_item = explorer_item
+                }
+                else {
+                  // Double clicked
+                  screen_preview_image = explorer_item.thumb
+                  explorer_item.last_click_time = null
+                }
               }
             }
           }
@@ -673,6 +734,7 @@ function update_screen () {
           }
           else {
             // Double clicked
+            desktop_item.last_click_time = null
             if (desktop_item.txt == '3d') {
               camera_ry_target = Math.PI/2 - 1*Math.PI/7
               camera_tx_target = 4.4*Math.sin(camera_ry_target)
@@ -681,12 +743,44 @@ function update_screen () {
               camera_animation_tween = 0
             }
             else if (desktop_item.txt == 'Painting') {
-              screen_explorer_item_set = screen_explorer_item_sets.painting
-              screen_explorer_title = "/Desktop/Painting"
+              let is_open = false
+              for (let j=0; j<screen_windows.length; j++) {
+                if (screen_windows[j].title == "/Desktop/Painting") {
+                  move_window_to_top(screen_windows[j])
+                  is_open = true
+                  break
+                }
+              }
+              if (!is_open) {
+                screen_windows.push({
+                  item_set: screen_explorer_item_sets.painting,
+                  title: "/Desktop/Painting",
+                  x: 200+100*Math.random(),
+                  y: 250+100*Math.random(),
+                  w: 1200,
+                  h: 700,
+                })
+              }
             }
             else if (desktop_item.txt == 'Animation') {
-              screen_explorer_item_set = screen_explorer_item_sets.animation
-              screen_explorer_title = "/Desktop/Animation"
+              let is_open = false
+              for (let j=0; j<screen_windows.length; j++) {
+                if (screen_windows[j].title == "/Desktop/Animation") {
+                  move_window_to_top(screen_windows[j])
+                  is_open = true
+                  break
+                }
+              }
+              if (!is_open) {
+                screen_windows.push({
+                  item_set: screen_explorer_item_sets.animation,
+                  title: "/Desktop/Animation",
+                  x: 200+100*Math.random(),
+                  y: 250+100*Math.random(),
+                  w: 1200,
+                  h: 700,
+                })
+              }
             }
             else if (desktop_item.txt == 'contact') {
               window.location.href = "mailto:mail@example.org";
