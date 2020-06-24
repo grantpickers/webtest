@@ -6,7 +6,11 @@ function render () {
   render_welcometext()
   render_tower()
   render_table()
-  render_folder()
+
+  if (screen_hovered_desktop_item && screen_hovered_desktop_item.txt == '3d') {
+    render_folder()
+  }
+
   render_sky()
 }
 
@@ -57,23 +61,28 @@ function render_screen () {
     const desktop_item = screen_desktop_items[i]
 
     // Render icon
-    let thumb_width = 0    
-    let thumb_height = 0
-    if (images[desktop_item.thumb].width > images[desktop_item.thumb].height) {
-      thumb_width = 50
-      thumb_height = thumb_width/images[desktop_item.thumb].width*images[desktop_item.thumb].height
+    if (!screen_hovered_desktop_item || !(
+      (screen_hovered_desktop_item.txt == 'Painting' && desktop_item.txt == 'Painting') ||
+      (screen_hovered_desktop_item.txt == '3d' && desktop_item.txt == '3d')
+    )) {
+      let thumb_width = 0    
+      let thumb_height = 0
+      if (images[desktop_item.thumb].width > images[desktop_item.thumb].height) {
+        thumb_width = 50
+        thumb_height = thumb_width/images[desktop_item.thumb].width*images[desktop_item.thumb].height
+      }
+      else {
+        thumb_height = 50
+        thumb_width = thumb_height/images[desktop_item.thumb].height*images[desktop_item.thumb].width
+      }
+      screen_ctx.drawImage(
+        images[desktop_item.thumb],
+        desktop_item.x + 0.5*desktop_item.w - 0.5*thumb_width,
+        desktop_item.y + 25 - 0.5*thumb_height,
+        thumb_width,
+        thumb_height
+      )
     }
-    else {
-      thumb_height = 50
-      thumb_width = thumb_height/images[desktop_item.thumb].height*images[desktop_item.thumb].width
-    }
-    screen_ctx.drawImage(
-      images[desktop_item.thumb],
-      desktop_item.x + 0.5*desktop_item.w - 0.5*thumb_width,
-      desktop_item.y + 25 - 0.5*thumb_height,
-      thumb_width,
-      thumb_height
-    )
 
 
     screen_ctx.textAlign = "center"
@@ -176,6 +185,10 @@ function render_screen () {
   if (screen_hovered_desktop_item && screen_hovered_desktop_item.txt == 'Painting') {
     screen_ctx.drawImage(video_catblue_mp4,screen_hovered_desktop_item.x, screen_hovered_desktop_item.y, 60, 52)
   }
+
+  // DEBUG WHITE SPOT
+  screen_ctx.fillStyle = "#fff"
+  screen_ctx.fillRect(screen_pick_p[0], screen_pick_p[1], 1, 1)
 
   // GL
 
