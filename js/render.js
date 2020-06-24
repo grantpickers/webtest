@@ -103,6 +103,7 @@ function render_screen () {
    ************/ 
   for (let i=0; i<screen_windows.length; i++) {
     const screen_win = screen_windows[i]
+
     if (screen_win.item_set) {
       screen_ctx.fillStyle = '#fff'
       screen_ctx.fillRect(screen_win.x, screen_win.y, screen_win.w, screen_win.h)
@@ -151,30 +152,25 @@ function render_screen () {
         }
       }
     }
-  }
-  /*
-  TODO: Centre and resize images and add frame
-  */
-  if (screen_preview_image) {
-    const img = images[screen_preview_image]
-    /*
-    img looks like this: {width: 1234, height: 5677, ...}
-    */
 
-    screen_preview_x = 30
-    screen_preview_y = 40
-    screen_preview_w = img.width + 10
-    screen_preview_h = img.height + 35
-    screen_ctx.drawImage(img, screen_preview_x + 5, screen_preview_y + 30, img.width, img.height )
+    if (screen_win.preview_image) {
+      const img = images[screen_win.preview_image]
 
-    screen_ctx.drawImage(images.window_frame_t_l_png, screen_preview_x, screen_preview_y, 5, 30)
-    screen_ctx.drawImage(images.window_frame_t_r_png, screen_preview_x+screen_preview_w-26, screen_preview_y, 26, 30)
-    screen_ctx.drawImage(images.window_frame_b_l_png, screen_preview_x, screen_preview_y+screen_preview_h-5, 5, 5)
-    screen_ctx.drawImage(images.window_frame_b_r_png, screen_preview_x+screen_preview_w-5, screen_preview_y+screen_preview_h-5, 5, 5)
-    screen_ctx.drawImage(images.window_frame_t_png, screen_preview_x+5, screen_preview_y, screen_preview_w-26-5, 30)
-    screen_ctx.drawImage(images.window_frame_r_png, screen_preview_x+screen_preview_w-5, screen_preview_y+30, 5, screen_preview_h-30-5)
-    screen_ctx.drawImage(images.window_frame_b_png, screen_preview_x+5, screen_preview_y+screen_preview_h-5, screen_preview_w-10, 5)
-    screen_ctx.drawImage(images.window_frame_l_png, screen_preview_x, screen_preview_y+30, 5, screen_preview_h-30-5)
+      screen_ctx.drawImage(img, screen_win.x + 5, screen_win.y + 30, img.width, img.height )
+
+      screen_ctx.drawImage(images.window_frame_t_l_png, screen_win.x, screen_win.y, 5, 30)
+      screen_ctx.drawImage(images.window_frame_t_r_png, screen_win.x+screen_win.w-26, screen_win.y, 26, 30)
+      screen_ctx.drawImage(images.window_frame_b_l_png, screen_win.x, screen_win.y+screen_win.h-5, 5, 5)
+      screen_ctx.drawImage(images.window_frame_b_r_png, screen_win.x+screen_win.w-5, screen_win.y+screen_win.h-5, 5, 5)
+      screen_ctx.drawImage(images.window_frame_t_png, screen_win.x+5, screen_win.y, screen_win.w-26-5, 30)
+      screen_ctx.drawImage(images.window_frame_r_png, screen_win.x+screen_win.w-5, screen_win.y+30, 5, screen_win.h-30-5)
+      screen_ctx.drawImage(images.window_frame_b_png, screen_win.x+5, screen_win.y+screen_win.h-5, screen_win.w-10, 5)
+      screen_ctx.drawImage(images.window_frame_l_png, screen_win.x, screen_win.y+30, 5, screen_win.h-30-5)
+
+      screen_ctx.textAlign = "left"
+      screen_ctx.fillStyle = '#fff'
+      screen_ctx.fillText(screen_win.title, screen_win.x + 35, screen_win.y + 19)
+    }
   }
 
   if (screen_hovered_desktop_item && screen_hovered_desktop_item.txt == 'Painting') {

@@ -166,11 +166,6 @@ let screen_hovered_desktop_item = null
 
 let screen_preview_image = null
 
-let screen_preview_x = 0
-let screen_preview_y = 0
-let screen_preview_w = 0
-let screen_preview_h = 0
-
 let screen_dragged_window = null
 let screen_drag_mouse_offset_x = 0
 let screen_drag_mouse_offset_y = 0
@@ -667,7 +662,7 @@ function update_screen () {
     if (!screen_dragged_window) {
       const target_window = get_window_by_x_y(screen_mouse_x, screen_mouse_y)
       if (target_window) {
-        move_window_to_top(screen_dragged_window)
+        move_window_to_top(target_window)
         if (did_click_title_bar(target_window, screen_mouse_x, screen_mouse_y)) {
           screen_dragged_window = target_window
           screen_drag_mouse_offset_x = screen_mouse_x - screen_dragged_window.x
@@ -710,11 +705,41 @@ function update_screen () {
                 else {
                   // Double clicked
                   screen_preview_image = explorer_item.thumb
+
+                  let is_open = false
+                  for (let j=0; j<screen_windows.length; j++) {
+                    if (screen_windows[j].title == explorer_item.txt) {
+                      move_window_to_top(screen_windows[j])
+                      is_open = true
+                      break
+                    }
+                  }
+                  if (!is_open) {
+                    screen_windows.push({
+                      preview_image: explorer_item.thumb,
+                      title: explorer_item.txt,
+                      x: 200+100*Math.random(),
+                      y: 250+100*Math.random(),
+                      w: images[explorer_item.thumb].width + 10,
+                      h: images[explorer_item.thumb].height + 35,
+                    })
+                  }
+
                   explorer_item.last_click_time = null
                 }
               }
             }
           }
+        }
+      }
+
+      if (screen_win.preview_image) {
+        let has_clicked_close = false
+        if (has_clicked) {
+          has_clicked_close = screen_mouse_x > screen_win.x + screen_win.w - 26 && screen_mouse_y > screen_win.y && screen_mouse_x < screen_win.x + screen_win.w && screen_mouse_y < screen_win.y + 30
+        }
+        if (has_clicked_close) {
+          screen_windows.splice(screen_windows.indexOf(screen_win), 1)
         }
       }
     }
@@ -787,20 +812,6 @@ function update_screen () {
             }
           }
         }
-      }
-    }
-
-    if (screen_preview_image) {
-      let has_clicked_close = false
-      if (has_clicked) {
-        const w = 26
-        const h = 30
-        const x = screen_preview_x + screen_preview_w - w
-        const y = screen_preview_y
-        has_clicked_close = screen_mouse_x > x && screen_mouse_y > y && screen_mouse_x < x + w && screen_mouse_y < y + h
-      }
-      if (has_clicked_close) {
-        screen_preview_image = null
       }
     }
 
