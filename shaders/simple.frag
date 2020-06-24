@@ -15,7 +15,7 @@ varying vec3 normal;
 
 float get_light (sampler2D shadow_map, mat4 rotation, vec4 light_space_pos) {
   vec3 light_direction = (rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
-  float ambience = 0.01;
+  float ambience = 0.05;
   float brightness = 3.0;
   float falloff_linear = 0.7;
   float falloff_quadratic = 1.8;
@@ -51,7 +51,8 @@ float get_light (sampler2D shadow_map, mat4 rotation, vec4 light_space_pos) {
 
   float dist = sqrt(dot(scaled_light_space_pos, scaled_light_space_pos));
   float falloff = 1.0/(1.0 + falloff_linear * dist + falloff_quadratic * dist * dist);
-  float c = ambience + (1.0-shadow) * (brightness*clamp((falloff*dot(light_direction, normal)), 0.0, 1.0));
+  float light = (brightness*clamp((falloff*dot(light_direction, normal)), 0.0, 1.0));
+  float c = ambience + (1.0-shadow) * light;
 
   return c;
 }

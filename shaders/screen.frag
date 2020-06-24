@@ -18,7 +18,7 @@ varying vec4 light_space_pos[NUM_POINT_LIGHTS];
 
 float get_light (sampler2D shadow_map, mat4 light_rotation, vec4 light_space_pos) {
   vec3 light_direction = (light_rotation * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
-  float ambience = 0.01;
+  float ambience = 0.05;
   float brightness = 3.0;
   float falloff_linear = 0.7;
   float falloff_quadratic = 1.8;
@@ -60,7 +60,7 @@ void main () {
   vec4 tex = texture2D(u_sampler, vec2(uv.x, 1.0-uv.y));
   float c = 0.0;
   for (int i=0; i<NUM_POINT_LIGHTS; i++) {
-    c += 0.6*get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
+    c += 0.3*get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
   }
 
   if (uv.x < 0.0) {

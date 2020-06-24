@@ -3,15 +3,15 @@ function render () {
 
   render_shadow()
   render_screen()
-  render_welcometext()
-  render_tower()
+  //render_welcometext()
+  //render_tower()
   render_table()
 
   if (screen_hovered_desktop_item && screen_hovered_desktop_item.txt == '3d') {
     render_folder()
   }
 
-  render_sky()
+  //render_sky()
 }
 
 function render_shadow () {
@@ -188,7 +188,7 @@ function render_screen () {
 
   // DEBUG WHITE SPOT
   screen_ctx.fillStyle = "#fff"
-  screen_ctx.fillRect(screen_pick_p[0], screen_pick_p[1], 1, 1)
+  screen_ctx.fillRect(screen_pick_p[0]-1, screen_pick_p[1]-1, 3, 3)
 
   // GL
 

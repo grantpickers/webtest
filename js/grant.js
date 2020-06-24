@@ -47,7 +47,7 @@ let tower_is_selected = false
  * table
  ***************************/
 
-const table_translation = create_translation_matrix(new Float32Array(16), -0,0,0)
+const table_translation = create_translation_matrix(new Float32Array(16), -0,-0.034,0)
 const table_inverse_translation = create_translation_matrix(new Float32Array(16), -table_translation[12], -table_translation[13], -table_translation[14])
 
 const table_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
@@ -190,7 +190,7 @@ video_catblue_mp4.play()
 const point_lights = [
   { position: new Float32Array([3, 3, 3]), },
   { position: new Float32Array([3, 4, 2]), },
-  { position: new Float32Array([3.5, 9, -2.5]), },
+  { position: new Float32Array([3, 4, -3]), },
 ]
 
 for (let i=0; i<point_lights.length; i++) {
