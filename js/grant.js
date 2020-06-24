@@ -319,7 +319,6 @@ function compile_skybox_shader () {
 let envmap_shader_program = null
 let envmap_a_pos = null
 let envmap_a_normal = null
-let envmap_a_uv = null
 let envmap_u_model_view_matrix = null
 let envmap_u_perspective_matrix = null
 let envmap_u_sampler = null
@@ -331,7 +330,6 @@ function compile_envmap_shader () {
   gl.useProgram(envmap_shader_program)
   envmap_a_pos    = gl.getAttribLocation(envmap_shader_program, 'a_pos')
   envmap_a_normal = gl.getAttribLocation(envmap_shader_program, 'a_normal')
-  envmap_a_uv     = gl.getAttribLocation(envmap_shader_program, 'a_uv')
   envmap_u_model_view_matrix  = gl.getUniformLocation(envmap_shader_program, 'u_model_view_matrix')
   envmap_u_sampler            = gl.getUniformLocation(envmap_shader_program, 'u_sampler')
   envmap_u_camera_position    = gl.getUniformLocation(envmap_shader_program, 'u_camera_position')
