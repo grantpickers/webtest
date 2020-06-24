@@ -64,8 +64,8 @@ const table_model_view_matrix = new Float32Array(16)
  * folder
  ***************************/
 
-const folder_translation = create_translation_matrix(new Float32Array(16), .20,.005,.3)
-const folder_inverse_translation = create_translation_matrix(new Float32Array(16), -.20,-.005,-.3)
+const folder_translation = create_translation_matrix(new Float32Array(16), 0.06, 0.35, 0.45)
+const folder_inverse_translation = create_translation_matrix(new Float32Array(16), -folder_translation[12], -folder_translation[13], -folder_translation[14])
 
 const folder_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const folder_inverse_rotation = new Float32Array(16)
