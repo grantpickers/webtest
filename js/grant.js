@@ -64,8 +64,8 @@ const table_model_view_matrix = new Float32Array(16)
  * folder
  ***************************/
 
-const folder_translation = create_translation_matrix(new Float32Array(16), .28,.005,.3)
-const folder_inverse_translation = create_translation_matrix(new Float32Array(16), -.28,-.005,-.3)
+const folder_translation = create_translation_matrix(new Float32Array(16), .20,.005,.3)
+const folder_inverse_translation = create_translation_matrix(new Float32Array(16), -.20,-.005,-.3)
 
 const folder_rotation = create_x_rotation_matrix(new Float32Array(16), 0)
 const folder_inverse_rotation = new Float32Array(16)
@@ -675,7 +675,7 @@ function update_table () {
 }
 
 function update_folder () {
-  create_y_rotation_matrix(folder_rotation, prev_timestamp*0.0004)
+  create_y_rotation_matrix(folder_rotation, prev_timestamp*0.002)
   matrix_mult_4(folder_model_world_matrix, folder_translation, folder_rotation)
 
   matrix_mult_4(folder_model_view_matrix, camera_world_view_matrix, folder_model_world_matrix)
@@ -854,16 +854,16 @@ function main () {
   init_canvas()
   camera_update_perspective(screen_pixel_width, screen_pixel_height)
 
-    /*
   camera_ry_target = Math.PI/2
   camera_tx_target = 0.78
   camera_ty_target = 0.020
   camera_tz_target = -0.004
-  */
+    /*
   camera_ry_target = Math.PI/2 - 1*Math.PI/7
   camera_tx_target = 4.4*Math.sin(camera_ry_target)
   camera_ty_target = 0
   camera_tz_target = -0.5+4.4*Math.cos(camera_ry_target)
+  */
 
 
   gl.getExtension('WEBGL_depth_texture')
