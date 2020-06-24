@@ -1,6 +1,6 @@
 precision mediump float;
 
-#define NUM_POINT_LIGHTS 4
+#define NUM_POINT_LIGHTS 3
 
 struct PointLight {
   sampler2D shadow_map;
@@ -45,6 +45,11 @@ float get_light (sampler2D shadow_map, mat4 light_rotation, vec4 light_space_pos
   shadow /= 9.0;
 
   bool in_range = scaled_light_space_pos.x >= 0.0 && scaled_light_space_pos.x <= 1.0 && scaled_light_space_pos.y >= 0.0 && scaled_light_space_pos.y <= 1.0;
+
+  if (!in_range || light_space_pos.z < 0.0) {
+    shadow = 0.0;
+  }
+
   float dist = sqrt(dot(scaled_light_space_pos, scaled_light_space_pos));
   float falloff = 1.0/(1.0 + falloff_linear * dist + falloff_quadratic * dist * dist);
   float c = ambience + (1.0-shadow) * (brightness*clamp((falloff*dot(light_direction, normal)), 0.0, 1.0));
@@ -55,7 +60,7 @@ void main () {
   vec4 tex = texture2D(u_sampler, vec2(uv.x, 1.0-uv.y));
   float c = 0.0;
   for (int i=0; i<NUM_POINT_LIGHTS; i++) {
-    c += 0.3*get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
+    c += 0.6*get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
   }
 
   if (uv.x < 0.0) {

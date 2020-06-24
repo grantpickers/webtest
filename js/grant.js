@@ -200,71 +200,62 @@ video_catblue_mp4.play()
 
 
 
-// TODO: put all texture IDs in one spot
-
 const point_lights = [
   {
     world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: 4,
-    shadow_color_texture_id: 5,
-    position: new Float32Array(3),
+    shadow_depth_texture_id: gen_next_texture_id(),
+    shadow_color_texture_id: gen_next_texture_id(),
+    position: new Float32Array([3, 3, 3]),
     inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    rotation: create_x_rotation_matrix(new Float32Array(16), -Math.PI/3),
     inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
     perspective_matrix: new Float32Array(16),
     shadow_framebuffer: null,
     shadow_depth_texture: null,
     shadow_color_texture: null,
     shadow_resolution: 2048,
-    ry: Math.PI/2 + 6*Math.PI/8,
   },
   {
     world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: 6,
-    shadow_color_texture_id: 7,
-    position: new Float32Array(3),
+    shadow_depth_texture_id: gen_next_texture_id(),
+    shadow_color_texture_id: gen_next_texture_id(),
+    position: new Float32Array([3, 4, 3]),
     inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    rotation: create_x_rotation_matrix(new Float32Array(16), -Math.PI/3),
     inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
     perspective_matrix: new Float32Array(16),
     shadow_framebuffer: null,
     shadow_depth_texture: null,
     shadow_color_texture: null,
     shadow_resolution: 2048,
-    ry: Math.PI/2 + 6*Math.PI/8,
   },
   {
     world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: 8,
-    shadow_color_texture_id: 9,
-    position: new Float32Array(3),
+    shadow_depth_texture_id: gen_next_texture_id(),
+    shadow_color_texture_id: gen_next_texture_id(),
+    position: new Float32Array([3.5, 9, -2.5]),
     inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
+    rotation: create_x_rotation_matrix(new Float32Array(16), -Math.PI/3),
     inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
     perspective_matrix: new Float32Array(16),
     shadow_framebuffer: null,
     shadow_depth_texture: null,
     shadow_color_texture: null,
     shadow_resolution: 2048,
-    ry: Math.PI/2 + 6*Math.PI/8,
-  },
-  {
-    world_light_matrix: new Float32Array(16),
-    shadow_depth_texture_id: 10,
-    shadow_color_texture_id: 11,
-    position: new Float32Array(3),
-    inverse_translation: create_translation_matrix(new Float32Array(16), 0,0,0),
-    rotation: create_y_rotation_matrix(new Float32Array(16), 0),
-    inverse_rotation: create_y_rotation_matrix(new Float32Array(16), 0),
-    perspective_matrix: new Float32Array(16),
-    shadow_framebuffer: null,
-    shadow_depth_texture: null,
-    shadow_color_texture: null,
-    shadow_resolution: 2048,
-    ry: Math.PI/2 + 6*Math.PI/8,
   },
 ]
 
+for (let i=0; i<point_lights.length; i++) {
+  create_lookat_rotation_matrix(point_lights[i].rotation, point_lights[i].position, [0,-1.0,0])
+
+  point_lights[i].inverse_translation[12] = -point_lights[i].position[0]
+  point_lights[i].inverse_translation[13] = -point_lights[i].position[1]
+  point_lights[i].inverse_translation[14] = -point_lights[i].position[2]
+
+  matrix_transpose_4(point_lights[i].inverse_rotation, point_lights[i].rotation)
+
+  matrix_mult_4(point_lights[i].world_light_matrix, point_lights[i].inverse_rotation, point_lights[i].inverse_translation)
+}
 
 
 
@@ -497,7 +488,6 @@ function update () {
   update_folder()
   update_sky()
   update_screen()
-  update_point_lights()
 
   
 
@@ -808,28 +798,6 @@ function update_screen () {
 }
 
 
-function update_point_lights () {
-  for (let i=0; i<point_lights.length; i++) {
-    point_lights[i].ry = prev_timestamp*(0.0004 + 0.0002*i)
-
-    create_x_rotation_matrix(point_lights[i].rotation, -Math.PI/3)
-    matrix_mult_4(point_lights[i].rotation, create_y_rotation_matrix([], point_lights[i].ry), point_lights[i].rotation)
-
-    point_lights[i].position[0] = 3.0*Math.sin(point_lights[i].ry)
-    point_lights[i].position[1] = 3.0
-    point_lights[i].position[2] = -0.5+3.0*Math.cos(point_lights[i].ry)
-
-    point_lights[i].inverse_translation[12] = -point_lights[i].position[0]
-    point_lights[i].inverse_translation[13] = -point_lights[i].position[1]
-    point_lights[i].inverse_translation[14] = -point_lights[i].position[2]
-
-    matrix_transpose_4(point_lights[i].inverse_rotation, point_lights[i].rotation)
-
-    matrix_mult_4(point_lights[i].world_light_matrix, point_lights[i].inverse_rotation, point_lights[i].inverse_translation)
-  }
-}
-
-
 /****************************
  * Main
  ***************************/
@@ -916,12 +884,12 @@ function main () {
 
 
   model_buffers.screen = load_obj(gl, assets.screen_obj)
-  model_buffers.screen.texture_id = 0
+  model_buffers.screen.texture_id = gen_next_texture_id()
   model_buffers.screen.texture = load_texture(gl, screen_ctx.canvas, model_buffers.screen.texture_id)
 
 
   model_buffers.welcometext = load_obj(gl, assets.welcometext_obj)
-  model_buffers.welcometext.texture_id = 3
+  model_buffers.welcometext.texture_id = gen_next_texture_id()
   model_buffers.welcometext.texture = load_texture_cube(
     gl,
     images.sky_px_png,
@@ -939,7 +907,7 @@ function main () {
   model_buffers.folder = load_obj(gl, assets.folder_obj)
 
   model_buffers.sky = load_obj(gl, assets.sky_obj)
-  model_buffers.sky.texture_id = 2
+  model_buffers.sky.texture_id = gen_next_texture_id()
   model_buffers.sky.texture = load_texture(gl, images.sky_png, model_buffers.sky.texture_id)
 
   gl.useProgram(basic_shader_program)

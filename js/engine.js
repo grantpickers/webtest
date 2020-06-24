@@ -76,6 +76,18 @@ function camera_update_perspective () {
 
 
 /****************************
+ * Texture IDs
+ ***************************/
+
+let texture_id_counter = 0
+function gen_next_texture_id () {
+  const id = texture_id_counter
+  texture_id_counter++
+  return id
+}
+
+
+/****************************
  * Canvas
  ***************************/
 

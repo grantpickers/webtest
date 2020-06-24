@@ -20,6 +20,13 @@ function sub3 (v,a,b) { v[0] = a[0]-b[0]; v[1] = a[1]-b[1]; v[2] = a[2]-b[2]; re
 function sum3 (v,a,b) { v[0] = a[0]+b[0]; v[1] = a[1]+b[1]; v[2] = a[2]+b[2]; return v; }
 function scl3 (v,c,a) { v[0] = c*a[0];    v[1] = c*a[1];    v[2] = c*a[2];    return v; }
 function dot3 (a,b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] }
+function norm3 (v, a) {
+  const n = Math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])
+  v[0] = a[0]/n
+  v[1] = a[1]/n
+  v[2] = a[2]/n
+  return v
+}
 
 
 
@@ -117,6 +124,21 @@ function create_translation_matrix (m, x,y,z) {
   m[4]  = 0; m[5]  = 1; m[6]  = 0; m[7]  = 0;
   m[8]  = 0; m[9]  = 0; m[10] = 1; m[11] = 0;
   m[12] = x; m[13] = y; m[14] = z; m[15] = 1;
+  return m
+}
+function create_lookat_rotation_matrix (m, from, to) {
+  const f = new Float32Array(3)
+  const r = new Float32Array(3)
+  const u = new Float32Array([0,1,0])
+  sub3(f, from, to)
+  norm3(f, f)
+  cross3(r, u, f)
+  norm3(r, r)
+  cross3(u, f, r)
+  m[0]  = r[0];    m[1]  = r[1];    m[2]  = r[2];    m[3]  = 0;
+  m[4]  = u[0];    m[5]  = u[1];    m[6]  = u[2];    m[7]  = 0;
+  m[8]  = f[0];    m[9]  = f[1];    m[10] = f[2];    m[11] = 0;
+  m[12] = 0;      m[13] = 0;      m[14] = 0;      m[15] = 1;
   return m
 }
 

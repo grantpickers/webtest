@@ -214,7 +214,7 @@ function render_screen () {
 
   gl.activeTexture(gl.TEXTURE0 + model_buffers.screen.texture_id)
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, screen_canvas)
-  gl.uniform1i(screen_u_sampler, model_buffers.screen.texture_id)
+  gl.uniform1i(screen_u_sampler, point_lights[2].shadow_depth_texture_id)
 
   gl.uniformMatrix4fv(screen_u_model_world_matrix, false, screen_model_world_matrix)
   gl.uniformMatrix4fv(screen_u_world_view_matrix, false, camera_world_view_matrix)
