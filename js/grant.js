@@ -244,19 +244,14 @@ let skybox_u_world_view_matrix = null
 let skybox_u_perspective_matrix = null
 let skybox_u_sampler = null
 let skybox_u_world_model_transpose_matrix = null
-
-let skybox_u_point_lights_0_world_light_matrix = null
-let skybox_u_point_lights_0_shadow_map = null
-let skybox_u_point_lights_0_rotation = null
-
-let skybox_u_point_lights_1_world_light_matrix = null
-let skybox_u_point_lights_1_shadow_map = null
-let skybox_u_point_lights_1_rotation = null
-
-let skybox_u_point_lights_2_world_light_matrix = null
-let skybox_u_point_lights_2_shadow_map = null
-let skybox_u_point_lights_2_rotation = null
-
+let skybox_u_point_lights = []
+for (let i=0; i<point_lights.length; i++) {
+  skybox_u_point_lights[i] = {
+    world_light_matrix: null,
+    shadow_map: null,
+    rotation: null,
+  }
+}
 function compile_skybox_shader () {
   skybox_shader_program = create_shader_program(gl, assets.skybox_vertex, assets.skybox_fragment)
   gl.useProgram(skybox_shader_program)
@@ -268,19 +263,11 @@ function compile_skybox_shader () {
   skybox_u_sampler            = gl.getUniformLocation(skybox_shader_program, 'u_sampler')
   skybox_u_perspective_matrix = gl.getUniformLocation(skybox_shader_program, 'u_perspective_matrix')
   skybox_u_world_model_transpose_matrix = gl.getUniformLocation(skybox_shader_program, 'u_world_model_transpose_matrix')
-
-  skybox_u_point_lights_0_world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_0_world_light_matrix')
-  skybox_u_point_lights_0_shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_0_shadow_map')
-  skybox_u_point_lights_0_rotation = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_0_rotation')
-
-  skybox_u_point_lights_1_world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_1_world_light_matrix')
-  skybox_u_point_lights_1_shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_1_shadow_map')
-  skybox_u_point_lights_1_rotation = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_1_rotation')
-
-  skybox_u_point_lights_2_world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_2_world_light_matrix')
-  skybox_u_point_lights_2_shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_2_shadow_map')
-  skybox_u_point_lights_2_rotation = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_2_rotation')
-
+  for (let i=0; i<point_lights.length; i++) {
+    skybox_u_point_lights[i].world_light_matrix = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_'+i+'_world_light_matrix')
+    skybox_u_point_lights[i].shadow_map = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_'+i+'_shadow_map')
+    skybox_u_point_lights[i].rotation = gl.getUniformLocation(skybox_shader_program, 'u_point_lights_'+i+'_rotation')
+  }
   gl.uniformMatrix4fv(skybox_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
@@ -320,19 +307,14 @@ let screen_u_world_view_matrix = null
 let screen_u_perspective_matrix = null
 let screen_u_sampler = null
 let screen_u_world_model_transpose_matrix = null
-
-let screen_u_point_lights_0_world_light_matrix = null
-let screen_u_point_lights_0_shadow_map = null
-let screen_u_point_lights_0_rotation = null
-
-let screen_u_point_lights_1_world_light_matrix = null
-let screen_u_point_lights_1_shadow_map = null
-let screen_u_point_lights_1_rotation = null
-
-let screen_u_point_lights_2_world_light_matrix = null
-let screen_u_point_lights_2_shadow_map = null
-let screen_u_point_lights_2_rotation = null
-
+let screen_u_point_lights = []
+for (let i=0; i<point_lights.length; i++) {
+  screen_u_point_lights[i] = {
+    world_light_matrix: null,
+    shadow_map: null,
+    rotation: null,
+  }
+}
 function compile_screen_shader () {
   screen_shader_program = create_shader_program(gl, assets.screen_vertex, assets.screen_fragment)
   gl.useProgram(screen_shader_program)
@@ -344,18 +326,11 @@ function compile_screen_shader () {
   screen_u_sampler            = gl.getUniformLocation(screen_shader_program, 'u_sampler')
   screen_u_perspective_matrix = gl.getUniformLocation(screen_shader_program, 'u_perspective_matrix')
   screen_u_world_model_transpose_matrix = gl.getUniformLocation(screen_shader_program, 'u_world_model_transpose_matrix')
-
-  screen_u_point_lights_0_world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_point_lights_0_world_light_matrix')
-  screen_u_point_lights_0_shadow_map = gl.getUniformLocation(screen_shader_program, 'u_point_lights_0_shadow_map')
-  screen_u_point_lights_0_rotation = gl.getUniformLocation(screen_shader_program, 'u_point_lights_0_rotation')
-
-  screen_u_point_lights_1_world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_point_lights_1_world_light_matrix')
-  screen_u_point_lights_1_shadow_map = gl.getUniformLocation(screen_shader_program, 'u_point_lights_1_shadow_map')
-  screen_u_point_lights_1_rotation = gl.getUniformLocation(screen_shader_program, 'u_point_lights_1_rotation')
-
-  screen_u_point_lights_2_world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_point_lights_2_world_light_matrix')
-  screen_u_point_lights_2_shadow_map = gl.getUniformLocation(screen_shader_program, 'u_point_lights_2_shadow_map')
-  screen_u_point_lights_2_rotation = gl.getUniformLocation(screen_shader_program, 'u_point_lights_2_rotation')
+  for (let i=0; i<point_lights.length; i++) {
+    screen_u_point_lights[i].world_light_matrix = gl.getUniformLocation(screen_shader_program, 'u_point_lights_'+i+'_world_light_matrix')
+    screen_u_point_lights[i].shadow_map = gl.getUniformLocation(screen_shader_program, 'u_point_lights_'+i+'_shadow_map')
+    screen_u_point_lights[i].rotation = gl.getUniformLocation(screen_shader_program, 'u_point_lights_'+i+'_rotation')
+  }
 
   gl.uniformMatrix4fv(screen_u_perspective_matrix, false, camera_perspective_matrix)
 }
@@ -370,19 +345,14 @@ let simple_u_model_world_matrix = null
 let simple_u_world_view_matrix = null
 let simple_u_perspective_matrix = null
 let simple_u_world_model_transpose_matrix = null
-
-let simple_u_point_lights_0_world_light_matrix = null
-let simple_u_point_lights_0_shadow_map = null
-let simple_u_point_lights_0_rotation = null
-
-let simple_u_point_lights_1_world_light_matrix = null
-let simple_u_point_lights_1_shadow_map = null
-let simple_u_point_lights_1_rotation = null
-
-let simple_u_point_lights_2_world_light_matrix = null
-let simple_u_point_lights_2_shadow_map = null
-let simple_u_point_lights_2_rotation = null
-
+let simple_u_point_lights = []
+for (let i=0; i<point_lights.length; i++) {
+  simple_u_point_lights[i] = {
+    world_light_matrix: null,
+    shadow_map: null,
+    rotation: null,
+  }
+}
 function compile_simple_shader () {
   simple_shader_program = create_shader_program(gl, assets.simple_vertex, assets.simple_fragment)
   gl.useProgram(simple_shader_program)
@@ -393,19 +363,11 @@ function compile_simple_shader () {
   simple_u_world_view_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_view_matrix')
   simple_u_perspective_matrix = gl.getUniformLocation(simple_shader_program, 'u_perspective_matrix')
   simple_u_world_model_transpose_matrix = gl.getUniformLocation(simple_shader_program, 'u_world_model_transpose_matrix')
-
-  simple_u_point_lights_0_world_light_matrix = gl.getUniformLocation(simple_shader_program, 'u_point_lights_0_world_light_matrix')
-  simple_u_point_lights_0_shadow_map = gl.getUniformLocation(simple_shader_program, 'u_point_lights_0_shadow_map')
-  simple_u_point_lights_0_rotation = gl.getUniformLocation(simple_shader_program, 'u_point_lights_0_rotation')
-
-  simple_u_point_lights_1_world_light_matrix = gl.getUniformLocation(simple_shader_program, 'u_point_lights_1_world_light_matrix')
-  simple_u_point_lights_1_shadow_map = gl.getUniformLocation(simple_shader_program, 'u_point_lights_1_shadow_map')
-  simple_u_point_lights_1_rotation = gl.getUniformLocation(simple_shader_program, 'u_point_lights_1_rotation')
-
-  simple_u_point_lights_2_world_light_matrix = gl.getUniformLocation(simple_shader_program, 'u_point_lights_2_world_light_matrix')
-  simple_u_point_lights_2_shadow_map = gl.getUniformLocation(simple_shader_program, 'u_point_lights_2_shadow_map')
-  simple_u_point_lights_2_rotation = gl.getUniformLocation(simple_shader_program, 'u_point_lights_2_rotation')
-
+  for (let i=0; i<point_lights.length; i++) {
+    simple_u_point_lights[i].world_light_matrix = gl.getUniformLocation(simple_shader_program, 'u_point_lights_'+i+'_world_light_matrix')
+    simple_u_point_lights[i].shadow_map = gl.getUniformLocation(simple_shader_program, 'u_point_lights_'+i+'_shadow_map')
+    simple_u_point_lights[i].rotation = gl.getUniformLocation(simple_shader_program, 'u_point_lights_'+i+'_rotation')
+  }
   gl.uniformMatrix4fv(simple_u_perspective_matrix, false, camera_perspective_matrix)
 }
 
