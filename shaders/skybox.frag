@@ -1,18 +1,20 @@
 precision mediump float;
 
-#define NUM_POINT_LIGHTS 3
-
-struct PointLight {
-  sampler2D shadow_map;
-  mat4 world_light_matrix;
-  mat4 rotation;
-};
-
 
 uniform sampler2D u_sampler;
-uniform PointLight u_point_lights[NUM_POINT_LIGHTS];
 
-varying vec4 light_space_pos[NUM_POINT_LIGHTS];
+uniform sampler2D u_point_lights_0_shadow_map;
+uniform mat4 u_point_lights_0_rotation;
+
+uniform sampler2D u_point_lights_1_shadow_map;
+uniform mat4 u_point_lights_1_rotation;
+
+uniform sampler2D u_point_lights_2_shadow_map;
+uniform mat4 u_point_lights_2_rotation;
+
+varying vec4 light_space_pos_0;
+varying vec4 light_space_pos_1;
+varying vec4 light_space_pos_2;
 varying highp vec2 uv;
 varying vec3 normal;
 
@@ -58,9 +60,9 @@ void main () {
   vec4 tex = texture2D(u_sampler, vec2(uv.x, 1.0-uv.y));
 
   float shadow = 0.0;
-  for (int i=0; i<NUM_POINT_LIGHTS; i++) {
-    shadow += 0.3*get_shadow(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
-  }
+  shadow += 0.3*get_shadow(u_point_lights_0_shadow_map, u_point_lights_0_rotation, light_space_pos_0);
+  shadow += 0.3*get_shadow(u_point_lights_1_shadow_map, u_point_lights_1_rotation, light_space_pos_1);
+  shadow += 0.3*get_shadow(u_point_lights_2_shadow_map, u_point_lights_2_rotation, light_space_pos_2);
 
   gl_FragColor = vec4((1.0-shadow) * vec3(tex.x, tex.y, tex.z), 1.0);
 }

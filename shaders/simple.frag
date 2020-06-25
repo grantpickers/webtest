@@ -1,16 +1,17 @@
 precision mediump float;
 
-#define NUM_POINT_LIGHTS 3
+uniform sampler2D u_point_lights_0_shadow_map;
+uniform mat4 u_point_lights_0_rotation;
 
-struct PointLight {
-  sampler2D shadow_map;
-  mat4 world_light_matrix;
-  mat4 rotation;
-};
+uniform sampler2D u_point_lights_1_shadow_map;
+uniform mat4 u_point_lights_1_rotation;
 
-uniform PointLight u_point_lights[NUM_POINT_LIGHTS];
+uniform sampler2D u_point_lights_2_shadow_map;
+uniform mat4 u_point_lights_2_rotation;
 
-varying vec4 light_space_pos[NUM_POINT_LIGHTS];
+varying vec4 light_space_pos_0;
+varying vec4 light_space_pos_1;
+varying vec4 light_space_pos_2;
 varying vec3 normal;
 
 float get_light (sampler2D shadow_map, mat4 rotation, vec4 light_space_pos) {
@@ -59,8 +60,8 @@ float get_light (sampler2D shadow_map, mat4 rotation, vec4 light_space_pos) {
 
 void main () {
   float c = 0.0;
-  for (int i=0; i<NUM_POINT_LIGHTS; i++) {
-    c += 0.3*get_light(u_point_lights[i].shadow_map, u_point_lights[i].rotation, light_space_pos[i]);
-  }
+  c += 0.3*get_light(u_point_lights_0_shadow_map, u_point_lights_0_rotation, light_space_pos_0);
+  c += 0.3*get_light(u_point_lights_1_shadow_map, u_point_lights_1_rotation, light_space_pos_1);
+  c += 0.3*get_light(u_point_lights_2_shadow_map, u_point_lights_2_rotation, light_space_pos_2);
   gl_FragColor = vec4(c * vec3(1.0, 1.0, 1.0), 1.0);
 }
